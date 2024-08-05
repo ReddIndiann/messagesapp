@@ -139,7 +139,7 @@ const SignIn: React.FC = () => {
               <input type="password" id="password" name="password" placeholder="Enter password" className="w-full h-12 p-4 text-lg border border-gray-300 rounded-lg focus:border-orange-600 focus:border-2 focus:outline-none text-black" />
             </div>
             <a href="#" className="text-orange-600 text-sm mb-4 self-end">Forgot Your Password?</a>
-            <button type="submit" className="bg-orange-600 text-white py-3 font-semibold w-full rounded-md hover:bg-orange-500 transition duration-200">Login</button>
+         <button type="submit" className="bg-orange-600 text-white py-3 font-semibold w-full rounded-md hover:bg-orange-500 transition duration-200">   <Link href="/auth/signup" passHref> Login </Link></button>
           </form>
           <div className="mt-6 text-center">
             <p className="text-gray-800">Don't have an account? <Link href="/auth/signup" passHref><button className="text-orange-600">Sign Up</button></Link></p>
