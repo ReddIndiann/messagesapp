@@ -1,5 +1,4 @@
-'use client';
-
+'use client'
 import React, { useState } from 'react';
 import Header from '@/app/Components/Header';
 import Sidebar from '@/app/Components/SideNav';
@@ -7,37 +6,24 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPaperPlane, faEdit, faTrash } from '@fortawesome/free-solid-svg-icons';
 import CreateTemplateModal from '@/app/Components/Modals/CreatTemplateModal';
 import SendMessageModal from '@/app/Components/Modals/SendMessageModal';
+import QuickSMSModal from '@/app/Components/SendQuicksms';
+
 const Dashboard = () => {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [currentSection, setCurrentSection] = useState('bulkSMS');
-  const [activeTab, setActiveTab] = useState('messageTemplates');
+  const [activeTab, setActiveTab] = useState('createMessageTemplates');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSendMessageModalOpen, setIsSendMessageModalOpen] = useState(false);
+  const [isQuickSMSModalOpen, setIsQuickSMSModalOpen] = useState(false);
 
-  // Placeholder data for SMS campaigns
+  // Placeholder data for SMS campaigns and scheduled messages
   const smsCampaigns = [
-    {
-      id: 1,
-      title: 'FriendsList',
-      content: 'This is it bros',
-      type: 'SMS',
-      date: 'Fri 2 Aug, 2024 2:12:22 pm',
-    },
+    { id: 1, title: 'FriendsList', content: 'This is it bros', type: 'SMS', date: 'Fri 2 Aug, 2024 2:12:22 pm' },
     // More campaigns...
   ];
 
   const scheduledMessages = [
-    {
-      id: 1,
-      title: 'Meeting Reminder',
-      content: "Don't forget our meeting at 3 PM.",
-      type: 'Scheduled',
-      scheduled: 'Fri 2 Aug, 2024 1:12:22 pm',
-      lastseen: 'Fri 2 Aug, 2024 1:12:22 pm',
-      recipient: 'John Doe',
-      status: 'COMPLETE',
-      repeatperiod: 'None',
-    },
+    { id: 1, title: 'Meeting Reminder', content: "Don't forget our meeting at 3 PM.", type: 'Scheduled', scheduled: 'Fri 2 Aug, 2024 1:12:22 pm', lastseen: 'Fri 2 Aug, 2024 1:12:22 pm', recipient: 'John Doe', status: 'COMPLETE', repeatperiod: 'None' },
     // More scheduled messages...
   ];
 
@@ -117,72 +103,75 @@ const Dashboard = () => {
     </table>
   );
 
-   return (
-    <div className={`min-h-screen bg-gray-100 flex flex-col ${isModalOpen || isSendMessageModalOpen ? 'overflow-hidden' : ''}`}>
-      {/* ... other JSX ... */}
+  return (
+    <div className={`min-h-screen bg-gray-100 flex flex-col ${isModalOpen || isSendMessageModalOpen || isQuickSMSModalOpen ? 'overflow-hidden' : ''}`}>
       <Header currentSection={currentSection} />
       <div className="flex flex-1 pt-16">
         <Sidebar 
           onCollapse={setIsSidebarCollapsed} 
           setCurrentSection={setCurrentSection}
         />
-         <main className={`flex-1 ${isSidebarCollapsed ? 'ml-20' : 'ml-64'} p-6 overflow-y-auto ${isModalOpen || isSendMessageModalOpen ? 'blur' : ''}`}>
-         {/* ... other JSX ... */}
-         <div className="bg-white p-6 rounded-lg shadow-md">
+        <main className={`flex-1 ${isSidebarCollapsed ? 'ml-20' : 'ml-64'} p-6 overflow-y-auto ${isModalOpen || isSendMessageModalOpen || isQuickSMSModalOpen ? 'blur' : ''}`}>
+          <div className="bg-white p-6 rounded-lg shadow-md">
             <div className="flex justify-between items-center mb-6 text-xl border border-gray-300 p-4 rounded-lg">
               <div>
                 <button 
-                  className={`px-4 py-3 rounded-xl mr-4 text-base border ${activeTab === 'messageTemplates' ? 'bg-gray-100 text-orange-600 border-orange-600' : 'bg-gray-100 text-gray-700 border-gray-300'}`}
-                  onClick={() => setActiveTab('messageTemplates')}
+                  className={`px-4 py-3 rounded-xl mr-4 text-base border ${activeTab === 'createMessageTemplates' ? 'bg-gray-100 text-orange-600 border-orange-600' : 'bg-gray-100 text-gray-700 border-gray-300'}`}
+                  onClick={() => setActiveTab('createMessageTemplates')}
                 >
-                  Message Templates
+                  Create Message Templates
                 </button>
                 <button 
-                  className={`px-4 py-3 rounded-xl mr-4 text-base border ${activeTab === 'scheduledMessages' ? 'bg-gray-100 text-orange-600 border-orange-600' : 'bg-gray-100 text-gray-700 border-gray-300'}`}
+                  className={`px-4 py-3 rounded-xl mr-4 text-base border ${activeTab === 'sendMessages' ? 'bg-gray-100 text-orange-600 border-orange-600' : 'bg-gray-100 text-gray-700 border-gray-300'}`}
+                  onClick={() => setActiveTab('sendMessages')}
+                >
+                  Send Messages
+                </button>
+                <button 
+                  className={`px-4 py-3 rounded-xl text-base border ${activeTab === 'scheduledMessages' ? 'bg-gray-100 text-orange-600 border-orange-600' : 'bg-gray-100 text-gray-700 border-gray-300'}`}
                   onClick={() => setActiveTab('scheduledMessages')}
                 >
                   Scheduled Messages
                 </button>
-                <button className="bg-gray-100 text-gray-700 px-4 py-3 rounded-xl text-base border border-gray-300">International Messages</button>
               </div>
               <div>
-          {activeTab === 'messageTemplates' && (
-            <button 
-              className="bg-orange-400 text-white px-4 py-2 rounded-full mr-4 text-base"
-              onClick={() => setIsModalOpen(true)}
-            >
-              Create Message Template
-            </button>
-          )}
-          <button 
-            className="bg-orange-400 text-white px-4 py-2 rounded-full text-base"
-            onClick={() => setIsSendMessageModalOpen(true)}
-          >
-            <FontAwesomeIcon icon={faPaperPlane} className="mr-2" />
-            {activeTab === 'scheduledMessages' ? 'Schedule Message' : 'Send Message'}
-          </button>
-        </div>
+                {activeTab === 'createMessageTemplates' && (
+                  <button 
+                    className="bg-orange-400 text-white px-4 py-2 rounded-full text-base"
+                    onClick={() => setIsModalOpen(true)}
+                  >
+                    Create Message Template
+                  </button>
+                )}
+                {activeTab === 'sendMessages' && (
+                  <button 
+                    className="bg-orange-400 text-white px-4 py-2 rounded-full text-base"
+                    onClick={() => setIsSendMessageModalOpen(true)}
+                  >
+                    Send Message
+                  </button>
+                )}
+                {activeTab === 'scheduledMessages' && (
+                  <button 
+                    className="bg-orange-400 text-white px-4 py-2 rounded-full text-base"
+                    onClick={() => setIsSendMessageModalOpen(true)}
+                  >
+                    Schedule Message
+                  </button>
+                )}
+              </div>
             </div>
-            <h2 className="text-2xl font-semibold text-gray-600 mb-4">
-              {activeTab === 'messageTemplates' ? 'Send SMS Campaign' : 'Scheduled Messages'}
-            </h2>
-            {activeTab === 'messageTemplates' ? <MessageTemplatesTable /> : <ScheduledMessagesTable />}
-          </div>
-          <div className="flex justify-center mt-6 mb-4">
-            <button className="bg-yellow-100 px-3 py-1 rounded-l-lg text-slate-400">❮</button>
-            <button className="bg-orange-400 text-white px-3 py-1">1</button>
-            <button className="bg-yellow-100 px-3 py-1 rounded-r-lg text-slate-400">❯</button>
+
+            {activeTab === 'createMessageTemplates' && <MessageTemplatesTable />}
+            {activeTab === 'sendMessages' && <MessageTemplatesTable />}
+            {activeTab === 'scheduledMessages' && <ScheduledMessagesTable />}
           </div>
         </main>
       </div>
-      <CreateTemplateModal 
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-      />
-      <SendMessageModal
-        isOpen={isSendMessageModalOpen}
-        onClose={() => setIsSendMessageModalOpen(false)}
-      />
+
+      {isModalOpen && <CreateTemplateModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />}
+      {isSendMessageModalOpen && <SendMessageModal isOpen={isSendMessageModalOpen} onClose={() => setIsSendMessageModalOpen(false)} onQuickSMSClick={() => setIsQuickSMSModalOpen(true)} />}
+      {isQuickSMSModalOpen && <QuickSMSModal isOpen={isQuickSMSModalOpen} onClose={() => setIsQuickSMSModalOpen(false)} />}
     </div>
   );
 };
