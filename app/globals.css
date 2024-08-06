@@ -4,6 +4,14 @@
 @tailwind components;
 @tailwind utilities;
 
+
+*{
+  font-family: "Inter", sans-serif;
+  font-optical-sizing: auto;
+  font-style: normal;
+  font-variation-settings:
+    "slnt" 0;
+}
 :root {
   --foreground-rgb: 0, 0, 0;
   --background-start-rgb: 214, 219, 220;
@@ -18,13 +26,7 @@
   }
 }
  
-  *{
-    font-family: "Inter", sans-serif;
-    font-optical-sizing: auto;
-    font-style: normal;
-    font-variation-settings:
-      "slnt" 0;
-  }
+
 body {
   color: rgb(var(--foreground-rgb));
   background: linear-gradient(

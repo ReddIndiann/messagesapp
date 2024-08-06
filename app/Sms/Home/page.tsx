@@ -3,18 +3,29 @@
 import React, { useState } from 'react';
 import Header from '@/app/Components/Header';
 import Sidebar from '@/app/Components/SideNav';
+import AddSenderIdModal from '@/app/Components/Modals/SenderIdModal';
 
 const Dashboard = () => {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [currentSection, setCurrentSection] = useState('bulkSMS');
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const handleAddSenderId = (newSenderId) => {
+    // Handle the new Sender ID submission here
+    console.log('New Sender ID:', newSenderId);
+    // You might want to update your state or make an API call here
+  };
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col">
-      <Header />
-      <div className="flex flex-1 pt-16"> {/* Add padding-top to account for fixed header */}
-        <Sidebar onCollapse={setIsSidebarCollapsed} />
-        <main className={`flex-1 ${isSidebarCollapsed ? 'ml-20' : 'ml-64'} p-6 overflow-y-auto`}> {/* Adjust margin-left based on sidebar width */}
+      <Header currentSection={currentSection} />
+      <div className="flex flex-1 pt-16">
+        <Sidebar 
+          onCollapse={setIsSidebarCollapsed} 
+          setCurrentSection={setCurrentSection}
+        />
+        <main className={`flex-1 ${isSidebarCollapsed ? 'ml-20' : 'ml-64'} p-6 overflow-y-auto`}>
           <div className="max-w-7xl mx-auto">
-            {/* Your main content goes here */}
             <p className="text-red-500 text-sm mb-6">Overview page displays data from the past 3 days.</p>
             
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
@@ -87,7 +98,10 @@ const Dashboard = () => {
               <div className="bg-white shadow rounded-lg p-6 w-full lg:w-72 h-96">
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-sm font-normal text-gray-500">Sender ID</h3>
-                  <button className="bg-orange-400 text-white px-3 py-1 rounded-md text-sm font-medium">
+                  <button 
+                    className="bg-orange-400 text-white px-3 py-1 rounded-md text-sm font-medium"
+                    onClick={() => setIsModalOpen(true)}
+                  >
                     Add Sender ID
                   </button>
                 </div>
@@ -113,6 +127,12 @@ const Dashboard = () => {
           </div>
         </main>
       </div>
+      
+      <AddSenderIdModal 
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSubmit={handleAddSenderId}
+      />
     </div>
   );
 };

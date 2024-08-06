@@ -1,12 +1,11 @@
-// components/Sidebar.js
-'use client'
+'use client';
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { FiGrid, FiMessageSquare, FiUsers, FiGift, FiCreditCard, FiFileText, FiHelpCircle, FiMail, FiPhone, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
+import { usePathname, useRouter } from 'next/navigation';
+import { FiGrid, FiMessageSquare, FiUsers, FiGift, FiCreditCard, FiFileText, FiHelpCircle, FiMail, FiPhone, FiChevronLeft, FiChevronRight, FiClock } from 'react-icons/fi';
 
-const Sidebar = ({ onCollapse }) => {
+const Sidebar = ({ onCollapse, setCurrentSection }) => {
   const [isCollapsed, setIsCollapsed] = useState(() => {
     if (typeof window !== 'undefined') {
       const storedState = localStorage.getItem('sidebar-collapsed');
@@ -14,8 +13,12 @@ const Sidebar = ({ onCollapse }) => {
     }
     return false;
   });
-  const [activeChannel, setActiveChannel] = useState('bulkSMS');
+  const [activeChannel, setActiveChannel] = useState(() => {
+    const path = window.location.pathname;
+    return path.includes('Sms') ? 'bulkSMS' : 'voiceCalls';
+  });
   const pathname = usePathname();
+  const router = useRouter();
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -24,11 +27,59 @@ const Sidebar = ({ onCollapse }) => {
     onCollapse(isCollapsed);
   }, [isCollapsed]);
 
+  useEffect(() => {
+    // Update active channel based on the current path
+    if (pathname.includes('Sms')) {
+      setActiveChannel('bulkSMS');
+    } else if (pathname.includes('Voice')) {
+      setActiveChannel('voiceCalls');
+    }
+  }, [pathname]);
+
+  useEffect(() => {
+    // Ensure the current section is updated whenever activeChannel changes
+    setCurrentSection(activeChannel);
+  }, [activeChannel, setCurrentSection]);
+
   const toggleCollapse = () => {
     setIsCollapsed(!isCollapsed);
   };
 
+  const handleChannelSwitch = (channel) => {
+    if (activeChannel === channel) return; // Avoid unnecessary state update
+
+    setActiveChannel(channel);
+
+    if (channel === 'bulkSMS') {
+      router.push('/Sms/SendMessage');
+    } else if (channel === 'voiceCalls') {
+      router.push('/Voice/Sendcall');
+    }
+  };
+
   const isActive = (path) => pathname === path;
+
+  const smsNavItems = [
+    { href: "/Sms/Home", icon: <FiGrid />, text: "Overview" },
+    { href: "/Sms/SendMessage", icon: <FiMessageSquare />, text: "Send Message" },
+    { href: "/Sms/Contacts", icon: <FiUsers />, text: "Contacts" },
+    { href: "/Sms/BirthdayApp", icon: <FiGift />, text: "Birthday App" },
+    { href: "/Sms/Wallet", icon: <FiCreditCard />, text: "Wallet", badge: <span className="text-xs bg-green-500 text-white px-2 py-0.5 rounded-full">GHS 0.00</span> },
+    { href: "/Sms/CampaignHistory", icon: <FiFileText />, text: "Campaign History" },
+    { href: "/Sms/GetHelp", icon: <FiHelpCircle />, text: "Get Help", badge: <span className="w-2 h-2 bg-orange-500 rounded-full"></span> },
+  ];
+
+  const voiceNavItems = [
+    { href: "/Voice/VoiceHome", icon: <FiGrid />, text: " Overview" },
+    { href: "/Voice/Sendcall", icon: <FiPhone />, text: " Send Voice " },
+    { href: "/Voice/VoiceContacts", icon: <FiUsers />, text: " Contacts" },
+    { href: "/Voice/VoiceTemplates", icon: <FiGift />, text: " Birthday App" },
+    { href: "/Voice/VoiceWallet", icon: <FiCreditCard />, text: " Wallet", badge: <span className="text-xs bg-green-500 text-white px-2 py-0.5 rounded-full">GHS 0.00</span> },
+    { href: "/Voice/VoiceHistory", icon: <FiClock />, text: "Campaign  History" },
+    { href: "/Voice/VoiceHelp", icon: <FiHelpCircle />, text: " Help", badge: <span className="w-2 h-2 bg-orange-500 rounded-full"></span> },
+  ];
+  
+  const currentNavItems = activeChannel === 'bulkSMS' ? smsNavItems : voiceNavItems;
 
   return (
     <div className={`bg-white shadow-md transition-all duration-300 fixed top-16 left-0 bottom-0 overflow-y-auto ${isCollapsed ? 'w-20 p-2' : 'w-64 p-4'}`}>
@@ -39,33 +90,17 @@ const Sidebar = ({ onCollapse }) => {
         </button>
       </div>
       <nav className="space-y-1 py-4">
-        <SidebarItem href="/Main/Home" icon={<FiGrid />} text="Overview" active={isActive('/Main/Home')} isCollapsed={isCollapsed} />
-        <SidebarItem 
-          href={activeChannel === 'bulkSMS' ? "/Main/SendMessage" : "/Main/SendVoice"} 
-          icon={<FiMessageSquare />} 
-          text={activeChannel === 'bulkSMS' ? "Send Message" : "Send Voice"} 
-          active={isActive(activeChannel === 'bulkSMS' ? '/Main/SendMessage' : '/Main/SendVoice')} 
-          isCollapsed={isCollapsed} 
-        />
-        <SidebarItem href="/Main/Contacts" icon={<FiUsers />} text="Contacts" active={isActive('/Main/Contacts')} isCollapsed={isCollapsed} />
-        <SidebarItem href="/Main/BirthdayApp" icon={<FiGift />} text="Birthday App" active={isActive('/Main/BirthdayApp')} isCollapsed={isCollapsed} />
-        <SidebarItem 
-          href="/Main/Wallet" 
-          icon={<FiCreditCard />} 
-          text="Wallet" 
-          active={isActive('/Main/Wallet')} 
-          badge={!isCollapsed && <span className="text-xs bg-green-500 text-white px-2 py-0.5 rounded-full">GHS 0.00</span>}
-          isCollapsed={isCollapsed}
-        />
-        <SidebarItem href="/Main/CampaignHistory" icon={<FiFileText />} text="Campaign History" active={isActive('/Main/CampaignHistory')} isCollapsed={isCollapsed} />
-        <SidebarItem 
-          href="/Main/GetHelp" 
-          icon={<FiHelpCircle />} 
-          text="Get Help" 
-          active={isActive('/Main/GetHelp')} 
-          badge={!isCollapsed && <span className="w-2 h-2 bg-orange-500 rounded-full"></span>}
-          isCollapsed={isCollapsed}
-        />
+        {currentNavItems.map((item, index) => (
+          <SidebarItem
+            key={index}
+            href={item.href}
+            icon={item.icon}
+            text={item.text}
+            active={isActive(item.href)}
+            isCollapsed={isCollapsed}
+            badge={item.badge}
+          />
+        ))}
       </nav>
       <div className={`px-4 py-12 ${isCollapsed ? 'px-2' : ''}`}>
         <h3 className={`text-sm font-semibold text-gray-500 uppercase tracking-wider mb-2 ${isCollapsed ? 'text-xs text-center ' : ''}`}>
@@ -77,14 +112,14 @@ const Sidebar = ({ onCollapse }) => {
             text="Bulk SMS" 
             active={activeChannel === 'bulkSMS'} 
             isCollapsed={isCollapsed} 
-            onClick={() => setActiveChannel('bulkSMS')} 
+            onClick={() => handleChannelSwitch('bulkSMS')}
           />
           <ChannelButton 
             icon={<FiPhone />} 
             text="Bulk Voice Calls" 
             active={activeChannel === 'voiceCalls'} 
             isCollapsed={isCollapsed} 
-            onClick={() => setActiveChannel('voiceCalls')} 
+            onClick={() => handleChannelSwitch('voiceCalls')}
           />
         </div>
       </div>
@@ -110,4 +145,4 @@ const ChannelButton = ({ icon, text, active, isCollapsed, onClick }) => (
   </button>
 );
 
-export default Sidebar; 
+export default Sidebar;
