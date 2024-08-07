@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import ConfirmationMessageModal from './ConfirmationModal';
 
-const DetailedMessageModal = ({ isOpen, onClose }) => {
+const SendMessageToGroup = ({ isOpen, onClose }) => {
   const [selectedSenderID, setSelectedSenderID] = useState('');
   const [newSenderID, setNewSenderID] = useState('');
   const [campaignTitle, setCampaignTitle] = useState('');
@@ -109,4 +109,4 @@ const DetailedMessageModal = ({ isOpen, onClose }) => {
   );
 };
 
-export default DetailedMessageModal;
+export default SendMessageToGroup;
