@@ -130,19 +130,19 @@
 //               <label htmlFor="number" className="mb-4 text-gray-600 text-sm flex items-center">
 //                 <span className="text-red-500 ml-1">*</span>Phone Number
 //               </label>
-//               <input type="text" id="number" name="number" placeholder="Enter phone number" className="w-full h-12 p-4 text-lg border border-gray-300 rounded-lg focus:border-orange-600 focus:border-2 focus:outline-none text-black" />
+//               <input type="text" id="number" name="number" placeholder="Enter phone number" className="w-full h-12 p-4 text-lg border border-gray-300 rounded-lg focus:border-blue-600 focus:border-2 focus:outline-none text-black" />
 //             </div>
 //             <div className="w-full mb-4">
 //               <label htmlFor="password" className="mb-4 text-gray-600 text-sm flex items-center">
 //                 <span className="text-red-500 ml-1">*</span>Password
 //               </label>
-//               <input type="password" id="password" name="password" placeholder="Enter password" className="w-full h-12 p-4 text-lg border border-gray-300 rounded-lg focus:border-orange-600 focus:border-2 focus:outline-none text-black" />
+//               <input type="password" id="password" name="password" placeholder="Enter password" className="w-full h-12 p-4 text-lg border border-gray-300 rounded-lg focus:border-blue-600 focus:border-2 focus:outline-none text-black" />
 //             </div>
-//             <a href="#" className="text-orange-600 text-sm mb-4 self-end">Forgot Your Password?</a>
-//          <button type="submit" className="bg-orange-600 text-white py-3 font-semibold w-full rounded-md hover:bg-orange-500 transition duration-200">   <Link href="/auth/signup" passHref> Login </Link></button>
+//             <a href="#" className="text-blue-600 text-sm mb-4 self-end">Forgot Your Password?</a>
+//          <button type="submit" className="bg-blue-600 text-white py-3 font-semibold w-full rounded-md hover:bg-blue-500 transition duration-200">   <Link href="/auth/signup" passHref> Login </Link></button>
 //           </form>
 //           <div className="mt-6 text-center">
-//             <p className="text-gray-800">Don't have an account? <Link href="/auth/signup" passHref><button className="text-orange-600">Sign Up</button></Link></p>
+//             <p className="text-gray-800">Don't have an account? <Link href="/auth/signup" passHref><button className="text-blue-600">Sign Up</button></Link></p>
 //           </div>
 //           <div className="mt-6 text-center">
 //             <a href="#" className="text-gray-600">Contact Support</a> | <a href="#" className="text-gray-600">View Guide</a>
@@ -164,17 +164,17 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 const slides = [
   {
-    image: '/Callcenter.png',
+    image: '/home1.svg',
     title: "Speak Your Audience's Language",
     description: 'Send voice notes in local dialects to connect with non-English speaking audiences.'
   },
   {
-    image: '/Email-campaign.png',
+    image: '/home2.svg',
     title: 'Engage Meaningfully',
     description: 'Reach a wide audience with bulk SMS at unbeatable rates.'
   },
   {
-    image: '/Sent-Message.png',
+    image: '/home3.svg',
     title: 'Stay Connected',
     description: 'Start sending bulk SMS and voice messages today.'
   }
@@ -191,9 +191,9 @@ const SignIn: React.FC = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 to-white flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white flex items-center justify-center p-4">
       <div className="w-full max-w-6xl bg-white rounded-2xl shadow-xl overflow-hidden flex flex-col lg:flex-row">
-        <div className="lg:w-1/2 p-8 bg-orange-100">
+        <div className="lg:w-1/2 p-8 bg-blue-100">
           <img src="/bms.png" alt="BMS Logo" className="w-48 h-20 object-contain mb-8" />
           <div className="relative h-80 overflow-hidden rounded-xl">
             <AnimatePresence initial={false}>
@@ -221,7 +221,7 @@ const SignIn: React.FC = () => {
                 type="tel"
                 id="phone"
                 name="phone"
-                className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-orange-500 focus:border-transparent transition"
+                className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
                 placeholder="Enter your phone number"
                 required
               />
@@ -232,7 +232,7 @@ const SignIn: React.FC = () => {
                 type="password"
                 id="password"
                 name="password"
-                className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-orange-500 focus:border-transparent transition"
+                className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
                 placeholder="Enter your password"
                 required
               />
@@ -243,22 +243,22 @@ const SignIn: React.FC = () => {
                   id="remember-me"
                   name="remember-me"
                   type="checkbox"
-                  className="h-4 w-4 text-orange-600 focus:ring-orange-500 border-gray-300 rounded"
+                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                 />
                 <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-700">Remember me</label>
               </div>
-              <a href="#" className="text-sm font-medium text-orange-600 hover:text-orange-500">Forgot password?</a>
+              <a href="#" className="text-sm font-medium text-blue-600 hover:text-blue-500">Forgot password?</a>
             </div>
             <button
               type="submit"
-              className="w-full bg-orange-600 text-white py-3 rounded-lg font-semibold hover:bg-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 transition"
+              className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition"
             >
               Sign In
             </button>
           </form>
           <p className="mt-8 text-center text-sm text-gray-600">
-            Don't have an account?{' '}
-            <a href="#" className="font-medium text-orange-600 hover:text-orange-500">Sign up now</a>
+            Dont have an account?{' '}
+            <a href="#" className="font-medium text-blue-600 hover:text-blue-500">Sign up now</a>
           </p>
           <div className="mt-6 flex justify-center space-x-4">
             <a href="#" className="text-sm text-gray-500 hover:text-gray-700">Contact Support</a>
