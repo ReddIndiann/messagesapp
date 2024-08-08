@@ -9,7 +9,7 @@ import SendMessageOptionsModal from '@/app/Components/Modals/SendMessageOptionsM
 import QuickSMSModal from '@/app/Components/Modals/SendQuicksms';
 import DetailedMessageModal from '@/app/Components/Modals/SendMessageModal';
 import MessageTemplatesTable from '@/app/Components/Tables/MessageTemplateTable';
-import ScheduledMessagesTable from '@/app/Components/Tables/ScheduledMessageTable';
+import ScheduledMessageTable from '@/app/Components/Tables/ScheduledMessageTable'; // Updated import for the new table
 import SendToGroupModal from '@/app/Components/Modals/SendToGroupModal';
 import SendMessageToGroup from '@/app/Components/Modals/SendMessageToGroup';
 import ConfirmationMessageModal from '@/app/Components/Modals/ConfirmationModal';
@@ -138,7 +138,6 @@ const Dashboard = () => {
                     className="bg-orange-400 text-white px-3 py-1 rounded-full text-sm"
                     onClick={() => setIsSendMessageModalOpen(true)}
                   >
-                    <FontAwesomeIcon icon={faPaperPlane} className="mr-1" />
                     Schedule Message
                   </button>
                 )}
@@ -155,7 +154,7 @@ const Dashboard = () => {
 
             {activeTab === 'createMessageTemplates' && <MessageTemplatesTable campaigns={smsCampaigns} />}
             {activeTab === 'sendMessage' && <MessageTemplatesTable campaigns={smsCampaigns} />}
-            {activeTab === 'scheduledMessages' && <ScheduledMessagesTable messages={scheduledMessages} />}
+            {activeTab === 'scheduledMessages' && <ScheduledMessageTable campaigns={scheduledMessages} />} {/* Replaced with new table */}
             {activeTab === 'internationalMessages' && <InternationalMessagesTable messages={internationalMessages} campaigns={internationalCampaigns} />}
           </div>
         </main>

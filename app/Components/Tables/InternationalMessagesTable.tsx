@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 
 const InternationalMessagesTable = ({ messages, campaigns }) => {
   return (
-    <div className="flex flex-wrap justify-between">
+    <div className="flex flex-wrap md:flex-nowrap justify-between">
       <div className="overflow-x-auto w-full md:w-1/2">
         <table className="min-w-full bg-white border-collapse max-w-full mx-auto text-sm">
           <thead className="bg-gray-100 text-slate-600">
@@ -27,7 +27,7 @@ const InternationalMessagesTable = ({ messages, campaigns }) => {
         </table>
       </div>
       
-      <div className="overflow-x-auto w-full md:w-1/2 mt-4 md:mt-0 md:ml-4">
+      <div className="overflow-x-auto w-full md:w-1/2 md:ml-4">
         <table className="min-w-full bg-white border-collapse max-w-full mx-auto text-sm">
           <thead className="bg-gray-100 text-slate-600">
             <tr>
