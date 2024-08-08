@@ -1,10 +1,28 @@
-import React from 'react';
+import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 
 const InternationalMessagesTable = ({ messages, campaigns }) => {
+  const [messageSearch, setMessageSearch] = useState('');
+  const [campaignSearch, setCampaignSearch] = useState('');
+
+  const filteredMessages = messages.filter((message) =>
+    message.country.toLowerCase().includes(messageSearch.toLowerCase())
+  );
+
+  const filteredCampaigns = campaigns.filter((campaign) =>
+    campaign.title.toLowerCase().includes(campaignSearch.toLowerCase())
+  );
+
   return (
     <div className="flex flex-wrap md:flex-nowrap justify-between">
-      <div className="overflow-x-auto w-full md:w-1/2">
+      <div className="overflow-x-auto w-full md:w-1/3">
+        <input
+          type="text"
+          placeholder="Search by Country"
+          className="w-full p-2 mb-2 border rounded"
+          value={messageSearch}
+          onChange={(e) => setMessageSearch(e.target.value)}
+        />
         <table className="min-w-full bg-white border-collapse max-w-full mx-auto text-sm">
           <thead className="bg-gray-100 text-slate-600">
             <tr>
@@ -15,7 +33,7 @@ const InternationalMessagesTable = ({ messages, campaigns }) => {
             </tr>
           </thead>
           <tbody>
-            {messages.map((message, index) => (
+            {filteredMessages.map((message, index) => (
               <tr key={index} className="border-t hover:bg-gray-50">
                 <td className="py-4 px-2 text-gray-500 border-b">{message.country}</td>
                 <td className="py-4 px-2 text-gray-500 border-b">{message.code}</td>
@@ -27,7 +45,14 @@ const InternationalMessagesTable = ({ messages, campaigns }) => {
         </table>
       </div>
       
-      <div className="overflow-x-auto w-full md:w-1/2 md:ml-4">
+      <div className="overflow-x-auto w-full md:w-2/3 md:ml-4">
+        <input
+          type="text"
+          placeholder="Search by Title"
+          className="w-full p-2 mb-2 border rounded"
+          value={campaignSearch}
+          onChange={(e) => setCampaignSearch(e.target.value)}
+        />
         <table className="min-w-full bg-white border-collapse max-w-full mx-auto text-sm">
           <thead className="bg-gray-100 text-slate-600">
             <tr>
@@ -39,7 +64,7 @@ const InternationalMessagesTable = ({ messages, campaigns }) => {
             </tr>
           </thead>
           <tbody>
-            {campaigns.map((campaign, index) => (
+            {filteredCampaigns.map((campaign, index) => (
               <tr key={index} className="border-t hover:bg-gray-50">
                 <td className="py-4 px-2 text-gray-500 border-b">{campaign.title}</td>
                 <td className="py-4 px-2 text-gray-500 border-b">{campaign.content}</td>
