@@ -1,11 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, ChangeEvent, FormEvent } from 'react';
 
-interface SendToGroupStepperProps {
+// Define the props type
+interface ScheduleToGroupStepperProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
-const SendToGroupStepper: React.FC<SendToGroupStepperProps> = ({ isOpen, onClose }) => {
+const ScheduleToGroupStepper: React.FC<ScheduleToGroupStepperProps> = ({ isOpen, onClose }) => {
   const [step, setStep] = useState<number>(1);
   const [selectedGroups, setSelectedGroups] = useState<string[]>([]);
   const [selectedSenderID, setSelectedSenderID] = useState<string>('');
@@ -14,14 +15,14 @@ const SendToGroupStepper: React.FC<SendToGroupStepperProps> = ({ isOpen, onClose
   const [messageContent, setMessageContent] = useState<string>('');
 
   const handleNext = () => {
-    setStep((prevStep) => prevStep + 1);
+    setStep(prevStep => prevStep + 1);
   };
 
   const handlePrevious = () => {
-    setStep((prevStep) => prevStep - 1);
+    setStep(prevStep => prevStep - 1);
   };
 
-  const handleFormSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleFormSubmit = (e: FormEvent) => {
     e.preventDefault();
     handleNext();
   };
@@ -34,9 +35,9 @@ const SendToGroupStepper: React.FC<SendToGroupStepperProps> = ({ isOpen, onClose
   };
 
   const toggleGroupSelection = (groupName: string) => {
-    setSelectedGroups((prevSelectedGroups) =>
+    setSelectedGroups(prevSelectedGroups =>
       prevSelectedGroups.includes(groupName)
-        ? prevSelectedGroups.filter((group) => group !== groupName)
+        ? prevSelectedGroups.filter(group => group !== groupName)
         : [...prevSelectedGroups, groupName]
     );
   };
@@ -115,7 +116,7 @@ const SendToGroupStepper: React.FC<SendToGroupStepperProps> = ({ isOpen, onClose
                   <div className="flex items-center gap-2">
                     <select
                       value={selectedSenderID}
-                      onChange={(e) => setSelectedSenderID(e.target.value)}
+                      onChange={(e: ChangeEvent<HTMLSelectElement>) => setSelectedSenderID(e.target.value)}
                       className="block w-2/3 bg-gray-100 border border-gray-300 rounded-md shadow-sm py-2 px-3 text-gray-800 text-sm focus:ring focus:ring-opacity-50"
                     >
                       <option value="" disabled>Select Sender ID</option>
@@ -139,7 +140,7 @@ const SendToGroupStepper: React.FC<SendToGroupStepperProps> = ({ isOpen, onClose
                 <input
                   type="text"
                   value={campaignTitle}
-                  onChange={(e) => setCampaignTitle(e.target.value)}
+                  onChange={(e: ChangeEvent<HTMLInputElement>) => setCampaignTitle(e.target.value)}
                   className="mt-2 block w-full bg-gray-100 border border-gray-300 rounded-md shadow-sm py-2 px-3 text-gray-800 text-sm focus:ring focus:ring-opacity-50"
                   placeholder="Enter Campaign Title"
                 />
@@ -148,10 +149,10 @@ const SendToGroupStepper: React.FC<SendToGroupStepperProps> = ({ isOpen, onClose
                 <label className="block text-sm font-medium text-gray-700">Message Content</label>
                 <textarea
                   value={messageContent}
-                  onChange={(e) => setMessageContent(e.target.value)}
+                  onChange={(e: ChangeEvent<HTMLTextAreaElement>) => setMessageContent(e.target.value)}
                   className="mt-2 block w-full bg-gray-100 border border-gray-300 rounded-md shadow-sm py-2 px-3 text-gray-800 text-sm focus:ring focus:ring-opacity-50"
                   placeholder="Enter your message"
-                  rows={6}
+                  rows={6} 
                 ></textarea>
               </div>
               <div className="flex justify-between gap-4">
@@ -229,4 +230,4 @@ const SendToGroupStepper: React.FC<SendToGroupStepperProps> = ({ isOpen, onClose
   );
 };
 
-export default SendToGroupStepper;
+export default ScheduleToGroupStepper;

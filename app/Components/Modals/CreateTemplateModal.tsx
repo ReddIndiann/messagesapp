@@ -1,16 +1,19 @@
-// components/CreateTemplateModal.js
-'use client';
-
 import React, { useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTimes } from '@fortawesome/free-solid-svg-icons';
 
-const CreateTemplateModal = ({ isOpen, onClose }) => {
+// Define the props interface
+interface CreateTemplateModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+const CreateTemplateModal: React.FC<CreateTemplateModalProps> = ({ isOpen, onClose }) => {
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [category, setCategory] = useState('');
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     // Handle form submission logic here
     onClose();
@@ -19,8 +22,8 @@ const CreateTemplateModal = ({ isOpen, onClose }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-      <div className="bg-white rounded-lg p-4 md:p-6 lg:p-8 w-full max-w-md md:max-w-lg lg:max-w-xl"> {/* Responsive max-width */}
+    <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex justify-center items-center z-50">
+      <div className="bg-white rounded-lg p-4 md:p-6 lg:p-8 w-full max-w-md md:max-w-lg lg:max-w-xl">
         <div className="flex justify-between items-center mb-4 md:mb-6">
           <h2 className="text-xl md:text-2xl font-semibold text-slate-600">Create a Template</h2>
           <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
@@ -43,7 +46,7 @@ const CreateTemplateModal = ({ isOpen, onClose }) => {
             <label className="block text-sm font-medium text-gray-700">Content</label>
             <textarea
               className="mt-2 block w-full bg-gray-100 border border-gray-300 rounded-md shadow-sm p-2 md:p-3 focus:border-gray-400 focus:ring focus:ring-gray-400 focus:ring-opacity-50 text-gray-800"
-              rows="4"
+              rows={4}
               placeholder="Enter the message content"
               value={content}
               onChange={(e) => setContent(e.target.value)}
@@ -79,7 +82,7 @@ const CreateTemplateModal = ({ isOpen, onClose }) => {
             </button>
             <button
               type="submit"
-              className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-orange-400 hover:bg-orange-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-400"
+              className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-400 hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-400"
             >
               Save
             </button>

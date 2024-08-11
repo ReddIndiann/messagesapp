@@ -1,8 +1,12 @@
-// SendMessageModal.js
-
 import React from 'react';
 
-const SendMessageModal = ({ isOpen, onClose, onQuickSMSClick }) => {
+interface SendMessageModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onQuickSMSClick: () => void;
+}
+
+const SendMessageModal: React.FC<SendMessageModalProps> = ({ isOpen, onClose, onQuickSMSClick }) => {
   if (!isOpen) return null;
 
   return (
@@ -11,7 +15,7 @@ const SendMessageModal = ({ isOpen, onClose, onQuickSMSClick }) => {
         <h2 className="text-xl font-medium mb-4 text-black">Send Message</h2>
         <p className="mb-4 text-black text-sm">What action do you want to perform to your message</p>
         <button
-          className="w-full bg-gray-100 text-gray-400 py-2 rounded mb-2 hover:bg-orange-100 hover:text-orange-400"
+          className="w-full bg-gray-100 text-gray-400 py-2 rounded mb-2 hover:bg-blue-100 hover:text-blue-400"
           onClick={() => {
             onClose();
             onQuickSMSClick();
@@ -19,10 +23,10 @@ const SendMessageModal = ({ isOpen, onClose, onQuickSMSClick }) => {
         >
           Quick SMS
         </button>
-        <button className="w-full bg-gray-100 text-gray-400 py-2 rounded mb-2 hover:bg-orange-100 hover:text-orange-400">
+        <button className="w-full bg-gray-100 text-gray-400 py-2 rounded mb-2 hover:bg-blue-100 hover:text-blue-400">
           Send to group
         </button>
-        <button className="w-full bg-gray-100 text-gray-400 py-2 rounded mb-2 hover:bg-orange-100 hover:text-orange-400">
+        <button className="w-full bg-gray-100 text-gray-400 py-2 rounded mb-2 hover:bg-blue-100 hover:text-blue-400">
           Send using Excel Sheet
         </button>
         <button className="w-24 bg-gray-100 text-gray-800 py-2 mt-5 rounded" onClick={onClose}>

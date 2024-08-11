@@ -1,14 +1,19 @@
 import React from 'react';
 
-// Define the props type
-interface SendMessageOptionsModalProps {
+// Define the props interface
+interface ScheduleMessageOptionsProps {
   isOpen: boolean;
   onClose: () => void;
-  onQuickSMSClick: () => void;
-  onSendToGroupClick: () => void;
+  onScheduleQuickSMSClick: () => void;
+  onScheduleToGroupClick: () => void;
 }
 
-const SendMessageOptionsModal: React.FC<SendMessageOptionsModalProps> = ({ isOpen, onClose, onQuickSMSClick, onSendToGroupClick }) => {
+const ScheduleMessageOptions: React.FC<ScheduleMessageOptionsProps> = ({
+  isOpen,
+  onClose,
+  onScheduleQuickSMSClick,
+  onScheduleToGroupClick,
+}) => {
   if (!isOpen) return null;
 
   return (
@@ -20,7 +25,7 @@ const SendMessageOptionsModal: React.FC<SendMessageOptionsModalProps> = ({ isOpe
           className="w-full bg-gray-100 text-gray-400 py-2 rounded mb-2 hover:bg-blue-100 hover:text-blue-400 text-sm sm:text-base"
           onClick={() => {
             onClose();
-            onQuickSMSClick();
+            onScheduleQuickSMSClick();
           }}
         >
           Quick SMS
@@ -29,7 +34,7 @@ const SendMessageOptionsModal: React.FC<SendMessageOptionsModalProps> = ({ isOpe
           className="w-full bg-gray-100 text-gray-400 py-2 rounded mb-2 hover:bg-blue-100 hover:text-blue-400 text-sm sm:text-base"
           onClick={() => {
             onClose();
-            onSendToGroupClick();
+            onScheduleToGroupClick();
           }}
         >
           Send to Group
@@ -50,4 +55,4 @@ const SendMessageOptionsModal: React.FC<SendMessageOptionsModalProps> = ({ isOpe
   );
 };
 
-export default SendMessageOptionsModal;
+export default ScheduleMessageOptions;

@@ -1,5 +1,16 @@
 import React, { useState } from 'react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faTimes } from '@fortawesome/free-solid-svg-icons';
 
+// Define the types for the form data
+interface FormData {
+  selectedSenderID: string;
+  newSenderID: string;
+  campaignTitle: string;
+  messageContent: string;
+}
+
+// Define the props for Step1 component
 interface Step1Props {
   onNext: () => void;
 }
@@ -11,10 +22,11 @@ const Step1: React.FC<Step1Props> = ({ onNext }) => (
       <div className="mb-6">
         <label className="block text-sm font-medium text-gray-700">Recipient</label>
         <textarea
-          className="mt-2 block w-full bg-gray-100 border border-gray-300 rounded-md shadow-sm p-3 focus:ring focus:ring-opacity-50 text-gray-800"
-          placeholder="Enter your message"
-          rows={6}
-        ></textarea>
+  className="mt-2 block w-full bg-gray-100 border border-gray-300 rounded-md shadow-sm p-3 focus:ring focus:ring-opacity-50 text-gray-800"
+  placeholder="Enter your message"
+  rows={6}  // Changed from rows="6" to rows={6}
+></textarea>
+
       </div>
       <button
         type="button"
@@ -27,15 +39,15 @@ const Step1: React.FC<Step1Props> = ({ onNext }) => (
   </div>
 );
 
+// Define the props for Step2 component
 interface Step2Props {
   onNext: () => void;
   onPrevious: () => void;
-  onClose: () => void;
-  onDataChange: (data: Partial<FormData>) => void;
+  onDataChange: (newData: Partial<FormData>) => void;
   formData: FormData;
 }
 
-const Step2: React.FC<Step2Props> = ({ onNext, onPrevious, onClose, onDataChange, formData }) => {
+const Step2: React.FC<Step2Props> = ({ onNext, onPrevious, onDataChange, formData }) => {
   const { selectedSenderID, newSenderID, campaignTitle, messageContent } = formData;
 
   const handleAddSenderID = () => {
@@ -60,7 +72,6 @@ const Step2: React.FC<Step2Props> = ({ onNext, onPrevious, onClose, onDataChange
                 <option value="" disabled>Select Sender ID</option>
                 <option value="12345">12345</option>
                 <option value="67890">67890</option>
-                {/* Add more options as needed */}
               </select>
               <button
                 type="button"
@@ -86,12 +97,11 @@ const Step2: React.FC<Step2Props> = ({ onNext, onPrevious, onClose, onDataChange
         <div className="mb-6">
           <label className="block text-sm font-medium text-gray-700">Message Content</label>
           <textarea
-            value={messageContent}
-            onChange={(e) => onDataChange({ messageContent: e.target.value })}
-            className="mt-2 block w-full bg-gray-100 border border-gray-300 rounded-md shadow-sm py-2 px-3 text-gray-800 text-sm focus:ring focus:ring-opacity-50"
-            placeholder="Enter your message"
-            rows={6}
-          ></textarea>
+  className="mt-2 block w-full bg-gray-100 border border-gray-300 rounded-md shadow-sm p-3 focus:ring focus:ring-opacity-50 text-gray-800"
+  placeholder="Enter your message"
+  rows={6}  // Changed from rows="6" to rows={6}
+></textarea>
+
         </div>
         <div className="flex justify-between gap-4">
           <button
@@ -113,6 +123,7 @@ const Step2: React.FC<Step2Props> = ({ onNext, onPrevious, onClose, onDataChange
   );
 };
 
+// Define the props for ConfirmationMessageModal component
 interface ConfirmationMessageModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -123,59 +134,51 @@ const ConfirmationMessageModal: React.FC<ConfirmationMessageModalProps> = ({ isO
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 backdrop-blur-sm">
-      <div className="bg-white p-6 rounded-lg shadow-lg w-11/12 sm:w-2/3 md:w-1/2 lg:w-1/3">
-        <h2 className="text-xl font-medium mb-6 text-black">Confirmation Message</h2>
-        <div className="mb-4">
-          <p className="text-sm font-medium text-gray-700">Sender ID:</p>
-          <p className="text-gray-800">{formData.selectedSenderID}</p>
-        </div>
-        <div className="mb-4">
-          <p className="text-sm font-medium text-gray-700">Campaign Title:</p>
-          <p className="text-gray-800">{formData.campaignTitle}</p>
-        </div>
-        <div className="mb-4">
-          <p className="text-sm font-medium text-gray-700">Message Content:</p>
-          <p className="text-gray-800">{formData.messageContent}</p>
-        </div>
-        <div className="mb-4">
-          <p className="text-sm font-medium text-gray-700">Character Count:</p>
-          <p className="text-gray-800">{formData.messageContent.length} characters</p>
-        </div>
-        <div className="flex justify-between gap-4">
-          <button
-            type="button"
-            className="bg-gray-500 text-white px-6 py-2 rounded-md text-sm"
-            onClick={onClose}
-          >
-            Back
-          </button>
-          <button
-            type="button"
-            className="bg-blue-500 text-white px-6 py-2 rounded-md text-sm"
-          >
-            Send Message
-          </button>
-        </div>
+    <div>
+      <h2 className="text-xl font-medium mb-6 text-black">Confirmation Message</h2>
+      <div className="mb-4">
+        <p className="text-sm font-medium text-gray-700">Sender ID:</p>
+        <p className="text-gray-800">{formData.selectedSenderID}</p>
+      </div>
+      <div className="mb-4">
+        <p className="text-sm font-medium text-gray-700">Campaign Title:</p>
+        <p className="text-gray-800">{formData.campaignTitle}</p>
+      </div>
+      <div className="mb-4">
+        <p className="text-sm font-medium text-gray-700">Message Content:</p>
+        <p className="text-gray-800">{formData.messageContent}</p>
+      </div>
+      <div className="mb-4">
+        <p className="text-sm font-medium text-gray-700">Character Count:</p>
+        <p className="text-gray-800">{formData.messageContent.length} characters</p>
+      </div>
+      <div className="flex justify-between gap-4">
+        <button
+          type="button"
+          className="bg-gray-500 text-white px-6 py-2 rounded-md text-sm"
+          onClick={onClose}
+        >
+          Back
+        </button>
+        <button
+          type="button"
+          className="bg-blue-500 text-white px-6 py-2 rounded-md text-sm"
+        >
+          Send Message
+        </button>
       </div>
     </div>
   );
 };
 
-interface FormData {
-  selectedSenderID: string;
-  newSenderID: string;
-  campaignTitle: string;
-  messageContent: string;
-}
-
-interface QuickSMSModalProps {
+// Define the props for ScheduleQuickSms component
+interface ScheduleQuickSmsProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
-const QuickSMSModal: React.FC<QuickSMSModalProps> = ({ isOpen, onClose }) => {
-  const [currentStep, setCurrentStep] = useState<number>(1);
+const ScheduleQuickSms: React.FC<ScheduleQuickSmsProps> = ({ isOpen, onClose }) => {
+  const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState<FormData>({
     selectedSenderID: '',
     newSenderID: '',
@@ -199,13 +202,20 @@ const QuickSMSModal: React.FC<QuickSMSModalProps> = ({ isOpen, onClose }) => {
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50">
-      <div className="bg-white p-6 sm:p-8 md:p-10 rounded-lg shadow-lg w-full max-w-md">
+      <div className="bg-white p-6 sm:p-8 md:p-10 rounded-lg shadow-lg w-full max-w-md relative">
+        {/* Close Button */}
+        <button
+          className="absolute top-4 right-4 text-gray-500 hover:text-gray-700"
+          onClick={onClose}
+        >
+          <FontAwesomeIcon icon={faTimes} />
+        </button>
+        {/* Step Content */}
         {currentStep === 1 && <Step1 onNext={handleNext} />}
         {currentStep === 2 && (
           <Step2
             onNext={handleNext}
             onPrevious={handlePrevious}
-            onClose={onClose}
             onDataChange={handleDataChange}
             formData={formData}
           />
@@ -217,29 +227,9 @@ const QuickSMSModal: React.FC<QuickSMSModalProps> = ({ isOpen, onClose }) => {
             formData={formData}
           />
         )}
-        <div className="flex justify-between gap-4 mt-6">
-          {currentStep > 1 && (
-            <button
-              type="button"
-              className="w-full sm:w-auto bg-gray-100 text-gray-800 py-2 px-4 rounded-md hover:bg-gray-200 text-sm sm:text-base"
-              onClick={handlePrevious}
-            >
-              Previous
-            </button>
-          )}
-          {currentStep < 3 && (
-            <button
-              type="button"
-              className="w-full sm:w-auto bg-blue-400 text-white py-2 px-4 rounded-md hover:bg-blue-500 text-sm sm:text-base"
-              onClick={handleNext}
-            >
-              Next
-            </button>
-          )}
-        </div>
       </div>
     </div>
   );
 };
 
-export default QuickSMSModal;
+export default ScheduleQuickSms;

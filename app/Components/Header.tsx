@@ -1,7 +1,11 @@
 import React, { useState } from 'react';
 
-const Header = ({ currentSection }) => {
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+interface HeaderProps {
+  currentSection: 'bulkSMS' | 'voiceCalls';
+}
+
+const Header: React.FC<HeaderProps> = ({ currentSection }) => {
+  const [isDropdownOpen, setIsDropdownOpen] = useState<boolean>(false);
 
   const handleMouseEnter = () => {
     setIsDropdownOpen(true);
@@ -15,7 +19,7 @@ const Header = ({ currentSection }) => {
     <header className="bg-white shadow-md fixed top-0 left-0 right-0 z-10">
       <div className="max-w-full sm:px-6 lg:px-8 py-2 flex justify-between items-center">
         <div className="flex items-center flex-grow">
-          <img src="/bms.png" alt="BMS Logo" className="h-12 w-auto sm:h-16 mr-2" />
+          <img src="/logo1.png" alt="BMS Logo" className="h-12 w-auto sm:h-16 mr-2" />
         </div>
         <div className="flex items-center space-x-4">
           {currentSection === 'bulkSMS' && (
@@ -37,7 +41,7 @@ const Header = ({ currentSection }) => {
             <div className="text-center pr-2 hidden sm:block">
               <div className="text-sm">
                 <span className="block text-xs text-gray-500 font-semibold mb-1">Bonus</span>
-                <span className="font-semibold bg-red-500 text-white rounded-full px-2 py-1 mb-1">407</span>
+                <span className="font-semibold bg-blue-500 text-white rounded-full px-2 py-1 mb-1">407</span>
                 <span className="block text-xs text-red-500">Expires on 2024-09-01</span>
               </div>
             </div>

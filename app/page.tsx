@@ -194,7 +194,7 @@ const SignIn: React.FC = () => {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white flex items-center justify-center p-4">
       <div className="w-full max-w-6xl bg-white rounded-2xl shadow-xl overflow-hidden flex flex-col lg:flex-row">
         <div className="lg:w-1/2 p-8 bg-blue-100">
-          <img src="/bms.png" alt="BMS Logo" className="w-48 h-20 object-contain mb-8" />
+          <img src="/logo1.png" alt="BMS Logo" className="w-48 h-20 object-contain mb-8" />
           <div className="relative h-80 overflow-hidden rounded-xl">
             <AnimatePresence initial={false}>
               <motion.div

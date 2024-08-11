@@ -5,15 +5,38 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { FiGrid, FiMessageSquare, FiUsers, FiGift, FiCreditCard, FiFileText, FiHelpCircle, FiMail, FiPhone, FiChevronLeft, FiChevronRight, FiClock } from 'react-icons/fi';
 
-const Sidebar = ({ onCollapse, setCurrentSection }) => {
-  const [isCollapsed, setIsCollapsed] = useState(() => {
+// Define types for SidebarProps
+interface SidebarProps {
+  onCollapse: (isCollapsed: boolean) => void;
+  setCurrentSection: (section: 'bulkSMS' | 'voiceCalls') => void;
+}
+
+interface SidebarItemProps {
+  href: string;
+  icon: React.ReactNode;
+  text: string;
+  badge?: React.ReactNode;
+  active: boolean;
+  isCollapsed: boolean;
+}
+
+interface ChannelButtonProps {
+  icon: React.ReactNode;
+  text: string;
+  active: boolean;
+  isCollapsed: boolean;
+  onClick: () => void;
+}
+
+const Sidebar: React.FC<SidebarProps> = ({ onCollapse, setCurrentSection }) => {
+  const [isCollapsed, setIsCollapsed] = useState<boolean>(() => {
     if (typeof window !== 'undefined') {
       const storedState = localStorage.getItem('sidebar-collapsed');
       return storedState === 'true';
     }
     return false;
   });
-  const [activeChannel, setActiveChannel] = useState(() => {
+  const [activeChannel, setActiveChannel] = useState<'bulkSMS' | 'voiceCalls'>(() => {
     const path = window.location.pathname;
     return path.includes('Sms') ? 'bulkSMS' : 'voiceCalls';
   });
@@ -45,7 +68,7 @@ const Sidebar = ({ onCollapse, setCurrentSection }) => {
     setIsCollapsed(!isCollapsed);
   };
 
-  const handleChannelSwitch = (channel) => {
+  const handleChannelSwitch = (channel: 'bulkSMS' | 'voiceCalls') => {
     if (activeChannel === channel) return; // Avoid unnecessary state update
 
     setActiveChannel(channel);
@@ -57,7 +80,7 @@ const Sidebar = ({ onCollapse, setCurrentSection }) => {
     }
   };
 
-  const isActive = (path) => pathname === path;
+  const isActive = (path: string) => pathname === path;
 
   const smsNavItems = [
     { href: "/Sms/Home", icon: <FiGrid />, text: "Overview" },
@@ -74,7 +97,7 @@ const Sidebar = ({ onCollapse, setCurrentSection }) => {
     { href: "/Voice/Sendcall", icon: <FiPhone />, text: " Send Voice " },
     { href: "/Voice/VoiceContacts", icon: <FiUsers />, text: " Contacts" },
     { href: "/Voice/VoiceTemplates", icon: <FiGift />, text: " Birthday App" },
-    { href: "/Voice/VoiceWallet", icon: <FiCreditCard />, text: " Wallet", badge: <span className="text-xs bg-green-500 text-white px-2 py-0.5 rounded-full">GHS 0.00</span> },
+    { href: "/Voice/VoiceWallet", icon: <FiCreditCard />, text: " Wallet", badge: <span className="text-xs bg-blue-500 text-white px-2 py-0.5 rounded-full">GHS 0.00</span> },
     { href: "/Voice/VoiceHistory", icon: <FiClock />, text: "Campaign  History" },
     { href: "/Voice/VoiceHelp", icon: <FiHelpCircle />, text: " Help", badge: <span className="w-2 h-2 bg-orange-500 rounded-full"></span> },
   ];
@@ -127,20 +150,20 @@ const Sidebar = ({ onCollapse, setCurrentSection }) => {
   );
 };
 
-const SidebarItem = ({ href, icon, text, badge, active, isCollapsed }) => (
-  <Link href={href} className={`flex items-center space-x-3 px-4 py-2 text-sm ${active ? 'bg-green-100 text-green-600' : 'text-gray-600 hover:bg-gray-100'}`}>
-    <span className={`text-xl ${active ? 'text-green-600' : 'text-gray-400'}`}>{icon}</span>
+const SidebarItem: React.FC<SidebarItemProps> = ({ href, icon, text, badge, active, isCollapsed }) => (
+  <Link href={href} className={`flex items-center space-x-3 px-4 py-2 text-sm ${active ? 'bg-blue-100 text-blue-600' : 'text-gray-600 hover:bg-gray-100'}`}>
+    <span className={`text-xl ${active ? 'text-blue-600' : 'text-gray-400'}`}>{icon}</span>
     {!isCollapsed && <span>{text}</span>}
     {!isCollapsed && badge && <div className="ml-auto">{badge}</div>}
   </Link>
 );
 
-const ChannelButton = ({ icon, text, active, isCollapsed, onClick }) => (
+const ChannelButton: React.FC<ChannelButtonProps> = ({ icon, text, active, isCollapsed, onClick }) => (
   <button 
     onClick={onClick} 
-    className={`flex items-center space-x-3 w-full px-2 py-2 text-sm rounded-md ${active ? 'bg-green-100 text-green-600' : 'text-gray-600 hover:bg-gray-100'}`}
+    className={`flex items-center space-x-3 w-full px-2 py-2 text-sm rounded-md ${active ? 'bg-blue-100 text-blue-600' : 'text-gray-600 hover:bg-gray-100'}`}
   >
-    <span className={`text-xl ${active ? 'text-green-600' : 'text-gray-400'}`}>{icon}</span>
+    <span className={`text-xl ${active ? 'text-blue-600' : 'text-gray-400'}`}>{icon}</span>
     {!isCollapsed && <span>{text}</span>}
   </button>
 );

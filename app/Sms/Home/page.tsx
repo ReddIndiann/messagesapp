@@ -1,16 +1,17 @@
-'use client'
+'use client';
 
 import React, { useState } from 'react';
 import Header from '@/app/Components/Header';
 import Sidebar from '@/app/Components/SideNav';
 import AddSenderIdModal from '@/app/Components/Modals/SenderIdModal';
 
-const Dashboard = () => {
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
-  const [currentSection, setCurrentSection] = useState('bulkSMS');
-  const [isModalOpen, setIsModalOpen] = useState(false);
+// Define types for Dashboard state
+const Dashboard: React.FC = () => {
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState<boolean>(false);
+  const [currentSection, setCurrentSection] = useState<'bulkSMS' | 'voiceCalls'>('bulkSMS');
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
 
-  const handleAddSenderId = (newSenderId) => {
+  const handleAddSenderId = (newSenderId: string) => {
     // Handle the new Sender ID submission here
     console.log('New Sender ID:', newSenderId);
     // You might want to update your state or make an API call here
@@ -99,7 +100,7 @@ const Dashboard = () => {
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-sm font-normal text-gray-500">Sender ID</h3>
                   <button 
-                    className="bg-orange-400 text-white px-3 py-1 rounded-md text-sm font-medium"
+                    className="bg-blue-400 text-white px-3 py-1 rounded-md text-sm font-medium"
                     onClick={() => setIsModalOpen(true)}
                   >
                     Add Sender ID
