@@ -1,232 +1,292 @@
 import React, { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faTimes } from '@fortawesome/free-solid-svg-icons';
+import { faTimes, faCalendar } from '@fortawesome/free-solid-svg-icons';
 
-// Define the types for the form data
 interface FormData {
   selectedSenderID: string;
   newSenderID: string;
   campaignTitle: string;
   messageContent: string;
+  scheduledDate: string;
+  scheduledTime: string;
 }
 
-// Define the props for Step1 component
-interface Step1Props {
-  onNext: () => void;
-}
+const StepIndicator = ({ currentStep, totalSteps }) => {
+  return (
+    <div className="flex justify-between items-center mb-8">
+      {[...Array(totalSteps)].map((_, index) => (
+        <React.Fragment key={index}>
+          <div className="flex flex-col items-center">
+            <div
+              className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-medium ${
+                index + 1 <= currentStep ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-500'
+              }`}
+            >
+              {index + 1}
+            </div>
+            <span className="mt-2 text-xs text-gray-500">
+              {index === 0 ? 'Select' : index === 1 ? 'Compose' : 'Schedule'}
+            </span>
+          </div>
+          {index < totalSteps - 1 && (
+            <div
+              className={`flex-1 h-1 ${
+                index + 1 < currentStep ? 'bg-blue-500' : 'bg-gray-200'
+              }`}
+            ></div>
+          )}
+        </React.Fragment>
+      ))}
+    </div>
+  );
+};
 
-const Step1: React.FC<Step1Props> = ({ onNext }) => (
-  <div>
-    <h2 className="text-lg sm:text-2xl font-semibold mb-4 text-gray-500">Select Individual</h2>
-    <form>
+const Step1 = ({ onNext }) => (
+  <motion.div
+    initial={{ opacity: 0, y: 20 }}
+    animate={{ opacity: 1, y: 0 }}
+    exit={{ opacity: 0, y: -20 }}
+    transition={{ duration: 0.3 }}
+  >
+    <h2 className="text-2xl font-semibold mb-6 text-gray-800">Select Recipient</h2>
+    <form onSubmit={(e) => { e.preventDefault(); onNext(); }}>
       <div className="mb-6">
-        <label className="block text-sm font-medium text-gray-700">Recipient</label>
+        <label htmlFor="recipient" className="block text-sm font-medium text-gray-700 mb-2">Recipient</label>
         <textarea
-  className="mt-2 block w-full bg-gray-100 border border-gray-300 rounded-md shadow-sm p-3 focus:ring focus:ring-opacity-50 text-gray-800"
-  placeholder="Enter your message"
-  rows={6}  // Changed from rows="6" to rows={6}
-></textarea>
-
+          id="recipient"
+          className="w-full bg-white border border-gray-300 rounded-lg shadow-sm p-4 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-800 transition-all duration-200"
+          placeholder="Enter recipient's number or select from contacts"
+          rows={4}
+          required
+        ></textarea>
       </div>
       <button
-        type="button"
-        className="bg-blue-400 text-white px-6 py-2 rounded-md text-sm"
-        onClick={onNext}
+        type="submit"
+        className="w-full bg-blue-500 text-white px-6 py-3 rounded-lg text-sm font-medium hover:bg-blue-600 transition-colors duration-200"
       >
-        Next
+        Next: Compose Message
       </button>
     </form>
-  </div>
+  </motion.div>
 );
 
-// Define the props for Step2 component
-interface Step2Props {
-  onNext: () => void;
-  onPrevious: () => void;
-  onDataChange: (newData: Partial<FormData>) => void;
-  formData: FormData;
-}
-
-const Step2: React.FC<Step2Props> = ({ onNext, onPrevious, onDataChange, formData }) => {
-  const { selectedSenderID, newSenderID, campaignTitle, messageContent } = formData;
-
+const Step2 = ({ onNext, onPrevious, formData, setFormData }) => {
   const handleAddSenderID = () => {
-    if (newSenderID) {
-      onDataChange({ selectedSenderID: newSenderID, newSenderID: '' });
+    if (formData.newSenderID) {
+      setFormData({
+        ...formData,
+        selectedSenderID: formData.newSenderID,
+        newSenderID: '',
+      });
     }
   };
 
   return (
-    <div>
-      <h2 className="text-xl font-medium mb-6 text-black">Enter Message Details</h2>
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -20 }}
+      transition={{ duration: 0.3 }}
+    >
+      <h2 className="text-2xl font-semibold mb-6 text-gray-800">Compose Message</h2>
       <form onSubmit={(e) => { e.preventDefault(); onNext(); }}>
-        <div className="mb-4 flex items-center gap-4">
-          <div className="flex-1">
-            <label className="block text-sm font-medium text-gray-700">Sender ID</label>
-            <div className="flex items-center gap-2">
-              <select
-                value={selectedSenderID}
-                onChange={(e) => onDataChange({ selectedSenderID: e.target.value })}
-                className="block w-2/3 bg-gray-100 border border-gray-300 rounded-md shadow-sm py-2 px-3 text-gray-800 text-sm focus:ring focus:ring-opacity-50"
-              >
-                <option value="" disabled>Select Sender ID</option>
-                <option value="12345">12345</option>
-                <option value="67890">67890</option>
-              </select>
-              <button
-                type="button"
-                className="bg-gray-300 text-gray-800 px-6 py-2 rounded-md text-sm"
-                onClick={handleAddSenderID}
-              >
-                Add Sender ID
-              </button>
-            </div>
+        <div className="mb-6">
+          <label htmlFor="senderID" className="block text-sm font-medium text-gray-700 mb-2">Sender ID</label>
+          <div className="flex items-center gap-2">
+            <select
+              id="senderID"
+              value={formData.selectedSenderID}
+              onChange={(e) => setFormData({ ...formData, selectedSenderID: e.target.value })}
+              className="flex-1 bg-white border border-gray-300 rounded-lg shadow-sm py-2 px-3 text-gray-800 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+              required
+            >
+              <option value="" disabled>Select Sender ID</option>
+              <option value="12345">12345</option>
+              <option value="67890">67890</option>
+            </select>
+            <button
+              type="button"
+              className="bg-gray-100 text-gray-800 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors duration-200"
+              onClick={handleAddSenderID}
+            >
+              Add New
+            </button>
           </div>
         </div>
 
-        <div className="mb-4">
-          <label className="block text-sm font-medium text-gray-700">Campaign Title</label>
+        <div className="mb-6">
+          <label htmlFor="campaignTitle" className="block text-sm font-medium text-gray-700 mb-2">Campaign Title</label>
           <input
+            id="campaignTitle"
             type="text"
-            value={campaignTitle}
-            onChange={(e) => onDataChange({ campaignTitle: e.target.value })}
-            className="mt-2 block w-full bg-gray-100 border border-gray-300 rounded-md shadow-sm py-2 px-3 text-gray-800 text-sm focus:ring focus:ring-opacity-50"
+            value={formData.campaignTitle}
+            onChange={(e) => setFormData({ ...formData, campaignTitle: e.target.value })}
+            className="w-full bg-white border border-gray-300 rounded-lg shadow-sm py-2 px-3 text-gray-800 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
             placeholder="Enter Campaign Title"
+            required
           />
         </div>
-        <div className="mb-6">
-          <label className="block text-sm font-medium text-gray-700">Message Content</label>
-          <textarea
-  className="mt-2 block w-full bg-gray-100 border border-gray-300 rounded-md shadow-sm p-3 focus:ring focus:ring-opacity-50 text-gray-800"
-  placeholder="Enter your message"
-  rows={6}  // Changed from rows="6" to rows={6}
-></textarea>
 
+        <div className="mb-6">
+          <label htmlFor="messageContent" className="block text-sm font-medium text-gray-700 mb-2">Message Content</label>
+          <textarea
+            id="messageContent"
+            value={formData.messageContent}
+            onChange={(e) => setFormData({ ...formData, messageContent: e.target.value })}
+            className="w-full bg-white border border-gray-300 rounded-lg shadow-sm p-4 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-800 transition-all duration-200"
+            placeholder="Enter your message"
+            rows={6}
+            required
+          ></textarea>
+          <p className="mt-2 text-sm text-gray-500">
+            Characters: {formData.messageContent.length} / 160
+          </p>
         </div>
+
         <div className="flex justify-between gap-4">
           <button
             type="button"
-            className="bg-gray-200 text-gray-500 px-6 py-2 rounded-md text-sm"
+            className="flex-1 bg-gray-100 text-gray-800 px-6 py-3 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors duration-200"
             onClick={onPrevious}
           >
-            Previous
+            Back
           </button>
           <button
             type="submit"
-            className="bg-blue-400 text-white px-6 py-2 rounded-md text-sm"
+            className="flex-1 bg-blue-500 text-white px-6 py-3 rounded-lg text-sm font-medium hover:bg-blue-600 transition-colors duration-200"
           >
-            Next
+            Next: Schedule
           </button>
         </div>
       </form>
-    </div>
+    </motion.div>
   );
 };
 
-// Define the props for ConfirmationMessageModal component
-interface ConfirmationMessageModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  formData: FormData;
-}
-
-const ConfirmationMessageModal: React.FC<ConfirmationMessageModalProps> = ({ isOpen, onClose, formData }) => {
-  if (!isOpen) return null;
-
-  return (
-    <div>
-      <h2 className="text-xl font-medium mb-6 text-black">Confirmation Message</h2>
-      <div className="mb-4">
-        <p className="text-sm font-medium text-gray-700">Sender ID:</p>
-        <p className="text-gray-800">{formData.selectedSenderID}</p>
+const Step3 = ({ onPrevious, formData, setFormData, onSchedule }) => (
+  <motion.div
+    initial={{ opacity: 0, scale: 0.9 }}
+    animate={{ opacity: 1, scale: 1 }}
+    exit={{ opacity: 0, scale: 0.9 }}
+    transition={{ duration: 0.3 }}
+  >
+    <h2 className="text-2xl font-semibold mb-6 text-gray-800">Schedule Message</h2>
+    <form onSubmit={(e) => { e.preventDefault(); onSchedule(); }}>
+      <div className="space-y-4 mb-6">
+        <div>
+          <p className="text-sm font-medium text-gray-500">Sender ID</p>
+          <p className="text-lg text-gray-800">{formData.selectedSenderID}</p>
+        </div>
+        <div>
+          <p className="text-sm font-medium text-gray-500">Campaign Title</p>
+          <p className="text-lg text-gray-800">{formData.campaignTitle}</p>
+        </div>
+        <div>
+          <p className="text-sm font-medium text-gray-500">Message Content</p>
+          <p className="text-lg text-gray-800">{formData.messageContent}</p>
+        </div>
+        <div>
+          <p className="text-sm font-medium text-gray-500">Character Count</p>
+          <p className="text-lg text-gray-800">{formData.messageContent.length} / 160</p>
+        </div>
       </div>
-      <div className="mb-4">
-        <p className="text-sm font-medium text-gray-700">Campaign Title:</p>
-        <p className="text-gray-800">{formData.campaignTitle}</p>
+      <div className="mb-6">
+        <label htmlFor="scheduledDate" className="block text-sm font-medium text-gray-700 mb-2">Scheduled Date</label>
+        <div className="relative">
+          <input
+            id="scheduledDate"
+            type="date"
+            value={formData.scheduledDate}
+            onChange={(e) => setFormData({ ...formData, scheduledDate: e.target.value })}
+            className="w-full bg-white border border-gray-300 rounded-lg shadow-sm py-2 px-3 text-gray-800 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+            required
+          />
+          <FontAwesomeIcon icon={faCalendar} className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+        </div>
       </div>
-      <div className="mb-4">
-        <p className="text-sm font-medium text-gray-700">Message Content:</p>
-        <p className="text-gray-800">{formData.messageContent}</p>
-      </div>
-      <div className="mb-4">
-        <p className="text-sm font-medium text-gray-700">Character Count:</p>
-        <p className="text-gray-800">{formData.messageContent.length} characters</p>
+      <div className="mb-6">
+        <label htmlFor="scheduledTime" className="block text-sm font-medium text-gray-700 mb-2">Scheduled Time</label>
+        <input
+          id="scheduledTime"
+          type="time"
+          value={formData.scheduledTime}
+          onChange={(e) => setFormData({ ...formData, scheduledTime: e.target.value })}
+          className="w-full bg-white border border-gray-300 rounded-lg shadow-sm py-2 px-3 text-gray-800 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+          required
+        />
       </div>
       <div className="flex justify-between gap-4">
         <button
           type="button"
-          className="bg-gray-500 text-white px-6 py-2 rounded-md text-sm"
-          onClick={onClose}
+          className="flex-1 bg-gray-100 text-gray-800 px-6 py-3 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors duration-200"
+          onClick={onPrevious}
         >
           Back
         </button>
         <button
-          type="button"
-          className="bg-blue-500 text-white px-6 py-2 rounded-md text-sm"
+          type="submit"
+          className="flex-1 bg-blue-500 text-white px-6 py-3 rounded-lg text-sm font-medium hover:bg-blue-600 transition-colors duration-200"
         >
-          Send Message
+          Schedule Message
         </button>
       </div>
-    </div>
-  );
-};
+    </form>
+  </motion.div>
+);
 
-// Define the props for ScheduleQuickSms component
-interface ScheduleQuickSmsProps {
-  isOpen: boolean;
-  onClose: () => void;
-}
-
-const ScheduleQuickSms: React.FC<ScheduleQuickSmsProps> = ({ isOpen, onClose }) => {
+const ScheduleQuickSms: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ isOpen, onClose }) => {
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState<FormData>({
     selectedSenderID: '',
     newSenderID: '',
     campaignTitle: '',
     messageContent: '',
+    scheduledDate: '',
+    scheduledTime: '',
   });
 
-  const handleNext = () => {
-    setCurrentStep((prev) => prev + 1);
-  };
+  const handleNext = () => setCurrentStep((prev) => prev + 1);
+  const handlePrevious = () => setCurrentStep((prev) => prev - 1);
 
-  const handlePrevious = () => {
-    setCurrentStep((prev) => prev - 1);
-  };
-
-  const handleDataChange = (newData: Partial<FormData>) => {
-    setFormData((prev) => ({ ...prev, ...newData }));
+  const handleSchedule = () => {
+    console.log('Scheduled message:', formData);
+    onClose();
   };
 
   if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50">
-      <div className="bg-white p-6 sm:p-8 md:p-10 rounded-lg shadow-lg w-full max-w-md relative">
-        {/* Close Button */}
+      <div className="bg-white p-8 rounded-xl shadow-2xl w-full max-w-md relative">
         <button
           className="absolute top-4 right-4 text-gray-500 hover:text-gray-700"
           onClick={onClose}
         >
           <FontAwesomeIcon icon={faTimes} />
         </button>
-        {/* Step Content */}
-        {currentStep === 1 && <Step1 onNext={handleNext} />}
-        {currentStep === 2 && (
-          <Step2
-            onNext={handleNext}
-            onPrevious={handlePrevious}
-            onDataChange={handleDataChange}
-            formData={formData}
-          />
-        )}
-        {currentStep === 3 && (
-          <ConfirmationMessageModal
-            isOpen={true}
-            onClose={onClose}
-            formData={formData}
-          />
-        )}
+        <StepIndicator currentStep={currentStep} totalSteps={3} />
+        <AnimatePresence mode="wait">
+          {currentStep === 1 && <Step1 key="step1" onNext={handleNext} />}
+          {currentStep === 2 && (
+            <Step2
+              key="step2"
+              onNext={handleNext}
+              onPrevious={handlePrevious}
+              formData={formData}
+              setFormData={setFormData}
+            />
+          )}
+          {currentStep === 3 && (
+            <Step3
+              key="step3"
+              onPrevious={handlePrevious}
+              formData={formData}
+              setFormData={setFormData}
+              onSchedule={handleSchedule}
+            />
+          )}
+        </AnimatePresence>
       </div>
     </div>
   );

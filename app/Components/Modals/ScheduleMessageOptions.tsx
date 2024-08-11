@@ -1,6 +1,8 @@
 import React from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faTimes, faEnvelope, faUsers, faFileExcel } from '@fortawesome/free-solid-svg-icons';
 
-// Define the props interface
 interface ScheduleMessageOptionsProps {
   isOpen: boolean;
   onClose: () => void;
@@ -17,41 +19,67 @@ const ScheduleMessageOptions: React.FC<ScheduleMessageOptionsProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50">
-      <div className="bg-white p-4 sm:p-6 md:p-8 lg:p-10 rounded-lg shadow-lg w-full max-w-sm sm:max-w-md lg:max-w-lg">
-        <h2 className="text-lg sm:text-xl font-medium mb-4 text-black">Send Message</h2>
-        <p className="mb-4 text-black text-xs sm:text-sm">What action do you want to perform on your message?</p>
-        <button
-          className="w-full bg-gray-100 text-gray-400 py-2 rounded mb-2 hover:bg-blue-100 hover:text-blue-400 text-sm sm:text-base"
-          onClick={() => {
-            onClose();
-            onScheduleQuickSMSClick();
-          }}
+    <AnimatePresence>
+      {isOpen && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50"
         >
-          Quick SMS
-        </button>
-        <button
-          className="w-full bg-gray-100 text-gray-400 py-2 rounded mb-2 hover:bg-blue-100 hover:text-blue-400 text-sm sm:text-base"
-          onClick={() => {
-            onClose();
-            onScheduleToGroupClick();
-          }}
-        >
-          Send to Group
-        </button>
-        <button
-          className="w-full bg-gray-100 text-gray-400 py-2 rounded mb-2 hover:bg-blue-100 hover:text-blue-400 text-sm sm:text-base"
-        >
-          Send using Excel Sheet
-        </button>
-        <button
-          className="w-full sm:w-24 bg-gray-100 text-gray-800 py-2 mt-4 sm:mt-5 rounded text-sm sm:text-base"
-          onClick={onClose}
-        >
-          Cancel
-        </button>
-      </div>
-    </div>
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.9, opacity: 0 }}
+            transition={{ duration: 0.3 }}
+            className="bg-white p-8 rounded-xl shadow-2xl w-full max-w-md relative"
+          >
+            <button
+              className="absolute top-4 right-4 text-gray-500 hover:text-gray-700"
+              onClick={onClose}
+            >
+              <FontAwesomeIcon icon={faTimes} />
+            </button>
+            <h2 className="text-2xl font-semibold mb-6 text-gray-800">Send Message</h2>
+            <p className="mb-6 text-gray-600">What action do you want to perform on your message?</p>
+            <div className="space-y-4">
+              <button
+                className="w-full bg-white border border-gray-300 text-gray-800 py-3 px-4 rounded-lg shadow-sm hover:bg-blue-50 hover:border-blue-300 transition-colors duration-200 flex items-center"
+                onClick={() => {
+                  onClose();
+                  onScheduleQuickSMSClick();
+                }}
+              >
+                <FontAwesomeIcon icon={faEnvelope} className="mr-3 text-blue-500" />
+                <span>Quick SMS</span>
+              </button>
+              <button
+                className="w-full bg-white border border-gray-300 text-gray-800 py-3 px-4 rounded-lg shadow-sm hover:bg-blue-50 hover:border-blue-300 transition-colors duration-200 flex items-center"
+                onClick={() => {
+                  onClose();
+                  onScheduleToGroupClick();
+                }}
+              >
+                <FontAwesomeIcon icon={faUsers} className="mr-3 text-blue-500" />
+                <span>Send to Group</span>
+              </button>
+              <button
+                className="w-full bg-white border border-gray-300 text-gray-800 py-3 px-4 rounded-lg shadow-sm hover:bg-blue-50 hover:border-blue-300 transition-colors duration-200 flex items-center"
+              >
+                <FontAwesomeIcon icon={faFileExcel} className="mr-3 text-blue-500" />
+                <span>Send using Excel Sheet</span>
+              </button>
+            </div>
+            <button
+              className="w-full mt-6 bg-gray-100 text-gray-800 py-3 px-4 rounded-lg shadow-sm hover:bg-gray-200 transition-colors duration-200"
+              onClick={onClose}
+            >
+              Cancel
+            </button>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 };
 

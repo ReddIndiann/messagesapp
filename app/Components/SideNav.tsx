@@ -127,7 +127,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onCollapse, setCurrentSection }) => {
       </nav>
       <div className={`px-4 py-12 ${isCollapsed ? 'px-2' : ''}`}>
         <h3 className={`text-sm font-semibold text-gray-500 uppercase tracking-wider mb-2 ${isCollapsed ? 'text-xs text-center ' : ''}`}>
-          Switch Channel
+          {/* Switch Channel */}TABS
         </h3>
         <div className="space-y-2">
           <ChannelButton 
