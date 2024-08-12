@@ -1,18 +1,25 @@
 'use client'
-import React, { useState } from 'react';
+
+import React, { useState, useEffect } from 'react';
 import Header from '@/app/Components/Header';
 import Sidebar from '@/app/Components/SideNav';
 import AddSenderIdModal from '@/app/Components/Modals/SenderIdModal';
 import TableComponent from '@/app/Components/Tables/SMSCampaignHistory';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faHistory, faFileAlt, faPlus } from '@fortawesome/free-solid-svg-icons';
+
 const Dashboard = () => {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
-  const [currentSection, setCurrentSection] = useState('campaignHistory');
+  const [currentSection, setCurrentSection] = useState('campaignHistory'); // Default section
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+  useEffect(() => {
+    console.log('Dashboard rendered. Current Section:', currentSection);
+  }, [currentSection]);
+
   const handleAddSenderId = (newSenderId) => {
-    // Handle the new Sender ID submission here
     console.log('New Sender ID:', newSenderId);
-    // You might want to update your state or make an API call here
+    // Handle the new Sender ID submission here
   };
 
   const campaignHistoryData = [
@@ -28,35 +35,61 @@ const Dashboard = () => {
     <div className="min-h-screen bg-gray-100 flex flex-col">
       <Header currentSection={currentSection} />
       <div className="flex flex-1 pt-16">
-        <Sidebar 
-          onCollapse={setIsSidebarCollapsed} 
+        <Sidebar
+          onCollapse={setIsSidebarCollapsed}
           setCurrentSection={setCurrentSection}
         />
-        <main className={`flex-1 ${isSidebarCollapsed ? 'ml-20' : 'ml-64'} p-6 overflow-y-auto`}>
-          <div className="mb-4">
-            <button
-              className={`px-4 py-2 rounded ${currentSection === 'campaignHistory' ? 'bg-orange-500 text-white' : 'bg-gray-200'}`}
-              onClick={() => setCurrentSection('campaignHistory')}
-            >
-              Campaign History
-            </button>
-            <button
-              className={`px-4 py-2 rounded ml-2 ${currentSection === 'deliveryReport' ? 'bg-orange-500 text-white' : 'bg-gray-200'}`}
-              onClick={() => setCurrentSection('deliveryReport')}
-            >
-              Delivery Report
-            </button>
+        <main className={`flex-1 ${isSidebarCollapsed ? 'ml-20' : 'ml-64'} p-8 overflow-y-auto`}>
+          <div className="bg-white shadow-lg rounded-xl p-6">
+            <div className="flex justify-between items-center mb-6">
+              <h1 className="text-2xl font-bold text-gray-800">SMS Campaigns</h1>
+              <button
+                onClick={() => setIsModalOpen(true)}
+                className="bg-orange-500 text-white px-4 py-2 rounded-lg hover:bg-orange-600 transition duration-300 flex items-center"
+              >
+                <FontAwesomeIcon icon={faPlus} className="mr-2" />
+                Add Sender ID
+              </button>
+            </div>
+
+            <div className="mb-6">
+              <div className="inline-flex rounded-lg border border-gray-200 bg-gray-50">
+                <button
+                  className={`px-4 py-2 rounded-l-lg flex items-center ${
+                    currentSection === 'campaignHistory'
+                      ? 'bg-orange-500 text-white'
+                      : 'text-gray-600 hover:bg-gray-100'
+                  }`}
+                  onClick={() => setCurrentSection('campaignHistory')}
+                >
+                  <FontAwesomeIcon icon={faHistory} className="mr-2" />
+                  Campaign History
+                </button>
+                <button
+                  className={`px-4 py-2 rounded-r-lg flex items-center ${
+                    currentSection === 'deliveryReport'
+                      ? 'bg-orange-500 text-white'
+                      : 'text-gray-600 hover:bg-gray-100'
+                  }`}
+                  onClick={() => setCurrentSection('deliveryReport')}
+                >
+                  <FontAwesomeIcon icon={faFileAlt} className="mr-2" />
+                  Delivery Report
+                </button>
+              </div>
+            </div>
+
+            {currentSection === 'campaignHistory' && (
+              <TableComponent data={campaignHistoryData} section="campaignHistory" />
+            )}
+            {currentSection === 'deliveryReport' && (
+              <TableComponent data={deliveryReportData} section="deliveryReport" />
+            )}
           </div>
-          {currentSection === 'campaignHistory' && (
-            <TableComponent data={campaignHistoryData} section="campaignHistory" />
-          )}
-          {currentSection === 'deliveryReport' && (
-            <TableComponent data={deliveryReportData} section="deliveryReport" />
-          )}
         </main>
       </div>
-      
-      <AddSenderIdModal 
+
+      <AddSenderIdModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onSubmit={handleAddSenderId}
