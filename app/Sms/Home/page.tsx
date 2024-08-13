@@ -1,5 +1,5 @@
 'use client'
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Header from '@/app/Components/Header';
 import Sidebar from '@/app/Components/SideNav';
 import AddSenderIdModal from '@/app/Components/Modals/SenderIdModal';
@@ -11,6 +11,44 @@ const Dashboard: React.FC = () => {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState<boolean>(false);
   const [currentSection, setCurrentSection] = useState<'bulkSMS' | 'voiceCalls'>('bulkSMS');
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [userId, setUserId] = useState<number | null>(null);
+  const [senderIds, setSenderIds] = useState<any[]>([]); // State to hold sender IDs
+
+  useEffect(() => {
+    // Retrieve and parse the signInResponse from localStorage
+    const signInResponse = localStorage.getItem('signInResponse');
+    
+    if (signInResponse) {
+      const parsedResponse = JSON.parse(signInResponse);
+      const extractedUserId = parsedResponse.user?.id || null;
+      setUserId(extractedUserId);
+      console.log('Extracted User ID:', extractedUserId);
+
+      if (extractedUserId) {
+        // Fetch sender IDs for the user
+        fetchSenderIds(extractedUserId);
+      }
+    }
+
+    // Log all localStorage details
+    console.log('LocalStorage contents:', localStorage);
+  }, []); // Empty dependency array to run this effect only once when the component mounts
+
+  const fetchSenderIds = async (userId: number) => {
+    try {
+      const response = await fetch(`http://localhost:5000/api/senders/user/${userId}`);
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.msg || 'Failed to fetch sender IDs');
+      }
+
+      setSenderIds(data); // Update state with the fetched sender IDs
+      console.log('Fetched Sender IDs:', data);
+    } catch (err: any) {
+      console.error('Error fetching sender IDs:', err.message || 'An error occurred');
+    }
+  };
 
   const handleAddSenderId = (newSenderId: string) => {
     console.log('New Sender ID:', newSenderId);
@@ -69,22 +107,28 @@ const Dashboard: React.FC = () => {
                     Add Sender ID
                   </button>
                 </div>
-                <div className="mt-4">
-                  <div className="flex items-center justify-between">
-                    <span className="text-slate-600">Daniel</span>
-                    <div className="flex items-center space-x-24">
-                      <div className="bg-green-500 text-white rounded-full p-1">
-                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
-                        </svg>
+                <div className="mt-4 space-y-4">
+                  {senderIds.map((sender, index) => (
+                    <div key={index} className="flex items-center justify-between">
+                      <span className="text-slate-600">{sender.name}</span>
+                      <div className="flex items-center space-x-24">
+                        <div 
+                          className={`rounded-full p-1 ${
+                            sender.status === 'pending' ? 'bg-yellow-500' : 'bg-green-500'
+                          } text-white`}
+                        >
+                          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+                          </svg>
+                        </div>
+                        <button className="text-gray-400 hover:text-gray-600">
+                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
+                          </svg>
+                        </button>
                       </div>
-                      <button className="text-gray-400 hover:text-gray-600">
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
-                        </svg>
-                      </button>
                     </div>
-                  </div>
+                  ))}
                 </div>
               </div>
             </div>

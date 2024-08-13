@@ -20,6 +20,7 @@
     "@fortawesome/react-fontawesome": "^0.2.2",
     "@mui/material": "^5.16.7",
     "@mui/x-charts": "^7.12.1",
+    "axios": "^1.7.3",
     "framer-motion": "^11.3.24",
     "next": "14.2.5",
     "react": "^18",
@@ -28,9 +29,11 @@
     "react-intl": "^6.6.8",
     "react-phone-input-2": "^2.15.1",
     "react-phone-number-input": "^3.4.5",
-    "react-responsive-carousel": "^3.2.23"
+    "react-responsive-carousel": "^3.2.23",
+    "react-toastify": "^10.0.5"
   },
   "devDependencies": {
+    "@types/axios": "^0.14.0",
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",

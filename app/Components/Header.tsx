@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation'; 
 
 interface HeaderProps {
   currentSection: 'bulkSMS' | 'voiceCalls';
@@ -6,6 +7,25 @@ interface HeaderProps {
 
 const Header: React.FC<HeaderProps> = ({ currentSection }) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState<boolean>(false);
+  const [username, setUsername] = useState<string | null>(null);
+  const router = useRouter(); 
+
+  useEffect(() => {
+    // Retrieve and parse the signInResponse from localStorage
+    const signInResponse = localStorage.getItem('signInResponse');
+    if (signInResponse) {
+      const parsedResponse = JSON.parse(signInResponse);
+      const extractedUsername = parsedResponse.user?.username || null;
+      setUsername(extractedUsername);
+      console.log('Extracted Username:', extractedUsername);
+    }
+
+    // Log all localStorage details
+    console.log('LocalStorage contents:', localStorage);
+
+    // Log specific details for clarity
+    console.log('SignIn Response:', signInResponse);
+  }, []);
 
   const handleMouseEnter = () => {
     setIsDropdownOpen(true);
@@ -13,6 +33,16 @@ const Header: React.FC<HeaderProps> = ({ currentSection }) => {
 
   const handleMouseLeave = () => {
     setIsDropdownOpen(false);
+  };
+
+  const handleLogout = () => {
+    // Clear localStorage
+    localStorage.removeItem('signUpResponse');
+    localStorage.removeItem('signInResponse');
+    localStorage.removeItem('username'); // Clear username if needed
+
+    // Redirect to the login page
+    router.push('/');
   };
 
   return (
@@ -62,7 +92,7 @@ const Header: React.FC<HeaderProps> = ({ currentSection }) => {
             onMouseEnter={handleMouseEnter}
             onMouseLeave={handleMouseLeave}
           >
-            Daniel Odoi
+            {username || 'User'}
             <svg className="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
             </svg>
@@ -73,7 +103,12 @@ const Header: React.FC<HeaderProps> = ({ currentSection }) => {
                   <li className="hover:bg-gray-100 cursor-pointer px-4 py-2 transition duration-200 ease-in-out">Developer</li>
                   <li className="hover:bg-gray-100 cursor-pointer px-4 py-2 transition duration-200 ease-in-out">Referral</li>
                   <li className="hover:bg-gray-100 cursor-pointer px-4 py-2 transition duration-200 ease-in-out">Marketplace</li>
-                  <li className="hover:bg-gray-100 cursor-pointer px-4 py-2 transition duration-200 ease-in-out">Logout</li>
+                  <li
+                    className="hover:bg-gray-100 cursor-pointer px-4 py-2 transition duration-200 ease-in-out"
+                    onClick={handleLogout}
+                  >
+                    Logout
+                  </li>
                 </ul>
               </div>
             )}
