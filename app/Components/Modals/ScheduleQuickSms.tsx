@@ -12,7 +12,12 @@ interface FormData {
   scheduledTime: string;
 }
 
-const StepIndicator = ({ currentStep, totalSteps }) => {
+interface StepIndicatorProps {
+  currentStep: number;
+  totalSteps: number;
+}
+
+const StepIndicator: React.FC<StepIndicatorProps> = ({ currentStep, totalSteps }) => {
   return (
     <div className="flex justify-between items-center mb-8">
       {[...Array(totalSteps)].map((_, index) => (
@@ -42,7 +47,11 @@ const StepIndicator = ({ currentStep, totalSteps }) => {
   );
 };
 
-const Step1 = ({ onNext }) => (
+interface Step1Props {
+  onNext: () => void;
+}
+
+const Step1: React.FC<Step1Props> = ({ onNext }) => (
   <motion.div
     initial={{ opacity: 0, y: 20 }}
     animate={{ opacity: 1, y: 0 }}
@@ -71,7 +80,14 @@ const Step1 = ({ onNext }) => (
   </motion.div>
 );
 
-const Step2 = ({ onNext, onPrevious, formData, setFormData }) => {
+interface Step2Props {
+  onNext: () => void;
+  onPrevious: () => void;
+  formData: FormData;
+  setFormData: React.Dispatch<React.SetStateAction<FormData>>;
+}
+
+const Step2: React.FC<Step2Props> = ({ onNext, onPrevious, formData, setFormData }) => {
   const handleAddSenderID = () => {
     if (formData.newSenderID) {
       setFormData({
@@ -164,7 +180,14 @@ const Step2 = ({ onNext, onPrevious, formData, setFormData }) => {
   );
 };
 
-const Step3 = ({ onPrevious, formData, setFormData, onSchedule }) => (
+interface Step3Props {
+  onPrevious: () => void;
+  formData: FormData;
+  setFormData: React.Dispatch<React.SetStateAction<FormData>>;
+  onSchedule: () => void;
+}
+
+const Step3: React.FC<Step3Props> = ({ onPrevious, formData, setFormData, onSchedule }) => (
   <motion.div
     initial={{ opacity: 0, scale: 0.9 }}
     animate={{ opacity: 1, scale: 1 }}
@@ -235,7 +258,12 @@ const Step3 = ({ onPrevious, formData, setFormData, onSchedule }) => (
   </motion.div>
 );
 
-const ScheduleQuickSms: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ isOpen, onClose }) => {
+interface ScheduleQuickSmsProps {
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+const ScheduleQuickSms: React.FC<ScheduleQuickSmsProps> = ({ isOpen, onClose }) => {
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState<FormData>({
     selectedSenderID: '',
@@ -260,8 +288,10 @@ const ScheduleQuickSms: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ 
     <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50">
       <div className="bg-white p-8 rounded-xl shadow-2xl w-full max-w-md relative">
         <button
+          aria-label="Close"
+          title="Close"
           className="absolute top-4 right-4 text-gray-500 hover:text-gray-700"
-          onClick={onClose}
+          onClick={onClose} // Ensure this is correctly wired to the onClose function
         >
           <FontAwesomeIcon icon={faTimes} />
         </button>

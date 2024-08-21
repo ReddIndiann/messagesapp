@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Header from '@/app/Components/Header';
 import Sidebar from '@/app/Components/SideNav';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -16,7 +16,10 @@ import SendToGroupModal from '@/app/Components/Modals/SendToGroupModal';
 import ScheduleToGroupStepper from '@/app/Components/Modals/ScheduleToGroupModal';
 import ScheduleMessageOptions from '@/app/Components/Modals/ScheduleMessageOptions';
 
-// Define types for the Dashboard component
+import { fetchMessageTemplates } from '@/app/lib/createTemplateUtils';// Adjust the path as necessary
+
+
+
 const Dashboard: React.FC = () => {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState<boolean>(false);
   const [currentSection, setCurrentSection] = useState<string>('bulkSMS');
@@ -28,10 +31,31 @@ const Dashboard: React.FC = () => {
   const [isScheduleToGroupModalOpen, setIsScheduleToGroupModalOpen] = useState<boolean>(false);
   const [isSendToGroupModalOpen, setIsSendToGroupModalOpen] = useState<boolean>(false);
   const [isScheduleMessageOptionsOpen, setIsScheduleMessageOptionsOpen] = useState<boolean>(false);
+  const [smsCampaigns, setSmsCampaigns] = useState([]);  // State to store fetched campaigns
+  const [userId, setUserId] = useState(null);
 
-  const smsCampaigns = [
-    { id: 1, title: 'FriendsList', content: 'This is it bros', type: 'SMS', date: 'Fri 2 Aug, 2024 2:12:22 pm' },
-  ];
+  // Fetch the userId from async storage
+  useEffect(() => {
+    // Retrieve and parse the user ID from async storage
+    const signInResponse = localStorage.getItem('signInResponse');
+    if (signInResponse) {
+      const parsedResponse = JSON.parse(signInResponse);
+      const extractedUserId = parsedResponse.user?.id || null;
+      setUserId(extractedUserId);
+    }
+  }, []);
+
+  // Fetch message templates from the API when userId is available
+  useEffect(() => {
+    if (userId) {
+      const getMessageTemplates = async () => {
+        const data = await fetchMessageTemplates(userId);
+        setSmsCampaigns(data);
+      };
+  
+      getMessageTemplates();
+    }
+  }, [userId]);
 
   const scheduledMessages = [
     { id: 1, title: 'Meeting Reminder', content: "Don't forget our meeting at 3 PM.", type: 'Scheduled', scheduled: 'Fri 2 Aug, 2024 1:12:22 pm', lastseen: 'Fri 2 Aug, 2024 1:12:22 pm', recipient: 'John Doe', status: 'COMPLETE', repeatperiod: 'None' },

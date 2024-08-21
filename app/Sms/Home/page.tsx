@@ -1,11 +1,12 @@
-'use client'
+'use client';
 import React, { useState, useEffect } from 'react';
 import Header from '@/app/Components/Header';
 import Sidebar from '@/app/Components/SideNav';
 import AddSenderIdModal from '@/app/Components/Modals/SenderIdModal';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faBullhorn, faAddressBook, faUsers, faCoins } from '@fortawesome/free-solid-svg-icons';
+import { faBullhorn, faAddressBook, faUsers, faCoins, faTrash } from '@fortawesome/free-solid-svg-icons';
 import BasicBars from '@/app/Components/Graph/Graph'; // Adjust the import path as needed
+import { fetchSenderIds, deleteSenderId } from '@/app/lib/senderIdUtils';
 
 const Dashboard: React.FC = () => {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState<boolean>(false);
@@ -13,46 +14,39 @@ const Dashboard: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [userId, setUserId] = useState<number | null>(null);
   const [senderIds, setSenderIds] = useState<any[]>([]); // State to hold sender IDs
+  const [error, setError] = useState<string | null>(null); // State to hold error messages
 
   useEffect(() => {
-    // Retrieve and parse the signInResponse from localStorage
     const signInResponse = localStorage.getItem('signInResponse');
-    
     if (signInResponse) {
       const parsedResponse = JSON.parse(signInResponse);
       const extractedUserId = parsedResponse.user?.id || null;
       setUserId(extractedUserId);
-      console.log('Extracted User ID:', extractedUserId);
-
       if (extractedUserId) {
-        // Fetch sender IDs for the user
-        fetchSenderIds(extractedUserId);
+        fetchSenderIds(extractedUserId)
+          .then(data => setSenderIds(data))
+          .catch(err => setError('Error fetching sender IDs: ' + err.message));
       }
     }
+  }, []);
 
-    // Log all localStorage details
-    console.log('LocalStorage contents:', localStorage);
-  }, []); // Empty dependency array to run this effect only once when the component mounts
-
-  const fetchSenderIds = async (userId: number) => {
-    try {
-      const response = await fetch(`http://localhost:5000/api/senders/user/${userId}`);
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.msg || 'Failed to fetch sender IDs');
-      }
-
-      setSenderIds(data); // Update state with the fetched sender IDs
-      console.log('Fetched Sender IDs:', data);
-    } catch (err: any) {
-      console.error('Error fetching sender IDs:', err.message || 'An error occurred');
+  const handleSuccess = () => {
+    if (userId) {
+      fetchSenderIds(userId)
+        .then(data => setSenderIds(data))
+        .catch(err => setError('Error fetching sender IDs: ' + err.message));
     }
   };
 
-  const handleAddSenderId = (newSenderId: string) => {
-    console.log('New Sender ID:', newSenderId);
-    // Handle the new Sender ID submission here
+  const handleDelete = async (senderId: number) => {
+    if (window.confirm('Are you sure you want to delete this Sender ID?')) {
+      try {
+        await deleteSenderId(senderId);
+        setSenderIds(senderIds.filter(sender => sender.id !== senderId));
+      } catch (err: any) {
+        setError('Error deleting sender ID: ' + err.message);
+      }
+    }
   };
 
   return (
@@ -66,6 +60,12 @@ const Dashboard: React.FC = () => {
         <main className={`flex-1 ${isSidebarCollapsed ? 'ml-20' : 'ml-64'} p-6 overflow-y-auto`}>
           <div className="max-w-7xl mx-auto">
             <p className="text-red-500 text-sm mb-6">Overview page displays data from the past 3 days.</p>
+
+            {error && (
+              <div className="bg-red-100 text-red-600 p-4 mb-4 rounded">
+                {error}
+              </div>
+            )}
             
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
               {[
@@ -122,9 +122,14 @@ const Dashboard: React.FC = () => {
                           </svg>
                         </div>
                         <button className="text-gray-400 hover:text-gray-600">
-                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                          {/* <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
-                          </svg>
+                          </svg> */}
+                           <button   aria-label="Delete Sender ID"
+  title="Delete Sender ID"className="text-black-200 hover:text-red-400 transition duration-200"
+ onClick={() => handleDelete(sender.id)}>
+                      <FontAwesomeIcon icon={faTrash} />
+                    </button>
                         </button>
                       </div>
                     </div>
@@ -135,11 +140,12 @@ const Dashboard: React.FC = () => {
           </div>
         </main>
       </div>
-      
-      <AddSenderIdModal 
+
+      <AddSenderIdModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        onSubmit={handleAddSenderId}
+        userId={userId}
+        onSuccess={handleSuccess}
       />
     </div>
   );

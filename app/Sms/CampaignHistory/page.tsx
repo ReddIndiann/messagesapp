@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
 import Header from '@/app/Components/Header';
 import Sidebar from '@/app/Components/SideNav';
 import AddSenderIdModal from '@/app/Components/Modals/SenderIdModal';
@@ -10,12 +11,12 @@ import { faHistory, faFileAlt, faPlus } from '@fortawesome/free-solid-svg-icons'
 
 const Dashboard = () => {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
-  const [currentSection, setCurrentSection] = useState('campaignHistory'); // Default section
+  const [currentSection, setCurrentSection] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
-    console.log('Dashboard rendered. Current Section:', currentSection);
-  }, [currentSection]);
+    setCurrentSection('campaignHistory');
+  }, []);
 
   const handleAddSenderId = (newSenderId) => {
     console.log('New Sender ID:', newSenderId);
@@ -29,63 +30,84 @@ const Dashboard = () => {
     { name: 'Gridguard', totalRecipients: 1, senderId: 'Daniel', dateTime: 'Fri, Aug 2, 2024 1:33 PM', totalCreditUsed: 1, walletBalanceUsed: 0 },
   ];
 
-  const deliveryReportData = []; // You can add delivery report data here
+  const deliveryReportData = []; 
+
+  const TabButton = ({ icon, label, isActive, onClick }) => (
+    <button
+      className={`flex items-center px-6 py-3 text-sm font-medium transition-colors duration-200 ${
+        isActive
+          ? 'bg-blue-500 text-white'
+          : 'text-blue-500 hover:bg-blue-50'
+      }`}
+      onClick={onClick}
+    >
+      <FontAwesomeIcon icon={icon} className="mr-2" />
+      {label}
+    </button>
+  );
 
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col">
-      <Header currentSection={currentSection} />
+    <div className="min-h-screen bg-gray-50 flex flex-col">
+      <Header currentSection={currentSection} className="bg-white shadow-md" />
       <div className="flex flex-1 pt-16">
         <Sidebar
           onCollapse={setIsSidebarCollapsed}
           setCurrentSection={setCurrentSection}
+          className="bg-white shadow-md"
         />
         <main className={`flex-1 ${isSidebarCollapsed ? 'ml-20' : 'ml-64'} p-8 overflow-y-auto`}>
-          <div className="bg-white shadow-lg rounded-xl p-6">
-            <div className="flex justify-between items-center mb-6">
-              <h1 className="text-2xl font-bold text-gray-800">SMS Campaigns</h1>
-              <button
-                onClick={() => setIsModalOpen(true)}
-                className="bg-orange-500 text-white px-4 py-2 rounded-lg hover:bg-orange-600 transition duration-300 flex items-center"
-              >
-                <FontAwesomeIcon icon={faPlus} className="mr-2" />
-                Add Sender ID
-              </button>
-            </div>
-
-            <div className="mb-6">
-              <div className="inline-flex rounded-lg border border-gray-200 bg-gray-50">
+          <motion.div 
+            className="bg-white shadow-lg rounded-xl overflow-hidden"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            <div className="bg-gradient-to-r from-blue-400 to-blue-900 p-6">
+              <div className="flex justify-between items-center">
+                <h1 className="text-2xl font-bold text-white">SMS Campaigns</h1>
                 <button
-                  className={`px-4 py-2 rounded-l-lg flex items-center ${
-                    currentSection === 'campaignHistory'
-                      ? 'bg-orange-500 text-white'
-                      : 'text-gray-600 hover:bg-gray-100'
-                  }`}
-                  onClick={() => setCurrentSection('campaignHistory')}
+                  onClick={() => setIsModalOpen(true)}
+                  className="bg-white text-blue-500 px-4 py-2 rounded-lg hover:bg-blue-50 transition duration-300 flex items-center"
                 >
-                  <FontAwesomeIcon icon={faHistory} className="mr-2" />
-                  Campaign History
-                </button>
-                <button
-                  className={`px-4 py-2 rounded-r-lg flex items-center ${
-                    currentSection === 'deliveryReport'
-                      ? 'bg-orange-500 text-white'
-                      : 'text-gray-600 hover:bg-gray-100'
-                  }`}
-                  onClick={() => setCurrentSection('deliveryReport')}
-                >
-                  <FontAwesomeIcon icon={faFileAlt} className="mr-2" />
-                  Delivery Report
+                  <FontAwesomeIcon icon={faPlus} className="mr-2" />
+                  Add Sender ID
                 </button>
               </div>
             </div>
 
-            {currentSection === 'campaignHistory' && (
-              <TableComponent data={campaignHistoryData} section="campaignHistory" />
-            )}
-            {currentSection === 'deliveryReport' && (
-              <TableComponent data={deliveryReportData} section="deliveryReport" />
-            )}
-          </div>
+            <div className="border-b border-gray-200">
+              <div className="flex">
+                <TabButton
+                  icon={faHistory}
+                  label="Campaign History"
+                  isActive={currentSection === 'campaignHistory'}
+                  onClick={() => setCurrentSection('campaignHistory')}
+                />
+                <TabButton
+                  icon={faFileAlt}
+                  label="Delivery Report"
+                  isActive={currentSection === 'deliveryReport'}
+                  onClick={() => setCurrentSection('deliveryReport')}
+                />
+              </div>
+            </div>
+
+            <div className="p-6">
+              <motion.div
+                key={currentSection}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.3 }}
+              >
+                {currentSection === 'campaignHistory' && (
+                  <TableComponent data={campaignHistoryData} section="campaignHistory" />
+                )}
+                {currentSection === 'deliveryReport' && (
+                  <TableComponent data={deliveryReportData} section="deliveryReport" />
+                )}
+              </motion.div>
+            </div>
+          </motion.div>
         </main>
       </div>
 

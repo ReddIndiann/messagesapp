@@ -28,7 +28,7 @@ const SignUp: React.FC = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [formData, setFormData] = useState({
     username: '',
-    phone: '',
+    number: '',
     email: '',
     password: '',
     confirmPassword: '',
@@ -62,7 +62,7 @@ const SignUp: React.FC = () => {
     setIsSubmitting(true);
     setError(''); // Clear previous errors
 
-    const { username, phone, email, password, confirmPassword } = formData;
+    const { username, number, email, password, confirmPassword } = formData;
 
     if (password !== confirmPassword) {
       setError('Passwords do not match');
@@ -132,9 +132,9 @@ const SignUp: React.FC = () => {
               <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
               <input
                 type="tel"
-                id="phone"
-                name="phone"
-                value={formData.phone}
+                id="number"
+                name="number"
+                value={formData.number}
                 onChange={handleChange}
                 className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition text-black"
                 placeholder="Enter your phone number"

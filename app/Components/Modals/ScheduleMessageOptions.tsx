@@ -35,6 +35,7 @@ const ScheduleMessageOptions: React.FC<ScheduleMessageOptionsProps> = ({
             className="bg-white p-8 rounded-xl shadow-2xl w-full max-w-md relative"
           >
             <button
+            title='close'
               className="absolute top-4 right-4 text-gray-500 hover:text-gray-700"
               onClick={onClose}
             >

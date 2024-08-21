@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
+// Step Indicator Component
 const StepIndicator = ({ currentStep, totalSteps }) => {
   return (
     <div className="flex justify-between items-center mb-8">
@@ -31,6 +32,7 @@ const StepIndicator = ({ currentStep, totalSteps }) => {
   );
 };
 
+// Step 1 Component
 const Step1 = ({ onNext }) => (
   <motion.div
     initial={{ opacity: 0, y: 20 }}
@@ -60,6 +62,7 @@ const Step1 = ({ onNext }) => (
   </motion.div>
 );
 
+// Step 2 Component
 const Step2 = ({ onNext, onPrevious, onDataChange, formData }) => {
   const { selectedSenderID, newSenderID, campaignTitle, messageContent } = formData;
 
@@ -151,6 +154,7 @@ const Step2 = ({ onNext, onPrevious, onDataChange, formData }) => {
   );
 };
 
+// Confirmation Message Modal Component
 const ConfirmationMessageModal = ({ onClose, formData, onSend }) => {
   return (
     <motion.div
@@ -160,7 +164,16 @@ const ConfirmationMessageModal = ({ onClose, formData, onSend }) => {
       transition={{ duration: 0.3 }}
       className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 backdrop-blur-sm"
     >
-      <div className="bg-white p-8 rounded-xl shadow-2xl w-11/12 sm:w-2/3 md:w-1/2 lg:w-1/3 max-w-lg">
+      <div className="bg-white p-8 rounded-xl shadow-2xl w-11/12 sm:w-2/3 md:w-1/2 lg:w-1/3 max-w-lg relative">
+        <button title='close'
+          type="button"
+          onClick={onClose}
+          className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 transition-colors duration-200"
+        >
+          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
         <h2 className="text-2xl font-semibold mb-6 text-gray-800">Confirm Message</h2>
         <div className="space-y-4">
           <div>
@@ -201,6 +214,7 @@ const ConfirmationMessageModal = ({ onClose, formData, onSend }) => {
   );
 };
 
+// Quick SMS Modal Component
 const QuickSMSModal = ({ isOpen, onClose }) => {
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState({
@@ -226,7 +240,16 @@ const QuickSMSModal = ({ isOpen, onClose }) => {
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50">
-      <div className="bg-white p-8 rounded-xl shadow-2xl w-full max-w-2xl">
+      <div className="bg-white p-8 rounded-xl shadow-2xl w-full max-w-2xl relative">
+        <button title='close'
+          type="button"
+          onClick={onClose}
+          className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 transition-colors duration-200"
+        >
+          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
         <StepIndicator currentStep={currentStep} totalSteps={3} />
         <AnimatePresence mode="wait">
           {currentStep === 1 && <Step1 key="step1" onNext={handleNext} />}

@@ -26,13 +26,13 @@ const ScheduledMessageTable = ({ campaigns }) => (
           <td className="py-4 px-4 text-gray-500 border-b">{campaign.repeatperiod}</td>
           <td className="py-4 px-4 text-gray-500 border-b">{campaign.status}</td>
           <td className="py-4 px-4 flex space-x-2 border-b">
-            <button className="text-gray-300 text-xl">
-              <FontAwesomeIcon icon={faPaperPlane} />
+            <button className="text-gray-300 text-xl" title='send'>
+              <FontAwesomeIcon icon={faPaperPlane}  />
             </button>
-            <button className="text-gray-300 text-xl">
+            <button className="text-gray-300 text-xl" title='edit'>
               <FontAwesomeIcon icon={faEdit} />
             </button>
-            <button className="text-gray-300 text-xl">
+            <button className="text-gray-300 text-xl" title='delete'>
               <FontAwesomeIcon icon={faTrash} />
             </button>
           </td>

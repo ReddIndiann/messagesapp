@@ -3,20 +3,51 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTimes, faCalendar } from '@fortawesome/free-solid-svg-icons';
 
-interface ScheduleToGroupStepperProps {
-  isOpen: boolean;
-  onClose: () => void;
-}
-
+// Define the interface for form data
 interface FormData {
-  selectedGroups: string[];
   selectedSenderID: string;
   newSenderID: string;
   campaignTitle: string;
   messageContent: string;
+  scheduledDate: string;
+  scheduledTime: string;
 }
 
-const StepIndicator = ({ currentStep, totalSteps }) => {
+// Define props for StepIndicator
+interface StepIndicatorProps {
+  currentStep: number;
+  totalSteps: number;
+}
+
+// Define props for Step1
+interface Step1Props {
+  onNext: () => void;
+}
+
+// Define props for Step2
+interface Step2Props {
+  onNext: () => void;
+  onPrevious: () => void;
+  formData: FormData;
+  setFormData: React.Dispatch<React.SetStateAction<FormData>>;
+}
+
+// Define props for Step3
+interface Step3Props {
+  onPrevious: () => void;
+  formData: FormData;
+  setFormData: React.Dispatch<React.SetStateAction<FormData>>;
+  onSchedule: () => void;
+}
+
+// Define props for ScheduleQuickSms
+interface ScheduleQuickSmsProps {
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+// StepIndicator component
+const StepIndicator: React.FC<StepIndicatorProps> = ({ currentStep, totalSteps }) => {
   return (
     <div className="flex justify-between items-center mb-8">
       {[...Array(totalSteps)].map((_, index) => (
@@ -30,7 +61,7 @@ const StepIndicator = ({ currentStep, totalSteps }) => {
               {index + 1}
             </div>
             <span className="mt-2 text-xs text-gray-500">
-              {index === 0 ? 'Select' : index === 1 ? 'Compose' : 'Confirm'}
+              {index === 0 ? 'Select' : index === 1 ? 'Compose' : 'Schedule'}
             </span>
           </div>
           {index < totalSteps - 1 && (
@@ -46,63 +77,38 @@ const StepIndicator = ({ currentStep, totalSteps }) => {
   );
 };
 
-const Step1 = ({ onNext, formData, setFormData }) => {
-  const toggleGroupSelection = (groupName: string) => {
-    setFormData(prevData => ({
-      ...prevData,
-      selectedGroups: prevData.selectedGroups.includes(groupName)
-        ? prevData.selectedGroups.filter(group => group !== groupName)
-        : [...prevData.selectedGroups, groupName]
-    }));
-  };
-
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -20 }}
-      transition={{ duration: 0.3 }}
-    >
-      <h2 className="text-2xl font-semibold mb-6 text-gray-800">Select Group to Send To</h2>
+// Step1 component
+const Step1: React.FC<Step1Props> = ({ onNext }) => (
+  <motion.div
+    initial={{ opacity: 0, y: 20 }}
+    animate={{ opacity: 1, y: 0 }}
+    exit={{ opacity: 0, y: -20 }}
+    transition={{ duration: 0.3 }}
+  >
+    <h2 className="text-2xl font-semibold mb-6 text-gray-800">Select Recipient</h2>
+    <form onSubmit={(e) => { e.preventDefault(); onNext(); }}>
       <div className="mb-6">
-        <div className="mb-4 flex justify-between items-center">
-          <label className="inline-flex items-center">
-            <input
-              type="checkbox"
-              className="form-checkbox"
-              checked={formData.selectedGroups.includes('Friends')}
-              onChange={() => toggleGroupSelection('Friends')}
-            />
-            <span className="ml-2 text-gray-800">Friends</span>
-          </label>
-          <span className="text-gray-600">120 members</span>
-        </div>
-        <div className="mb-4 flex justify-between items-center">
-          <label className="inline-flex items-center">
-            <input
-              type="checkbox"
-              className="form-checkbox"
-              checked={formData.selectedGroups.includes('List')}
-              onChange={() => toggleGroupSelection('List')}
-            />
-            <span className="ml-2 text-gray-800">List</span>
-          </label>
-          <span className="text-gray-600">85 members</span>
-        </div>
-        <p className="text-gray-600 text-sm mt-2">All groups loaded successfully</p>
+        <label htmlFor="recipient" className="block text-sm font-medium text-gray-700 mb-2">Recipient</label>
+        <textarea
+          id="recipient"
+          className="w-full bg-white border border-gray-300 rounded-lg shadow-sm p-4 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-800 transition-all duration-200"
+          placeholder="Enter recipient's number or select from contacts"
+          rows={4}
+          required
+        ></textarea>
       </div>
       <button
+        type="submit"
         className="w-full bg-blue-500 text-white px-6 py-3 rounded-lg text-sm font-medium hover:bg-blue-600 transition-colors duration-200"
-        onClick={onNext}
-        disabled={formData.selectedGroups.length === 0}
       >
         Next: Compose Message
       </button>
-    </motion.div>
-  );
-};
+    </form>
+  </motion.div>
+);
 
-const Step2 = ({ onNext, onPrevious, formData, setFormData }) => {
+// Step2 component
+const Step2: React.FC<Step2Props> = ({ onNext, onPrevious, formData, setFormData }) => {
   const handleAddSenderID = () => {
     if (formData.newSenderID) {
       setFormData({
@@ -187,7 +193,7 @@ const Step2 = ({ onNext, onPrevious, formData, setFormData }) => {
             type="submit"
             className="flex-1 bg-blue-500 text-white px-6 py-3 rounded-lg text-sm font-medium hover:bg-blue-600 transition-colors duration-200"
           >
-            Next: Confirm
+            Next: Schedule
           </button>
         </div>
       </form>
@@ -195,70 +201,95 @@ const Step2 = ({ onNext, onPrevious, formData, setFormData }) => {
   );
 };
 
-const Step3 = ({ onPrevious, formData, onSendMessage }) => (
+// Step3 component
+const Step3: React.FC<Step3Props> = ({ onPrevious, formData, setFormData, onSchedule }) => (
   <motion.div
     initial={{ opacity: 0, scale: 0.9 }}
     animate={{ opacity: 1, scale: 1 }}
     exit={{ opacity: 0, scale: 0.9 }}
     transition={{ duration: 0.3 }}
   >
-    <h2 className="text-2xl font-semibold mb-6 text-gray-800">Confirm Message</h2>
-    <div className="space-y-4 mb-6">
-      <div>
-        <p className="text-sm font-medium text-gray-500">Sender ID</p>
-        <p className="text-lg text-gray-800">{formData.selectedSenderID}</p>
+    <h2 className="text-2xl font-semibold mb-6 text-gray-800">Schedule Message</h2>
+    <form onSubmit={(e) => { e.preventDefault(); onSchedule(); }}>
+      <div className="space-y-4 mb-6">
+        <div>
+          <p className="text-sm font-medium text-gray-500">Sender ID</p>
+          <p className="text-lg text-gray-800">{formData.selectedSenderID}</p>
+        </div>
+        <div>
+          <p className="text-sm font-medium text-gray-500">Campaign Title</p>
+          <p className="text-lg text-gray-800">{formData.campaignTitle}</p>
+        </div>
+        <div>
+          <p className="text-sm font-medium text-gray-500">Message Content</p>
+          <p className="text-lg text-gray-800">{formData.messageContent}</p>
+        </div>
+        <div>
+          <p className="text-sm font-medium text-gray-500">Character Count</p>
+          <p className="text-lg text-gray-800">{formData.messageContent.length} / 160</p>
+        </div>
       </div>
-      <div>
-        <p className="text-sm font-medium text-gray-500">Campaign Title</p>
-        <p className="text-lg text-gray-800">{formData.campaignTitle}</p>
+      <div className="mb-6">
+        <label htmlFor="scheduledDate" className="block text-sm font-medium text-gray-700 mb-2">Scheduled Date</label>
+        <div className="relative">
+          <input
+            id="scheduledDate"
+            type="date"
+            value={formData.scheduledDate}
+            onChange={(e) => setFormData({ ...formData, scheduledDate: e.target.value })}
+            className="w-full bg-white border border-gray-300 rounded-lg shadow-sm py-2 px-3 text-gray-800 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+            required
+          />
+          <FontAwesomeIcon icon={faCalendar} className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+        </div>
       </div>
-      <div>
-        <p className="text-sm font-medium text-gray-500">Message Content</p>
-        <p className="text-lg text-gray-800">{formData.messageContent}</p>
+      <div className="mb-6">
+        <label htmlFor="scheduledTime" className="block text-sm font-medium text-gray-700 mb-2">Scheduled Time</label>
+        <input
+          id="scheduledTime"
+          type="time"
+          value={formData.scheduledTime}
+          onChange={(e) => setFormData({ ...formData, scheduledTime: e.target.value })}
+          className="w-full bg-white border border-gray-300 rounded-lg shadow-sm py-2 px-3 text-gray-800 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+          required
+        />
       </div>
-      <div>
-        <p className="text-sm font-medium text-gray-500">Character Count</p>
-        <p className="text-lg text-gray-800">{formData.messageContent.length} / 160</p>
+      <div className="flex justify-between gap-4">
+        <button
+          type="button"
+          className="flex-1 bg-gray-100 text-gray-800 px-6 py-3 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors duration-200"
+          onClick={onPrevious}
+        >
+          Back
+        </button>
+        <button
+          type="submit"
+          className="flex-1 bg-blue-500 text-white px-6 py-3 rounded-lg text-sm font-medium hover:bg-blue-600 transition-colors duration-200"
+        >
+          Schedule Message
+        </button>
       </div>
-      <div>
-        <p className="text-sm font-medium text-gray-500">Selected Groups</p>
-        <p className="text-lg text-gray-800">{formData.selectedGroups.join(', ')}</p>
-      </div>
-    </div>
-    <div className="flex justify-between gap-4"> 
-      <button
-        type="button"
-        className="flex-1 bg-gray-100 text-gray-800 px-6 py-3 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors duration-200"
-        onClick={onPrevious}
-      >
-        Back
-      </button> 
-      <button
-        type="button"
-        className="flex-1 bg-blue-500 text-white px-6 py-3 rounded-lg text-sm font-medium hover:bg-blue-600 transition-colors duration-200"
-        onClick={onSendMessage}
-      >
-        Send Message
-      </button>
-    </div>
+    </form>
   </motion.div>
 );
 
-const ScheduleToGroupStepper: React.FC<ScheduleToGroupStepperProps> = ({ isOpen, onClose }) => {
-  const [currentStep, setCurrentStep] = useState(1);
+// ScheduleQuickSms component
+const ScheduleQuickSms: React.FC<ScheduleQuickSmsProps> = ({ isOpen, onClose }) => {
+  const [currentStep, setCurrentStep] = useState<number>(1);
   const [formData, setFormData] = useState<FormData>({
-    selectedGroups: [],
     selectedSenderID: '',
     newSenderID: '',
     campaignTitle: '',
     messageContent: '',
+    scheduledDate: '',
+    scheduledTime: '',
   });
 
   const handleNext = () => setCurrentStep((prev) => prev + 1);
   const handlePrevious = () => setCurrentStep((prev) => prev - 1);
 
-  const handleSendMessage = () => {
-    console.log('Message sent:', formData);
+  const handleSchedule = () => {
+    console.log('Scheduled message:', formData);
     onClose();
   };
 
@@ -268,6 +299,8 @@ const ScheduleToGroupStepper: React.FC<ScheduleToGroupStepperProps> = ({ isOpen,
     <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50">
       <div className="bg-white p-8 rounded-xl shadow-2xl w-full max-w-md relative">
         <button
+          aria-label="Close"
+          title="Close"
           className="absolute top-4 right-4 text-gray-500 hover:text-gray-700"
           onClick={onClose}
         >
@@ -275,14 +308,7 @@ const ScheduleToGroupStepper: React.FC<ScheduleToGroupStepperProps> = ({ isOpen,
         </button>
         <StepIndicator currentStep={currentStep} totalSteps={3} />
         <AnimatePresence mode="wait">
-          {currentStep === 1 && (
-            <Step1
-              key="step1"
-              onNext={handleNext}
-              formData={formData}
-              setFormData={setFormData}
-            />
-          )}
+          {currentStep === 1 && <Step1 key="step1" onNext={handleNext} />}
           {currentStep === 2 && (
             <Step2
               key="step2"
@@ -297,7 +323,8 @@ const ScheduleToGroupStepper: React.FC<ScheduleToGroupStepperProps> = ({ isOpen,
               key="step3"
               onPrevious={handlePrevious}
               formData={formData}
-              onSendMessage={handleSendMessage}
+              setFormData={setFormData}
+              onSchedule={handleSchedule}
             />
           )}
         </AnimatePresence>
@@ -306,4 +333,4 @@ const ScheduleToGroupStepper: React.FC<ScheduleToGroupStepperProps> = ({ isOpen,
   );
 };
 
-export default ScheduleToGroupStepper;
+export default ScheduleQuickSms;

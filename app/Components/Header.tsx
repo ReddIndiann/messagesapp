@@ -8,6 +8,7 @@ interface HeaderProps {
 const Header: React.FC<HeaderProps> = ({ currentSection }) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState<boolean>(false);
   const [username, setUsername] = useState<string | null>(null);
+  const [creditbalance, setCreditbalance] = useState<number | null>(null); // Ensure this is a number
   const router = useRouter(); 
 
   useEffect(() => {
@@ -16,8 +17,11 @@ const Header: React.FC<HeaderProps> = ({ currentSection }) => {
     if (signInResponse) {
       const parsedResponse = JSON.parse(signInResponse);
       const extractedUsername = parsedResponse.user?.username || null;
+      const extractedCreditbalance = parsedResponse.user?.creditbalance ?? 7; // Use nullish coalescing operator to ensure a number or null
       setUsername(extractedUsername);
+      setCreditbalance(extractedCreditbalance); // Ensure this is handled as a number
       console.log('Extracted Username:', extractedUsername);
+      console.log('Extracted Credit Balance:', extractedCreditbalance); // Correct logging
     }
 
     // Log all localStorage details
@@ -63,7 +67,7 @@ const Header: React.FC<HeaderProps> = ({ currentSection }) => {
             <div className="text-center pr-2 hidden sm:block">
               <div className="text-sm">
                 <span className="block text-xs text-gray-500 font-semibold">SMS Balance</span>
-                <span className="text-gray-500">0</span>
+                <span className="text-gray-500">{creditbalance !== null ? creditbalance.toFixed(0) : '0'}</span>
               </div>
             </div>
           )}

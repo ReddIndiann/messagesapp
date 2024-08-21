@@ -19,16 +19,22 @@ const MessageTemplatesTable = ({ campaigns }) => (
         <tr key={campaign.id} className="border-t">
           <td className="py-4 px-4 text-gray-500 border-b">{campaign.title}</td>
           <td className="py-4 px-4 text-gray-500 border-b">{campaign.content}</td>
-          <td className="py-4 px-4 text-gray-500 border-b">{campaign.type}</td>
+          <td className="py-4 px-4 text-gray-500 border-b">{campaign.messageCategory}</td>
           <td className="py-4 px-4 text-gray-500 border-b">{campaign.date}</td>
           <td className="py-4 px-4 flex space-x-2 border-b">
-            <button className="text-gray-300 text-xl">
+            <button
+            title='send'
+            className="text-gray-300 text-xl">
               <FontAwesomeIcon icon={faPaperPlane} />
             </button>
-            <button className="text-gray-300 text-xl">
+            <button 
+            
+            title='edit'className="text-gray-300 text-xl">
               <FontAwesomeIcon icon={faEdit} />
             </button>
-            <button className="text-gray-300 text-xl">
+            <button 
+               title='delete'
+            className="text-gray-300 text-xl">
               <FontAwesomeIcon icon={faTrash} />
             </button>
           </td>

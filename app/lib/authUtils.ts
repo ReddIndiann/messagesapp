@@ -1,18 +1,18 @@
 export const signUp = async (formData: {
   username: string;
-  phone: string;
+  number: string;
   email: string;
   password: string;
 }) => {
-  const { username, phone, email, password } = formData;
+  const { username, number, email, password } = formData;
 
   try {
-      const response = await fetch('http://localhost:5000/api/auth/signup', {
+      const response = await fetch('http://localhost:5000/auth/signup', {
           method: 'POST',
           headers: {
               'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ username, email, password, number: phone }),
+          body: JSON.stringify({ username, email, password, number: number }),
       });
 
       const data = await response.json();
@@ -39,7 +39,7 @@ export const signIn = async (formData: {
   const { email, password } = formData;
 
   try {
-      const response = await fetch('http://localhost:5000/api/auth/signin', {
+      const response = await fetch('http://localhost:5000/auth/signin', {
           method: 'POST',
           headers: {
               'Content-Type': 'application/json'
