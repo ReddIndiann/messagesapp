@@ -1,7 +1,7 @@
 'use client'
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation'; // For redirection
+import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { signUp } from '@/app/lib/authUtils';
 import Loader from '@/app/Components/Loader';
@@ -35,51 +35,31 @@ const SignUp: React.FC = () => {
   });
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const router = useRouter(); // For redirection
-
-  useEffect(() => {
-    // Retrieve saved form data from localStorage
-    const savedFormData = localStorage.getItem('formData');
-    if (savedFormData) {
-      setFormData(JSON.parse(savedFormData));
-    }
-
-    // Start slide interval
-    const interval = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % slides.length);
-    }, 5000);
-
-    return () => clearInterval(interval);
-  }, []);
+  const router = useRouter();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setIsSubmitting(true);
-    setError(''); // Clear previous errors
 
-    const { username, number, email, password, confirmPassword } = formData;
-
-    if (password !== confirmPassword) {
+    if (formData.password !== formData.confirmPassword) {
       setError('Passwords do not match');
-      setIsSubmitting(false);
       return;
     }
 
-    try {
-      const data = await signUp(formData);
-      // Handle successful registration
-      console.log('Registration successful:', data);
-      // Redirect to home page
-      router.push('/Sms/Home');
+    setIsSubmitting(true);
+    setError('');
 
-    } catch (err: any) {
-      setError(err.message || 'An error occurred');
-      console.error('Unexpected Error:', err);
+    try {
+      await signUp(formData);
+      router.push('/Sms/Home'); // Navigate to the welcome page or any other page
+    } catch (err) {
+      setError('Failed to sign up. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
@@ -208,4 +188,4 @@ const SignUp: React.FC = () => {
   );
 };
 
-export default SignUp;
+export default SignUp;''

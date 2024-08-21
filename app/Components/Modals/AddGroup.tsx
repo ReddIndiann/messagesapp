@@ -1,6 +1,6 @@
 import React, { useState, ChangeEvent, useEffect } from 'react';
 import createGroup from '@/app/lib/grouputil';
-
+import Cookies from 'js-cookie';
 // Define the props type interface
 interface AddGroupModalProps {
   isOpen: boolean;
@@ -13,7 +13,7 @@ const AddGroup: React.FC<AddGroupModalProps> = ({ isOpen, onClose }) => {
 
   useEffect(() => {
     // Retrieve and parse the user ID from async storage
-    const signInResponse = localStorage.getItem('signInResponse');
+    const signInResponse = Cookies.get('signInResponse');
     if (signInResponse) {
       const parsedResponse = JSON.parse(signInResponse);
       const extractedUserId = parsedResponse.user?.id || null;

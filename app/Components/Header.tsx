@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation'; 
-
+import Cookies from 'js-cookie';
 interface HeaderProps {
   currentSection: 'bulkSMS' | 'voiceCalls';
 }
@@ -13,7 +13,7 @@ const Header: React.FC<HeaderProps> = ({ currentSection }) => {
 
   useEffect(() => {
     // Retrieve and parse the signInResponse from localStorage
-    const signInResponse = localStorage.getItem('signInResponse');
+    const signInResponse = Cookies.get('signInResponse');
     if (signInResponse) {
       const parsedResponse = JSON.parse(signInResponse);
       const extractedUsername = parsedResponse.user?.username || null;
@@ -41,9 +41,9 @@ const Header: React.FC<HeaderProps> = ({ currentSection }) => {
 
   const handleLogout = () => {
     // Clear localStorage
-    localStorage.removeItem('signUpResponse');
-    localStorage.removeItem('signInResponse');
-    localStorage.removeItem('username'); // Clear username if needed
+   Cookies.remove('signUpResponse');
+    Cookies.remove('signInResponse');
+    Cookies.remove('username'); // Clear username if needed
 
     // Redirect to the login page
     router.push('/');

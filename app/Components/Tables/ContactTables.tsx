@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import Cookies from 'js-cookie';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEye, faEdit, faTrash, faPlus, faFileExport } from '@fortawesome/free-solid-svg-icons';
 import AddContact from '../Modals/AddContact';
@@ -13,7 +14,7 @@ const ContactsTables: React.FC = () => {
   const [isGroupModalOpen, setIsGroupModalOpen] = useState<boolean>(false);
 
   useEffect(() => {
-    const signInResponse = localStorage.getItem('signInResponse');
+    const signInResponse = Cookies.get('signInResponse');
     if (signInResponse) {
       const parsedResponse = JSON.parse(signInResponse);
       const extractedUserId = parsedResponse.user?.id || null;

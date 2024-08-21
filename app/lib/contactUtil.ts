@@ -8,16 +8,31 @@ const createContact = async (contactData: {
   phone: string;
   email: string;
   userId: number | null;
+  groupId: number | null; 
 }) => {
   if (contactData.userId === null) {
     throw new Error('User ID is not available.');
   }
 
   try {
-    await axios.post('http://localhost:5000/contacts', contactData);
+    const response = await axios.post('http://localhost:5000/contacts', contactData);
     console.log('Contact registered successfully');
+    return response; // Return the full response, including the new contact's ID
   } catch (error) {
     console.error('Error registering contact:', error);
+    throw error;
+  }
+};
+
+const addContactToGroup = async (contactId: number, groupId: number) => {
+  try {
+    await axios.post('http://localhost:5000/contactgroups', {
+      contactId,
+      groupId,
+    });
+    console.log('Contact added to group successfully');
+  } catch (error) {
+    console.error('Error adding contact to group:', error);
     throw error;
   }
 };
@@ -33,4 +48,4 @@ const fetchContacts = async (userId: number) => {
   }
 };
 
-export { createContact, fetchContacts };
+export { createContact, fetchContacts ,addContactToGroup };

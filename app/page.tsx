@@ -166,7 +166,7 @@ const slides = [
   }
 ];
 
-const SignUp: React.FC = () => {
+const SignIn: React.FC = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -285,4 +285,4 @@ const SignUp: React.FC = () => {
   );
 }
 
-export default SignUp;
+export default SignIn;

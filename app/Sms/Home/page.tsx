@@ -1,5 +1,6 @@
 'use client';
 import React, { useState, useEffect } from 'react';
+import Cookies from 'js-cookie';
 import Header from '@/app/Components/Header';
 import Sidebar from '@/app/Components/SideNav';
 import AddSenderIdModal from '@/app/Components/Modals/SenderIdModal';
@@ -17,7 +18,7 @@ const Dashboard: React.FC = () => {
   const [error, setError] = useState<string | null>(null); // State to hold error messages
 
   useEffect(() => {
-    const signInResponse = localStorage.getItem('signInResponse');
+    const signInResponse = Cookies.get('signInResponse');
     if (signInResponse) {
       const parsedResponse = JSON.parse(signInResponse);
       const extractedUserId = parsedResponse.user?.id || null;

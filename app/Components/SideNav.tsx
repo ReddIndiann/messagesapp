@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import Cookies from 'js-cookie';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { FiGrid, FiMessageSquare, FiUsers, FiGift, FiCreditCard, FiFileText, FiHelpCircle, FiMail, FiPhone, FiChevronLeft, FiChevronRight, FiClock } from 'react-icons/fi';
@@ -31,7 +32,7 @@ interface ChannelButtonProps {
 const Sidebar: React.FC<SidebarProps> = ({ onCollapse, setCurrentSection }) => {
   const [isCollapsed, setIsCollapsed] = useState<boolean>(() => {
     if (typeof window !== 'undefined') {
-      const storedState = localStorage.getItem('sidebar-collapsed');
+      const storedState = Cookies.get('sidebar-collapsed');
       return storedState === 'true';
     }
     return false;
@@ -45,7 +46,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onCollapse, setCurrentSection }) => {
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      localStorage.setItem('sidebar-collapsed', JSON.stringify(isCollapsed));
+      Cookies.set('sidebar-collapsed', JSON.stringify(isCollapsed));
     }
     onCollapse(isCollapsed);
   }, [isCollapsed]);

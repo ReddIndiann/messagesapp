@@ -1,3 +1,5 @@
+import Cookies from 'js-cookie'; // Import the cookie library
+
 export const signUp = async (formData: {
   username: string;
   number: string;
@@ -12,7 +14,7 @@ export const signUp = async (formData: {
           headers: {
               'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ username, email, password, number: number }),
+          body: JSON.stringify({ username, email, password, number }),
       });
 
       const data = await response.json();
@@ -21,17 +23,18 @@ export const signUp = async (formData: {
           throw new Error(data.msg || 'Registration failed');
       }
 
-      // Save the response data to localStorage
-      localStorage.setItem('signUpResponse', JSON.stringify(data));
+      // Save the response data to cookies
+      Cookies.set('signInResponse', JSON.stringify(data), { expires: 1 / 1440 }); // Expires in 1 day
 
-      // Console log all details saved in localStorage
-      console.log('Sign-Up Response:', localStorage.getItem('signUpResponse'));
+      // Console log all details saved in cookies
+      console.log('Sign-Up Response:', Cookies.get('signInResponse'));
 
       return data;
   } catch (err: any) {
       throw new Error(err.message || 'An error occurred');
   }
 };
+
 export const signIn = async (formData: {
   email: string;
   password: string;
@@ -53,11 +56,11 @@ export const signIn = async (formData: {
           throw new Error(data.msg || 'Login failed');
       }
 
-      // Save the response data to localStorage
-      localStorage.setItem('signInResponse', JSON.stringify(data));
+      // Save the response data to cookies
+      Cookies.set('signInResponse', JSON.stringify(data), { expires: 1 / 1440 });// Expires in 1 day
 
-      // Console log all details saved in localStorage
-      console.log('Sign-In Response:', localStorage.getItem('signInResponse'));
+      // Console log all details saved in cookies
+      console.log('Sign-In Response:', Cookies.get('signInResponse'));
 
       return data;
   } catch (err: any) {
