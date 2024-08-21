@@ -1,15 +1,14 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import Cookies from 'js-cookie';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { FiGrid, FiMessageSquare, FiUsers, FiGift, FiCreditCard, FiFileText, FiHelpCircle, FiMail, FiPhone, FiChevronLeft, FiChevronRight, FiClock } from 'react-icons/fi';
+import { FiGrid, FiMessageSquare, FiUsers, FiGift, FiCreditCard, FiFileText, FiHelpCircle, FiMail, FiPhone, FiChevronLeft, FiChevronRight, FiClock, FiSettings } from 'react-icons/fi';
 
 // Define types for SidebarProps
 interface SidebarProps {
   onCollapse: (isCollapsed: boolean) => void;
-  setCurrentSection: (section: 'bulkSMS' | 'voiceCalls') => void;
+  setCurrentSection: (section: 'bulkSMS' | 'voiceCalls' | 'admin') => void;
 }
 
 interface SidebarItemProps {
@@ -32,36 +31,44 @@ interface ChannelButtonProps {
 const Sidebar: React.FC<SidebarProps> = ({ onCollapse, setCurrentSection }) => {
   const [isCollapsed, setIsCollapsed] = useState<boolean>(() => {
     if (typeof window !== 'undefined') {
-      const storedState = Cookies.get('sidebar-collapsed');
+      const storedState = localStorage.getItem('sidebar-collapsed');
       return storedState === 'true';
     }
     return false;
   });
-  const [activeChannel, setActiveChannel] = useState<'bulkSMS' | 'voiceCalls'>(() => {
-    const path = window.location.pathname;
-    return path.includes('Sms') ? 'bulkSMS' : 'voiceCalls';
-  });
+
+  const [activeChannel, setActiveChannel] = useState<'bulkSMS' | 'voiceCalls' | 'admin'>('admin');
+
   const pathname = usePathname();
   const router = useRouter();
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      Cookies.set('sidebar-collapsed', JSON.stringify(isCollapsed));
+      const path = window.location.pathname;
+      if (path.includes('Sms')) setActiveChannel('bulkSMS');
+      else if (path.includes('Voice')) setActiveChannel('voiceCalls');
+      else setActiveChannel('admin');
     }
-    onCollapse(isCollapsed);
-  }, [isCollapsed]);
+  }, []);
 
   useEffect(() => {
-    // Update active channel based on the current path
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('sidebar-collapsed', JSON.stringify(isCollapsed));
+    }
+    onCollapse(isCollapsed);
+  }, [isCollapsed, onCollapse]);
+
+  useEffect(() => {
     if (pathname.includes('Sms')) {
       setActiveChannel('bulkSMS');
     } else if (pathname.includes('Voice')) {
       setActiveChannel('voiceCalls');
+    } else if (pathname.includes('Admin')) {
+      setActiveChannel('admin');
     }
   }, [pathname]);
 
   useEffect(() => {
-    // Ensure the current section is updated whenever activeChannel changes
     setCurrentSection(activeChannel);
   }, [activeChannel, setCurrentSection]);
 
@@ -69,8 +76,8 @@ const Sidebar: React.FC<SidebarProps> = ({ onCollapse, setCurrentSection }) => {
     setIsCollapsed(!isCollapsed);
   };
 
-  const handleChannelSwitch = (channel: 'bulkSMS' | 'voiceCalls') => {
-    if (activeChannel === channel) return; // Avoid unnecessary state update
+  const handleChannelSwitch = (channel: 'bulkSMS' | 'voiceCalls' | 'admin') => {
+    if (activeChannel === channel) return;
 
     setActiveChannel(channel);
 
@@ -78,6 +85,8 @@ const Sidebar: React.FC<SidebarProps> = ({ onCollapse, setCurrentSection }) => {
       router.push('/Sms/SendMessage');
     } else if (channel === 'voiceCalls') {
       router.push('/Voice/Sendcall');
+    } else if (channel === 'admin') {
+      router.push('/Admin/Dashboard');
     }
   };
 
@@ -102,8 +111,14 @@ const Sidebar: React.FC<SidebarProps> = ({ onCollapse, setCurrentSection }) => {
     { href: "/Voice/VoiceHistory", icon: <FiClock />, text: "Campaign  History" },
     { href: "/Voice/VoiceHelp", icon: <FiHelpCircle />, text: " Help", badge: <span className="w-2 h-2 bg-orange-500 rounded-full"></span> },
   ];
-  
-  const currentNavItems = activeChannel === 'bulkSMS' ? smsNavItems : voiceNavItems;
+
+  const adminNavItems = [
+    { href: "/Admin/Dashboard", icon: <FiGrid />, text: "Dashboard" },
+    { href: "/Admin/Users", icon: <FiUsers />, text: "Manage Users" },
+    { href: "/Admin/Settings", icon: <FiSettings />, text: "Settings" },
+  ];
+
+  const currentNavItems = activeChannel === 'bulkSMS' ? smsNavItems : activeChannel === 'voiceCalls' ? voiceNavItems : adminNavItems;
 
   return (
     <div className={`bg-white shadow-md transition-all duration-300 fixed top-16 left-0 bottom-0 overflow-y-auto ${isCollapsed ? 'w-20 p-2' : 'w-64 p-4'}`}>
@@ -128,7 +143,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onCollapse, setCurrentSection }) => {
       </nav>
       <div className={`px-4 py-12 ${isCollapsed ? 'px-2' : ''}`}>
         <h3 className={`text-sm font-semibold text-gray-500 uppercase tracking-wider mb-2 ${isCollapsed ? 'text-xs text-center ' : ''}`}>
-          {/* Switch Channel */}TABS
+          TABS
         </h3>
         <div className="space-y-2">
           <ChannelButton 
@@ -137,13 +152,20 @@ const Sidebar: React.FC<SidebarProps> = ({ onCollapse, setCurrentSection }) => {
             active={activeChannel === 'bulkSMS'} 
             isCollapsed={isCollapsed} 
             onClick={() => handleChannelSwitch('bulkSMS')}
-          />
+          /> 
           <ChannelButton 
             icon={<FiPhone />} 
             text="Bulk Voice Calls" 
             active={activeChannel === 'voiceCalls'} 
             isCollapsed={isCollapsed} 
             onClick={() => handleChannelSwitch('voiceCalls')}
+          />
+          <ChannelButton 
+            icon={<FiSettings />} 
+            text="Admin" 
+            active={activeChannel === 'admin'} 
+            isCollapsed={isCollapsed} 
+            onClick={() => handleChannelSwitch('admin')}
           />
         </div>
       </div>

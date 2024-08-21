@@ -24,7 +24,7 @@ export const signUp = async (formData: {
       }
 
       // Save the response data to cookies
-      Cookies.set('signInResponse', JSON.stringify(data), { expires: 1 / 1440 }); // Expires in 1 day
+      Cookies.set('signInResponse', JSON.stringify(data), { expires: 1 }); // Expires in 1 day
 
       // Console log all details saved in cookies
       console.log('Sign-Up Response:', Cookies.get('signInResponse'));
@@ -57,7 +57,7 @@ export const signIn = async (formData: {
       }
 
       // Save the response data to cookies
-      Cookies.set('signInResponse', JSON.stringify(data), { expires: 1 / 1440 });// Expires in 1 day
+      Cookies.set('signInResponse', JSON.stringify(data), { expires: 1});// Expires in 1 day
 
       // Console log all details saved in cookies
       console.log('Sign-In Response:', Cookies.get('signInResponse'));

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTimes } from '@fortawesome/free-solid-svg-icons';
 import { createTemplate } from '@/app/lib/createTemplateUtils';
-
+import Cookies from 'js-cookie';
 interface CreateTemplateModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -19,7 +19,7 @@ const CreateTemplateModal: React.FC<CreateTemplateModalProps> = ({ isOpen, onClo
 
   useEffect(() => {
     // Retrieve and parse the user ID from async storage
-    const signInResponse = localStorage.getItem('signInResponse');
+    const signInResponse = Cookies.get('signInResponse');
     if (signInResponse) {
       const parsedResponse = JSON.parse(signInResponse);
       const extractedUserId = parsedResponse.user?.id || null;
