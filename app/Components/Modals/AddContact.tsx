@@ -1,7 +1,7 @@
 import React, { useState, ChangeEvent, useEffect } from 'react';
 import axios from 'axios';
 import { createContact ,addContactToGroup} from '@/app/lib/contactUtil';
-import Cookies from 'js-cookie';
+// import Cookies from 'js-cookie';
 // Define the props type interface
 interface AddContactModalProps {
   isOpen: boolean;
@@ -24,7 +24,7 @@ const AddContact: React.FC<AddContactModalProps> = ({ isOpen, onClose }) => {
   const [userId, setUserId] = useState<number | null>(null);
 
   useEffect(() => {
-    const signInResponse = Cookies.get('signInResponse');
+    const signInResponse = localStorage.getItem('signInResponse');
     if (signInResponse) {
       const parsedResponse = JSON.parse(signInResponse);
       const extractedUserId = parsedResponse.user?.id || null;

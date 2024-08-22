@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation'; 
+import { deleteAuthCookie } from '../lib/storage';
 import Cookies from 'js-cookie';
 interface HeaderProps {
   currentSection: 'bulkSMS' | 'voiceCalls';
@@ -13,7 +14,7 @@ const Header: React.FC<HeaderProps> = ({ currentSection }) => {
 
   useEffect(() => {
     // Retrieve and parse the signInResponse from localStorage
-    const signInResponse = Cookies.get('signInResponse');
+    const signInResponse = localStorage.getItem('signInResponse');
     if (signInResponse) {
       const parsedResponse = JSON.parse(signInResponse);
       const extractedUsername = parsedResponse.user?.username || null;
@@ -39,15 +40,21 @@ const Header: React.FC<HeaderProps> = ({ currentSection }) => {
     setIsDropdownOpen(false);
   };
 
-  const handleLogout = () => {
-    // Clear localStorage
-   Cookies.remove('signUpResponse');
-    Cookies.remove('signInResponse');
-    Cookies.remove('username'); // Clear username if needed
+  
+// Example usage of deleteCookie and logCookies
+const handleLogout = async () => {
+  // Delete cookies using cookies() from Next.js
+  await deleteAuthCookie(); // Ensure the function is awaited if it is asynchronous
 
-    // Redirect to the login page
-    router.push('/');
-  };
+  // Remove data from localStorage
+  localStorage.removeItem('signInResponse');
+  localStorage.removeItem('signUpResponse');
+  localStorage.removeItem('username');
+
+  // Redirect to the login page
+  router.push('/');
+};
+
 
   return (
     <header className="bg-white shadow-md fixed top-0 left-0 right-0 z-10">

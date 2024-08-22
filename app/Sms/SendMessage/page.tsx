@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Header from '@/app/Components/Header';
 import Sidebar from '@/app/Components/SideNav';
-import Cookies from 'js-cookie';
+// import Cookies from 'js-cookie';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPaperPlane, faPlus } from '@fortawesome/free-solid-svg-icons';
 import MessageTemplatesTable from '@/app/Components/Tables/MessageTemplateTable';
@@ -38,7 +38,7 @@ const Dashboard: React.FC = () => {
   // Fetch the userId from async storage
   useEffect(() => {
     // Retrieve and parse the user ID from async storage
-    const signInResponse = Cookies.get('signInResponse');
+    const signInResponse = localStorage.getItem('signInResponse');
     if (signInResponse) {
       const parsedResponse = JSON.parse(signInResponse);
       const extractedUserId = parsedResponse.user?.id || null;
