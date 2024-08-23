@@ -9,6 +9,10 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faBullhorn, faAddressBook, faUsers, faCoins, faTrash } from '@fortawesome/free-solid-svg-icons';
 import BasicBars from '@/app/Components/Graph/Graph';
 import { fetchSenderIds, deleteSenderId } from '@/app/lib/senderIdUtils';
+import { fetchAllContacts } from '@/app/lib/contactUtil';
+import { fetchAllGroups } from '@/app/lib/grouputil';
+import { fetchAllUsers } from '@/app/lib/userlib';
+
 
 const Dashboard: React.FC = () => {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
@@ -18,7 +22,9 @@ const Dashboard: React.FC = () => {
   const [userId, setUserId] = useState<number | null>(null);
   const [senderIds, setSenderIds] = useState<any[]>([]); // State to hold sender IDs
   const [error, setError] = useState<string | null>(null); // State to hold error messages
-
+  const [contactCount, setContactCount] = useState<number>(0); 
+  const [userCount, setUserCount] = useState<number>(0); 
+  const [groupCount, setGroupCount] = useState<number>(0); // State to hold contact count
   useEffect(() => {
     const signInResponse = localStorage.getItem('signInResponse');
     if (signInResponse) {
@@ -29,6 +35,17 @@ const Dashboard: React.FC = () => {
         fetchSenderIds(extractedUserId)
           .then(data => setSenderIds(data))
           .catch(err => setError('Error fetching sender IDs: ' + err.message));
+        
+        fetchAllContacts()
+          .then(data => setContactCount(data.length))
+          .catch(err => setError('Error fetching contacts: ' + err.message));
+          fetchAllUsers()
+          .then(data => setUserCount(data.length))
+          .catch(err => setError('Error fetching contacts: ' + err.message));
+
+          fetchAllGroups()
+          .then(data => setGroupCount(data.length))
+          .catch(err => setError('Error fetching contacts: ' + err.message));
       }
     }
   }, []);
@@ -38,7 +55,20 @@ const Dashboard: React.FC = () => {
       fetchSenderIds(userId)
         .then(data => setSenderIds(data))
         .catch(err => setError('Error fetching sender IDs: ' + err.message));
+        fetchAllGroups()
+    .then(data => setGroupCount(data.length))
+    .catch(err => setError('Error fetching contacts: ' + err.message));
+    fetchAllContacts()
+        .then(data => setContactCount(data.length))
+        .catch(err => setError('Error fetching contacts: ' + err.message));
+        fetchAllUsers()
+        .then(data => setUserCount(data.length))
+        .catch(err => setError('Error fetching contacts: ' + err.message));
+
+
+
     }
+    
   };
 
   const handleDelete = async (senderId: number) => {
@@ -74,14 +104,14 @@ const Dashboard: React.FC = () => {
               transition={{ duration: 0.5 }}
             >
               {[
-                { value: 2, label: 'All Users', icon: faBullhorn, color: 'bg-blue-500' },
+                { value: userCount, label: 'All Users', icon: faBullhorn, color: 'bg-blue-500' },
                 { value: 0, label: 'Users', icon: faAddressBook, color: 'bg-green-500' },
                 { value: 1, label: 'Admin', icon: faUsers, color: 'bg-yellow-500' },
                 { value: 3, label: 'Credit Used', icon: faCoins, color: 'bg-orange-500' },
                 { value: 3, label: 'Total Credit Used', icon: faCoins, color: 'bg-orange-500' },
                 { value: 3, label: 'Amount Accumulated', icon: faCoins, color: 'bg-orange-500' },
-                { value: 3, label: 'All Contacts', icon: faCoins, color: 'bg-orange-500' },
-                { value: 3, label: 'All Groups', icon: faCoins, color: 'bg-orange-500' },
+                { value: contactCount, label: 'All Contacts', icon: faAddressBook, color: 'bg-green-500' },
+                { value: groupCount, label: 'All Groups', icon: faCoins, color: 'bg-orange-500' },
               ].map((item, index) => (
                 <motion.div
                   key={index}

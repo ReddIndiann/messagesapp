@@ -1,5 +1,5 @@
 import React, { useState, ChangeEvent, useEffect } from 'react';
-import createGroup from '@/app/lib/grouputil';
+import { createGroup } from '@/app/lib/grouputil';
 
 interface AddGroupModalProps {
   isOpen: boolean;

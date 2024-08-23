@@ -1,4 +1,4 @@
-'use client';
+'use client'
 import React, { useState, useEffect } from 'react';
 import Cookies from 'js-cookie';
 import { motion } from 'framer-motion';
@@ -9,6 +9,9 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faBullhorn, faAddressBook, faUsers, faCoins, faTrash } from '@fortawesome/free-solid-svg-icons';
 import BasicBars from '@/app/Components/Graph/Graph';
 import { fetchSenderIds, deleteSenderId } from '@/app/lib/senderIdUtils';
+import { fetchContacts } from '@/app/lib/contactUtil';// Import the fetchContacts function
+import { fetchGroups } from '@/app/lib/grouputil';
+
 
 const Dashboard: React.FC = () => {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState<boolean>(false);
@@ -16,6 +19,8 @@ const Dashboard: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [userId, setUserId] = useState<number | null>(null);
   const [senderIds, setSenderIds] = useState<any[]>([]); // State to hold sender IDs
+  const [contactCount, setContactCount] = useState<number>(0); 
+  const [groupCount, setGroupCount] = useState<number>(0); // State to hold contact count
   const [error, setError] = useState<string | null>(null); // State to hold error messages
 
   useEffect(() => {
@@ -28,6 +33,14 @@ const Dashboard: React.FC = () => {
         fetchSenderIds(extractedUserId)
           .then(data => setSenderIds(data))
           .catch(err => setError('Error fetching sender IDs: ' + err.message));
+        
+        fetchContacts(extractedUserId)
+          .then(data => setContactCount(data.length))
+          .catch(err => setError('Error fetching contacts: ' + err.message));
+
+          fetchGroups(extractedUserId)
+          .then(data => setGroupCount(data.length))
+          .catch(err => setError('Error fetching contacts: ' + err.message));
       }
     }
   }, []);
@@ -37,13 +50,16 @@ const Dashboard: React.FC = () => {
       fetchSenderIds(userId)
         .then(data => setSenderIds(data))
         .catch(err => setError('Error fetching sender IDs: ' + err.message));
+        fetchGroups(userId)
+    .then(data => setGroupCount(data.length))
+    .catch(err => setError('Error fetching contacts: ' + err.message));
+      fetchContacts(userId)
+        .then(data => setContactCount(data.length))
+        .catch(err => setError('Error fetching contacts: ' + err.message));
     }
+    
   };
-  // const handleCreateTemplate = async () => {
-  //   // Logic for creating the template
-  //   // On success:
-  //   onSuccess();
-  // };
+
   const handleDelete = async (senderId: number) => {
     if (window.confirm('Are you sure you want to delete this Sender ID?')) {
       try {
@@ -64,11 +80,11 @@ const Dashboard: React.FC = () => {
           <div className="max-w-7xl mx-auto">
             <p className="text-red-500 text-sm mb-6">Overview page displays data from the past 3 days.</p>
 
-            {/* {error && (
+            {error && (
               <div className="bg-red-100 text-red-600 p-4 mb-4 rounded">
                 {error}
               </div>
-            )} */}
+            )}
 
             <motion.div
               className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-8"
@@ -78,8 +94,8 @@ const Dashboard: React.FC = () => {
             >
               {[
                 { value: 2, label: 'Campaigns', icon: faBullhorn, color: 'bg-blue-500' },
-                { value: 0, label: 'Contacts', icon: faAddressBook, color: 'bg-green-500' },
-                { value: 1, label: 'Groups', icon: faUsers, color: 'bg-yellow-500' },
+                { value: contactCount, label: 'Contacts', icon: faAddressBook, color: 'bg-green-500' }, // Use contactCount here
+                { value: groupCount, label: 'Groups', icon: faUsers, color: 'bg-yellow-500' },
                 { value: 3, label: 'Credit Used', icon: faCoins, color: 'bg-orange-500' },
               ].map((item, index) => (
                 <motion.div
@@ -145,7 +161,7 @@ const Dashboard: React.FC = () => {
                           </svg>
                         </div>
                         <button
-                        title='id'
+                          title='id'
                           className="text-gray-400 hover:text-red-500 transition duration-200"
                           onClick={() => handleDelete(sender.id)}
                         >

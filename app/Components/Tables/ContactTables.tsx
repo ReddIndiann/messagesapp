@@ -4,8 +4,10 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEye, faEdit, faTrash, faPlus, faFileExport, faUser, faUsers } from '@fortawesome/free-solid-svg-icons';
 import AddContact from '../Modals/AddContact';
 import AddGroup from '../Modals/AddGroup';
-import ViewContact from '../Modals/ViewContact'; // Import ViewContact Modal
-import ViewGroup from '../Modals/ViewGroup'; // Import ViewGroup Modal
+import ViewContact from '../Modals/ViewContact'; 
+import ViewGroup from '../Modals/ViewGroup'; 
+import { fetchContacts } from '@/app/lib/contactUtil';
+import { fetchGroups } from '@/app/lib/grouputil';
 
 const ContactsTables: React.FC = () => {
   const [contacts, setContacts] = useState<any[]>([]);
@@ -26,29 +28,11 @@ const ContactsTables: React.FC = () => {
       setUserId(extractedUserId);
 
       if (extractedUserId) {
-        fetchContacts(extractedUserId);
-        fetchGroups(extractedUserId);
+        fetchContacts(extractedUserId).then(setContacts).catch(console.error);
+        fetchGroups(extractedUserId).then(setGroups).catch(console.error);
       }
     }
   }, []);
-
-  const fetchContacts = async (userId: number) => {
-    try {
-      const response = await axios.get(`http://localhost:5000/contacts/user/${userId}`);
-      setContacts(response.data);
-    } catch (error) {
-      console.error('Error fetching contacts:', error);
-    }
-  };
-
-  const fetchGroups = async (userId: number) => {
-    try {
-      const response = await axios.get(`http://localhost:5000/groups/user/${userId}`);
-      setGroups(response.data);
-    } catch (error) {
-      console.error('Error fetching groups:', error);
-    }
-  };
 
   const getGroupCountForContact = (contactId: number) => {
     return groups.filter(group => group.contacts.some((contact: any) => contact.id === contactId)).length;
@@ -200,19 +184,24 @@ const ContactsTables: React.FC = () => {
         </div>
       </div>
 
-      <AddContact isOpen={isContactModalOpen} onClose={() => setIsContactModalOpen(false)} />
-      <AddGroup isOpen={isGroupModalOpen} onClose={() => setIsGroupModalOpen(false)} />
-      
-      <ViewContact 
-        isOpen={isContactViewModalOpen} 
-        onClose={() => setIsContactViewModalOpen(false)} 
-        contact={selectedContact} 
+      {/* Modals */}
+      <AddContact
+        isOpen={isContactModalOpen}
+        onClose={() => setIsContactModalOpen(false)}
       />
-      
-      <ViewGroup 
-        isOpen={isGroupViewModalOpen} 
-        onClose={() => setIsGroupViewModalOpen(false)} 
-        group={selectedGroup} 
+      <AddGroup
+        isOpen={isGroupModalOpen}
+        onClose={() => setIsGroupModalOpen(false)}
+      />
+      <ViewContact
+        isOpen={isContactViewModalOpen}
+        onClose={() => setIsContactViewModalOpen(false)}
+        contact={selectedContact}
+      />
+      <ViewGroup
+        isOpen={isGroupViewModalOpen}
+        onClose={() => setIsGroupViewModalOpen(false)}
+        group={selectedGroup}
       />
     </div>
   );

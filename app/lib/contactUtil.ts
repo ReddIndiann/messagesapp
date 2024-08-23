@@ -48,4 +48,15 @@ const fetchContacts = async (userId: number) => {
   }
 };
 
-export { createContact, fetchContacts ,addContactToGroup };
+
+const fetchAllContacts = async () => {
+  try {
+    const response = await axios.get(`http://localhost:5000/contacts/`);
+    return response.data; // Return the fetched contacts
+  } catch (error) {
+    console.error('Error fetching contacts:', error);
+    throw error;
+  }
+};
+
+export { createContact, fetchContacts ,addContactToGroup ,fetchAllContacts};

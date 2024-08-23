@@ -17,4 +17,25 @@ const createGroup = async (groupData: {
   }
 };
 
-export default createGroup;
+const fetchGroups = async (userId: number) => {
+  try {
+    const response = await axios.get(`http://localhost:5000/groups/user/${userId}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching groups:', error);
+    throw error;
+  }
+};
+
+
+const fetchAllGroups = async () => {
+  try {
+    const response = await axios.get(`http://localhost:5000/groups`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching groups:', error);
+    throw error;
+  }
+};
+
+export { createGroup, fetchGroups,fetchAllGroups };
