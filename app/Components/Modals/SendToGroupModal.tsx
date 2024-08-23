@@ -6,7 +6,39 @@ interface SendToGroupStepperProps {
   onClose: () => void;
 }
 
-const StepIndicator = ({ currentStep, totalSteps }) => {
+interface StepIndicatorProps {
+  currentStep: number;
+  totalSteps: number;
+}
+
+interface Step1Props {
+  onNext: () => void;
+  selectedGroups: string[];
+  toggleGroupSelection: (groupName: string) => void;
+}
+
+interface Step2Props {
+  onNext: () => void;
+  onPrevious: () => void;
+  formData: FormDataState;
+  setFormData: React.Dispatch<React.SetStateAction<FormDataState>>;
+}
+
+interface Step3Props {
+  onPrevious: () => void;
+  formData: FormDataState;
+  selectedGroups: string[];
+  onSendMessage: () => void;
+}
+
+interface FormDataState {
+  selectedSenderID: string;
+  newSenderID: string;
+  campaignTitle: string;
+  messageContent: string;
+}
+
+const StepIndicator: React.FC<StepIndicatorProps> = ({ currentStep, totalSteps }) => {
   return (
     <div className="flex justify-between items-center mb-8">
       {[...Array(totalSteps)].map((_, index) => (
@@ -36,7 +68,7 @@ const StepIndicator = ({ currentStep, totalSteps }) => {
   );
 };
 
-const Step1 = ({ onNext, selectedGroups, toggleGroupSelection }) => (
+const Step1: React.FC<Step1Props> = ({ onNext, selectedGroups, toggleGroupSelection }) => (
   <motion.div
     initial={{ opacity: 0, y: 20 }}
     animate={{ opacity: 1, y: 0 }}
@@ -71,7 +103,7 @@ const Step1 = ({ onNext, selectedGroups, toggleGroupSelection }) => (
   </motion.div>
 );
 
-const Step2 = ({ onNext, onPrevious, formData, setFormData }) => {
+const Step2: React.FC<Step2Props> = ({ onNext, onPrevious, formData, setFormData }) => {
   const handleAddSenderID = () => {
     if (formData.newSenderID) {
       setFormData({
@@ -164,7 +196,7 @@ const Step2 = ({ onNext, onPrevious, formData, setFormData }) => {
   );
 };
 
-const Step3 = ({ onPrevious, formData, selectedGroups, onSendMessage }) => (
+const Step3: React.FC<Step3Props> = ({ onPrevious, formData, selectedGroups, onSendMessage }) => (
   <motion.div
     initial={{ opacity: 0, scale: 0.9 }}
     animate={{ opacity: 1, scale: 1 }}
@@ -214,9 +246,9 @@ const Step3 = ({ onPrevious, formData, selectedGroups, onSendMessage }) => (
 );
 
 const SendToGroupStepper: React.FC<SendToGroupStepperProps> = ({ isOpen, onClose }) => {
-  const [step, setStep] = useState(1);
+  const [step, setStep] = useState<number>(1);
   const [selectedGroups, setSelectedGroups] = useState<string[]>([]);
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<FormDataState>({
     selectedSenderID: '',
     newSenderID: '',
     campaignTitle: '',
@@ -247,7 +279,8 @@ const SendToGroupStepper: React.FC<SendToGroupStepperProps> = ({ isOpen, onClose
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50">
       <div className="bg-white p-8 rounded-xl shadow-2xl w-full max-w-2xl relative">
-        <button title='close'
+        <button
+          title='close'
           className="absolute top-4 right-4 text-gray-500 hover:text-gray-800"
           onClick={onClose}
         >

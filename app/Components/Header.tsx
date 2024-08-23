@@ -3,7 +3,7 @@ import { useRouter } from 'next/navigation';
 import { deleteAuthCookie } from '../lib/storage';
 import Cookies from 'js-cookie';
 interface HeaderProps {
-  currentSection: 'bulkSMS' | 'voiceCalls';
+  currentSection: 'bulkSMS' | 'voiceCalls' | 'admin';
 }
 
 const Header: React.FC<HeaderProps> = ({ currentSection }) => {

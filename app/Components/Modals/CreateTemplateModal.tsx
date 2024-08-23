@@ -2,13 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTimes } from '@fortawesome/free-solid-svg-icons';
 import { createTemplate } from '@/app/lib/createTemplateUtils';
-// import Cookies from 'js-cookie';
+
 interface CreateTemplateModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onTemplateCreated?: () => void; // Callback to refresh the list or perform any other action
 }
 
-const CreateTemplateModal: React.FC<CreateTemplateModalProps> = ({ isOpen, onClose }) => {
+const CreateTemplateModal: React.FC<CreateTemplateModalProps> = ({ isOpen, onClose, onTemplateCreated }) => {
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [category, setCategory] = useState('');
@@ -18,7 +19,6 @@ const CreateTemplateModal: React.FC<CreateTemplateModalProps> = ({ isOpen, onClo
   const [showSuccessModal, setShowSuccessModal] = useState(false);
 
   useEffect(() => {
-    // Retrieve and parse the user ID from async storage
     const signInResponse = localStorage.getItem('signInResponse');
     if (signInResponse) {
       const parsedResponse = JSON.parse(signInResponse);
@@ -37,25 +37,24 @@ const CreateTemplateModal: React.FC<CreateTemplateModalProps> = ({ isOpen, onClo
     e.preventDefault();
 
     try {
-      await createTemplate(title, content, category, userId);
+      if (userId !== null) {
+        await createTemplate(title, content, category, userId);
 
-      // Reset form fields
-      setTitle('');
-      setContent('');
-      setCategory('');
-      setGsmOnly(false);
+        setTitle('');
+        setContent('');
+        setCategory('');
+        setGsmOnly(false);
+        onClose();
 
-      // Close the main modal
-      onClose();
+        setShowSuccessModal(true);
 
-      // Show the success modal
-      setShowSuccessModal(true);
-
-      // Auto-hide the success modal after a delay
-      setTimeout(() => {
-        setShowSuccessModal(false);
-      }, 2000);
-
+        setTimeout(() => {
+          setShowSuccessModal(false);
+          onTemplateCreated?.(); // Use optional chaining to safely call the callback
+        }, 2000);
+      } else {
+        console.error('User ID is not set.');
+      }
     } catch (error) {
       console.error('Error creating template:', error);
     }

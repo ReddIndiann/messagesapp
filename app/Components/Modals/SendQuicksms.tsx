@@ -1,8 +1,46 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import axios from 'axios';
+
+// Define interfaces for props and state
+interface FormData {
+  selectedSenderID: string;
+  newSenderID: string;
+  campaignTitle: string;
+  messageContent: string;
+  recipients: string; // Added field
+}
+
+interface StepIndicatorProps {
+  currentStep: number;
+  totalSteps: number;
+}
+
+interface Step1Props {
+  onNext: () => void;
+  onDataChange: (newData: Partial<FormData>) => void;
+}
+
+interface Step2Props {
+  onNext: () => void;
+  onPrevious: () => void;
+  onDataChange: (newData: Partial<FormData>) => void;
+  formData: FormData;
+}
+
+interface ConfirmationMessageModalProps {
+  onClose: () => void;
+  formData: FormData;
+  onSend: () => void;
+}
+
+interface QuickSMSModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+}
 
 // Step Indicator Component
-const StepIndicator = ({ currentStep, totalSteps }) => {
+const StepIndicator: React.FC<StepIndicatorProps> = ({ currentStep, totalSteps }) => {
   return (
     <div className="flex justify-between items-center mb-8">
       {[...Array(totalSteps)].map((_, index) => (
@@ -33,37 +71,49 @@ const StepIndicator = ({ currentStep, totalSteps }) => {
 };
 
 // Step 1 Component
-const Step1 = ({ onNext }) => (
-  <motion.div
-    initial={{ opacity: 0, y: 20 }}
-    animate={{ opacity: 1, y: 0 }}
-    exit={{ opacity: 0, y: -20 }}
-    transition={{ duration: 0.3 }}
-  >
-    <h2 className="text-2xl font-semibold mb-6 text-gray-800">Select Recipient</h2>
-    <form onSubmit={(e) => { e.preventDefault(); onNext(); }}>
-      <div className="mb-6">
-        <label htmlFor="recipient" className="block text-sm font-medium text-gray-700 mb-2">Recipient</label>
-        <textarea
-          id="recipient"
-          className="w-full bg-white border border-gray-300 rounded-lg shadow-sm p-4 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-800 transition-all duration-200"
-          placeholder="Enter recipient's number or select from contacts"
-          rows={4}
-          required
-        ></textarea>
-      </div>
-      <button
-        type="submit"
-        className="w-full bg-blue-500 text-white px-6 py-3 rounded-lg text-sm font-medium hover:bg-blue-600 transition-colors duration-200"
-      >
-        Next: Compose Message
-      </button>
-    </form>
-  </motion.div>
-);
+const Step1: React.FC<Step1Props> = ({ onNext, onDataChange }) => {
+  const [recipient, setRecipient] = useState<string>('');
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    onDataChange({ recipients: recipient });
+    onNext();
+  };
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -20 }}
+      transition={{ duration: 0.3 }}
+    >
+      <h2 className="text-2xl font-semibold mb-6 text-gray-800">Select Recipient</h2>
+      <form onSubmit={handleSubmit}>
+        <div className="mb-6">
+          <label htmlFor="recipient" className="block text-sm font-medium text-gray-700 mb-2">Recipient</label>
+          <textarea
+            id="recipient"
+            value={recipient}
+            onChange={(e) => setRecipient(e.target.value)}
+            className="w-full bg-white border border-gray-300 rounded-lg shadow-sm p-4 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-800 transition-all duration-200"
+            placeholder="Enter recipient's number or select from contacts"
+            rows={4}
+            required
+          ></textarea>
+        </div>
+        <button
+          type="submit"
+          className="w-full bg-blue-500 text-white px-6 py-3 rounded-lg text-sm font-medium hover:bg-blue-600 transition-colors duration-200"
+        >
+          Next: Compose Message
+        </button>
+      </form>
+    </motion.div>
+  );
+};
 
 // Step 2 Component
-const Step2 = ({ onNext, onPrevious, onDataChange, formData }) => {
+const Step2: React.FC<Step2Props> = ({ onNext, onPrevious, onDataChange, formData }) => {
   const { selectedSenderID, newSenderID, campaignTitle, messageContent } = formData;
 
   const handleAddSenderID = () => {
@@ -155,7 +205,7 @@ const Step2 = ({ onNext, onPrevious, onDataChange, formData }) => {
 };
 
 // Confirmation Message Modal Component
-const ConfirmationMessageModal = ({ onClose, formData, onSend }) => {
+const ConfirmationMessageModal: React.FC<ConfirmationMessageModalProps> = ({ onClose, formData, onSend }) => {
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.9 }}
@@ -165,48 +215,41 @@ const ConfirmationMessageModal = ({ onClose, formData, onSend }) => {
       className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 backdrop-blur-sm"
     >
       <div className="bg-white p-8 rounded-xl shadow-2xl w-11/12 sm:w-2/3 md:w-1/2 lg:w-1/3 max-w-lg relative">
-        <button title='close'
+        <button
+          title='close'
           type="button"
           onClick={onClose}
           className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 transition-colors duration-200"
         >
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
-          </svg>
+          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
         </button>
-        <h2 className="text-2xl font-semibold mb-6 text-gray-800">Confirm Message</h2>
-        <div className="space-y-4">
-          <div>
-            <p className="text-sm font-medium text-gray-500">Sender ID</p>
-            <p className="text-lg text-gray-800">{formData.selectedSenderID}</p>
-          </div>
-          <div>
-            <p className="text-sm font-medium text-gray-500">Campaign Title</p>
-            <p className="text-lg text-gray-800">{formData.campaignTitle}</p>
-          </div>
-          <div>
-            <p className="text-sm font-medium text-gray-500">Message Content</p>
-            <p className="text-lg text-gray-800">{formData.messageContent}</p>
-          </div>
-          <div>
-            <p className="text-sm font-medium text-gray-500">Character Count</p>
-            <p className="text-lg text-gray-800">{formData.messageContent.length} / 160</p>
-          </div>
-        </div>
-        <div className="flex justify-between gap-4 mt-8">
+        <h2 className="text-2xl font-semibold mb-6 text-gray-800">Confirm and Send</h2>
+        <p className="text-gray-800 mb-4">
+          <strong>Recipient:</strong> {formData.recipients}
+        </p>
+        <p className="text-gray-800 mb-4">
+          <strong>Sender ID:</strong> {formData.selectedSenderID || 'Not provided'}
+        </p>
+        <p className="text-gray-800 mb-4">
+          <strong>Campaign Title:</strong> {formData.campaignTitle}
+        </p>
+        <p className="text-gray-800 mb-4">
+          <strong>Message Content:</strong> {formData.messageContent}
+        </p>
+        <div className="flex justify-end gap-4">
           <button
             type="button"
-            className="flex-1 bg-gray-100 text-gray-800 px-6 py-3 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors duration-200"
+            className="bg-gray-100 text-gray-800 px-6 py-3 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors duration-200"
             onClick={onClose}
           >
-            Edit Message
+            Cancel
           </button>
           <button
             type="button"
-            className="flex-1 bg-blue-500 text-white px-6 py-3 rounded-lg text-sm font-medium hover:bg-blue-600 transition-colors duration-200"
+            className="bg-blue-500 text-white px-6 py-3 rounded-lg text-sm font-medium hover:bg-blue-600 transition-colors duration-200"
             onClick={onSend}
           >
-            Send Message
+            Send
           </button>
         </div>
       </div>
@@ -214,65 +257,80 @@ const ConfirmationMessageModal = ({ onClose, formData, onSend }) => {
   );
 };
 
-// Quick SMS Modal Component
-const QuickSMSModal = ({ isOpen, onClose }) => {
-  const [currentStep, setCurrentStep] = useState(1);
-  const [formData, setFormData] = useState({
+// Main Modal Component
+const QuickSMSModal: React.FC<QuickSMSModalProps> = ({ isOpen, onClose }) => {
+  const [currentStep, setCurrentStep] = useState<number>(1);
+  const [formData, setFormData] = useState<FormData>({
     selectedSenderID: '',
     newSenderID: '',
     campaignTitle: '',
     messageContent: '',
+    recipients: '',
   });
 
-  const handleNext = () => setCurrentStep((prev) => prev + 1);
-  const handlePrevious = () => setCurrentStep((prev) => prev - 1);
-  const handleDataChange = (newData) => {
-    setFormData((prev) => ({ ...prev, ...newData }));
+  const handleDataChange = (newData: Partial<FormData>) => {
+    setFormData(prevData => ({ ...prevData, ...newData }));
   };
 
-  const handleSend = () => {
-    // Implement the logic to send the SMS
-    console.log('Sending SMS:', formData);
-    onClose();
-  };
+  const handleNext = () => setCurrentStep(prevStep => prevStep + 1);
+  const handlePrevious = () => setCurrentStep(prevStep => prevStep - 1);
 
-  if (!isOpen) return null;
+  const handleSend = async () => {
+    try {
+      const payload = {
+        recipients: formData.recipients,
+        senderId: 5,
+        userId: 5, // Replace with dynamic user ID if necessary
+        content: formData.messageContent,
+        messageType: 'text',
+        recursion: 'none',
+      };
+
+      const response = await axios.post('http://localhost:5000/send-messages/create', payload);
+      
+      if (response.status === 200) {
+        console.log('SMS sent successfully:', response.data);
+        onClose();
+      } else {
+        console.error('Failed to send SMS:', response.data);
+      }
+    } catch (error) {
+      console.error('Error sending SMS:', error);
+    }
+  };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50">
-      <div className="bg-white p-8 rounded-xl shadow-2xl w-full max-w-2xl relative">
-        <button title='close'
-          type="button"
-          onClick={onClose}
-          className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 transition-colors duration-200"
-        >
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
-          </svg>
-        </button>
-        <StepIndicator currentStep={currentStep} totalSteps={3} />
-        <AnimatePresence mode="wait">
-          {currentStep === 1 && <Step1 key="step1" onNext={handleNext} />}
-          {currentStep === 2 && (
-            <Step2
-              key="step2"
-              onNext={handleNext}
-              onPrevious={handlePrevious}
-              onDataChange={handleDataChange}
-              formData={formData}
-            />
-          )}
-          {currentStep === 3 && (
-            <ConfirmationMessageModal
-              key="step3"
-              onClose={() => setCurrentStep(2)}
-              formData={formData}
-              onSend={handleSend}
-            />
-          )}
-        </AnimatePresence>
-      </div>
-    </div>
+    <AnimatePresence>
+      {isOpen && (
+        <div className="fixed inset-0 flex items-center justify-center z-50">
+          <div className="relative w-full max-w-4xl bg-white rounded-lg shadow-lg">
+            <StepIndicator currentStep={currentStep} totalSteps={3} />
+            <div className="p-8">
+              <AnimatePresence>
+                {currentStep === 1 && (
+                  <Step1 onNext={handleNext} onDataChange={handleDataChange} />
+                )}
+                {currentStep === 2 && (
+                  <Step2
+                    onNext={handleNext}
+                    onPrevious={handlePrevious}
+                    onDataChange={handleDataChange}
+                    formData={formData}
+                  />
+                )}
+                {currentStep === 3 && (
+                  <ConfirmationMessageModal
+                    onClose={onClose}
+                    formData={formData}
+                    onSend={handleSend}
+                  />
+                )}
+              </AnimatePresence>
+            </div>
+          </div>
+        </div>
+      )}
+    </AnimatePresence>
   );
 };
 

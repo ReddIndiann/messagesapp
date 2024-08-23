@@ -11,8 +11,9 @@ import BasicBars from '@/app/Components/Graph/Graph';
 import { fetchSenderIds, deleteSenderId } from '@/app/lib/senderIdUtils';
 
 const Dashboard: React.FC = () => {
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState<boolean>(false);
-  const [currentSection, setCurrentSection] = useState<'bulkSMS' | 'voiceCalls'>('bulkSMS');
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [currentSection, setCurrentSection] = useState<'bulkSMS' | 'voiceCalls' | 'admin'>('bulkSMS');
+
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [userId, setUserId] = useState<number | null>(null);
   const [senderIds, setSenderIds] = useState<any[]>([]); // State to hold sender IDs
@@ -58,7 +59,7 @@ const Dashboard: React.FC = () => {
         <Sidebar onCollapse={setIsSidebarCollapsed} setCurrentSection={setCurrentSection} />
         <main className={`flex-1 ${isSidebarCollapsed ? 'ml-20' : 'ml-64'} p-6 overflow-y-auto`}>
           <div className="max-w-7xl mx-auto">
-            <p className="text-red-500 text-sm mb-6">Overview page displays data from the past 3 days.</p>
+            <p className="text-red-500 text-sm mb-6">Overview page displays data from the past Month.</p>
 
             {error && (
               <div className="bg-red-100 text-red-600 p-4 mb-4 rounded">
@@ -73,10 +74,14 @@ const Dashboard: React.FC = () => {
               transition={{ duration: 0.5 }}
             >
               {[
-                { value: 2, label: 'Campaigns', icon: faBullhorn, color: 'bg-blue-500' },
-                { value: 0, label: 'Contacts', icon: faAddressBook, color: 'bg-green-500' },
-                { value: 1, label: 'Groups', icon: faUsers, color: 'bg-yellow-500' },
+                { value: 2, label: 'All Users', icon: faBullhorn, color: 'bg-blue-500' },
+                { value: 0, label: 'Users', icon: faAddressBook, color: 'bg-green-500' },
+                { value: 1, label: 'Admin', icon: faUsers, color: 'bg-yellow-500' },
                 { value: 3, label: 'Credit Used', icon: faCoins, color: 'bg-orange-500' },
+                { value: 3, label: 'Total Credit Used', icon: faCoins, color: 'bg-orange-500' },
+                { value: 3, label: 'Amount Accumulated', icon: faCoins, color: 'bg-orange-500' },
+                { value: 3, label: 'All Contacts', icon: faCoins, color: 'bg-orange-500' },
+                { value: 3, label: 'All Groups', icon: faCoins, color: 'bg-orange-500' },
               ].map((item, index) => (
                 <motion.div
                   key={index}
@@ -106,7 +111,7 @@ const Dashboard: React.FC = () => {
                 <BasicBars />
               </motion.div>
 
-              <motion.div
+              {/* <motion.div
                 className="bg-white shadow rounded-lg p-6 w-full lg:w-72 h-96 lg:flex-shrink-0"
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
@@ -151,7 +156,7 @@ const Dashboard: React.FC = () => {
                     </motion.div>
                   ))}
                 </div>
-              </motion.div>
+              </motion.div> */}
             </div>
           </div>
         </main>

@@ -21,13 +21,26 @@ type DeliveryReportItem = {
   updatedAt: string;
 };
 
+type UserReportItems = {
+  id: number;
+  username: string;
+  email: string;
+  userId: number;
+  number: string;
+  role: string;
+  walletbalance: number;
+  creditalance: number;
+  createdAt: string;
+  updatedAt: string;
+};
+
 type TableComponentProps = {
-  section: 'campaignHistory' | 'deliveryReport';
+  section: 'campaignHistory' | 'deliveryReport' | 'usersreport';
   userId: number | null;
 };
 
 const TableComponent: React.FC<TableComponentProps> = ({ section, userId }) => {
-  const [data, setData] = useState<CampaignHistoryItem[] | DeliveryReportItem[]>([]);
+  const [data, setData] = useState<CampaignHistoryItem[] | DeliveryReportItem[] | UserReportItems[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -37,12 +50,13 @@ const TableComponent: React.FC<TableComponentProps> = ({ section, userId }) => {
 
     const fetchData = async () => {
       try {
-        const response = await fetch(`http://localhost:5000/send-messages/user/${userId}`);
-        const result = await response.json();
+        const campresponse = await fetch(`http://localhost:5000/send-messages/user/${userId}`);
+        const campresult = await campresponse.json();
+        const userresponse = await fetch(`http://localhost:5000/auth`);
+        const userresult = await userresponse.json();
 
         if (section === 'campaignHistory') {
-          // Format the data for campaign history
-          const formattedData = result.map((item: any) => ({
+          const formattedData = campresult.map((item: any) => ({
             name: item.content,
             totalRecipients: 1, // Placeholder
             senderId: item.senderId,
@@ -52,13 +66,24 @@ const TableComponent: React.FC<TableComponentProps> = ({ section, userId }) => {
           }));
           setData(formattedData);
         } else if (section === 'deliveryReport') {
-          // Format the data for delivery report
-          const formattedData = result.map((item: any) => ({
+          const formattedData = campresult.map((item: any) => ({
             id: item.id,
             recipients: item.recipients,
             senderId: item.senderId,
             content: item.content,
             messageType: item.messageType,
+            createdAt: new Date(item.createdAt).toLocaleString(),
+          }));
+          setData(formattedData);
+        } else if (section === 'usersreport') {
+          const formattedData = userresult.map((item: any) => ({
+            id: item.id,
+            username: item.username, // Updated to match the API field
+            email: item.email,
+            number: item.number,
+            role: item.role,
+            walletbalance: item.walletbalance,
+            creditalance: item.creditalance,
             createdAt: new Date(item.createdAt).toLocaleString(),
           }));
           setData(formattedData);
@@ -122,6 +147,27 @@ const TableComponent: React.FC<TableComponentProps> = ({ section, userId }) => {
           </td>
         </tr>
       );
+    } else if (section === 'usersreport') {
+      return (data as UserReportItems[]).length > 0 ? (
+        (data as UserReportItems[]).map((item, index) => (
+          <tr key={index} className="border-t">
+            <td className="py-4 px-4 text-gray-500 border-b">{item.id}</td>
+            <td className="py-4 px-4 text-gray-500 border-b">{item.username}</td>
+            <td className="py-4 px-4 text-gray-500 border-b">{item.email}</td>
+            <td className="py-4 px-4 text-gray-500 border-b">{item.number}</td>
+            <td className="py-4 px-4 text-gray-500 border-b">{item.role}</td>
+            <td className="py-4 px-4 text-gray-500 border-b">{item.walletbalance}</td>
+            <td className="py-4 px-4 text-gray-500 border-b">{item.creditalance}</td>
+            <td className="py-4 px-4 text-gray-500 border-b">{item.createdAt}</td>
+          </tr>
+        ))
+      ) : (
+        <tr>
+          <td colSpan={8} className="py-4 px-4 text-center text-gray-500 border-b">
+            No Data Available
+          </td>
+        </tr>
+      );
     }
 
     return null;
@@ -130,7 +176,7 @@ const TableComponent: React.FC<TableComponentProps> = ({ section, userId }) => {
   return (
     <div>
       <h2 className="text-2xl font-semibold mb-4">
-        {section === 'campaignHistory' ? 'SMS Campaign History' : 'Delivery Report'}
+        {section === 'campaignHistory' ? 'SMS Campaign History' : section === 'deliveryReport' ? 'Delivery Report' : 'User Report'}
       </h2>
       <table className="min-w-full bg-white border-collapse border border-gray-200">
         <thead className="bg-gray-100 text-slate-600">
@@ -144,7 +190,7 @@ const TableComponent: React.FC<TableComponentProps> = ({ section, userId }) => {
                 <th className="py-2 px-4 text-left border-b">Total Credit Used</th>
                 <th className="py-2 px-4 text-left border-b">Wallet Balance Used</th>
               </>
-            ) : (
+            ) : section === 'deliveryReport' ? (
               <>
                 <th className="py-2 px-4 text-left border-b">ID</th>
                 <th className="py-2 px-4 text-left border-b">Recipients</th>
@@ -153,7 +199,18 @@ const TableComponent: React.FC<TableComponentProps> = ({ section, userId }) => {
                 <th className="py-2 px-4 text-left border-b">Content</th>
                 <th className="py-2 px-4 text-left border-b">Message Type</th>
               </>
-            )}
+            ) : section === 'usersreport' ? (
+              <>
+                <th className="py-2 px-4 text-left border-b">ID</th>
+                <th className="py-2 px-4 text-left border-b">Username</th>
+                <th className="py-2 px-4 text-left border-b">Email</th>
+                <th className="py-2 px-4 text-left border-b">Number</th>
+                <th className="py-2 px-4 text-left border-b">Role</th>
+                <th className="py-2 px-4 text-left border-b">Wallet Balance</th>
+                <th className="py-2 px-4 text-left border-b">Credit Balance</th>
+                <th className="py-2 px-4 text-left border-b">Created At</th>
+              </>
+            ) : null}
           </tr>
         </thead>
         <tbody>

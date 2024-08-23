@@ -12,7 +12,7 @@ import { fetchSenderIds, deleteSenderId } from '@/app/lib/senderIdUtils';
 
 const Dashboard: React.FC = () => {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState<boolean>(false);
-  const [currentSection, setCurrentSection] = useState<'bulkSMS' | 'voiceCalls'>('bulkSMS');
+  const [currentSection, setCurrentSection] = useState<'bulkSMS' | 'voiceCalls' | 'admin'>('bulkSMS');
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [userId, setUserId] = useState<number | null>(null);
   const [senderIds, setSenderIds] = useState<any[]>([]); // State to hold sender IDs
@@ -39,7 +39,11 @@ const Dashboard: React.FC = () => {
         .catch(err => setError('Error fetching sender IDs: ' + err.message));
     }
   };
-
+  // const handleCreateTemplate = async () => {
+  //   // Logic for creating the template
+  //   // On success:
+  //   onSuccess();
+  // };
   const handleDelete = async (senderId: number) => {
     if (window.confirm('Are you sure you want to delete this Sender ID?')) {
       try {
@@ -60,11 +64,11 @@ const Dashboard: React.FC = () => {
           <div className="max-w-7xl mx-auto">
             <p className="text-red-500 text-sm mb-6">Overview page displays data from the past 3 days.</p>
 
-            {error && (
+            {/* {error && (
               <div className="bg-red-100 text-red-600 p-4 mb-4 rounded">
                 {error}
               </div>
-            )}
+            )} */}
 
             <motion.div
               className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-8"

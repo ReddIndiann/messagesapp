@@ -9,7 +9,7 @@ import ContactsTables from '@/app/Components/Tables/ContactTables';
 
 const Dashboard = () => {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
-  const [currentSection, setCurrentSection] = useState('contacts');
+  const [currentSection, setCurrentSection] = useState<'bulkSMS' | 'voiceCalls' | 'admin'>('bulkSMS');
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col">

@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-// import Cookies from 'js-cookie';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEye, faEdit, faTrash, faPlus, faFileExport, faUser, faUsers } from '@fortawesome/free-solid-svg-icons';
 import AddContact from '../Modals/AddContact';
 import AddGroup from '../Modals/AddGroup';
+import ViewContact from '../Modals/ViewContact'; // Import ViewContact Modal
+import ViewGroup from '../Modals/ViewGroup'; // Import ViewGroup Modal
 
 const ContactsTables: React.FC = () => {
   const [contacts, setContacts] = useState<any[]>([]);
@@ -12,6 +13,10 @@ const ContactsTables: React.FC = () => {
   const [userId, setUserId] = useState<number | null>(null);
   const [isContactModalOpen, setIsContactModalOpen] = useState<boolean>(false);
   const [isGroupModalOpen, setIsGroupModalOpen] = useState<boolean>(false);
+  const [selectedContact, setSelectedContact] = useState<any>(null);
+  const [selectedGroup, setSelectedGroup] = useState<any>(null);
+  const [isContactViewModalOpen, setIsContactViewModalOpen] = useState<boolean>(false);
+  const [isGroupViewModalOpen, setIsGroupViewModalOpen] = useState<boolean>(false);
 
   useEffect(() => {
     const signInResponse = localStorage.getItem('signInResponse');
@@ -51,6 +56,16 @@ const ContactsTables: React.FC = () => {
 
   const getContactCountForGroup = (groupId: number) => {
     return contacts.filter(contact => contact.groups.some((group: any) => group.id === groupId)).length;
+  };
+
+  const handleViewContact = (contact: any) => {
+    setSelectedContact(contact);
+    setIsContactViewModalOpen(true);
+  };
+
+  const handleViewGroup = (group: any) => {
+    setSelectedGroup(group);
+    setIsGroupViewModalOpen(true);
   };
 
   return (
@@ -96,6 +111,7 @@ const ContactsTables: React.FC = () => {
                       <button
                         title="view"
                         className="text-gray-400 hover:text-gray-600 transition duration-200"
+                        onClick={() => handleViewContact(contact)}
                       >
                         <FontAwesomeIcon icon={faUser} />
                       </button>
@@ -159,6 +175,7 @@ const ContactsTables: React.FC = () => {
                       <button
                         title="view"
                         className="text-gray-400 hover:text-gray-600 transition duration-200"
+                        onClick={() => handleViewGroup(group)}
                       >
                         <FontAwesomeIcon icon={faUsers} />
                       </button>
@@ -185,6 +202,18 @@ const ContactsTables: React.FC = () => {
 
       <AddContact isOpen={isContactModalOpen} onClose={() => setIsContactModalOpen(false)} />
       <AddGroup isOpen={isGroupModalOpen} onClose={() => setIsGroupModalOpen(false)} />
+      
+      <ViewContact 
+        isOpen={isContactViewModalOpen} 
+        onClose={() => setIsContactViewModalOpen(false)} 
+        contact={selectedContact} 
+      />
+      
+      <ViewGroup 
+        isOpen={isGroupViewModalOpen} 
+        onClose={() => setIsGroupViewModalOpen(false)} 
+        group={selectedGroup} 
+      />
     </div>
   );
 };

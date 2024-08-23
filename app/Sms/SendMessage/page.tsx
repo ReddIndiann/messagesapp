@@ -1,9 +1,8 @@
-'use client';
+'use client'
 
 import React, { useState, useEffect } from 'react';
 import Header from '@/app/Components/Header';
 import Sidebar from '@/app/Components/SideNav';
-// import Cookies from 'js-cookie';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPaperPlane, faPlus } from '@fortawesome/free-solid-svg-icons';
 import MessageTemplatesTable from '@/app/Components/Tables/MessageTemplateTable';
@@ -17,13 +16,11 @@ import SendToGroupModal from '@/app/Components/Modals/SendToGroupModal';
 import ScheduleToGroupStepper from '@/app/Components/Modals/ScheduleToGroupModal';
 import ScheduleMessageOptions from '@/app/Components/Modals/ScheduleMessageOptions';
 
-import { fetchMessageTemplates } from '@/app/lib/createTemplateUtils';// Adjust the path as necessary
-
-
+import { fetchMessageTemplates } from '@/app/lib/createTemplateUtils'; // Adjust the path as necessary
 
 const Dashboard: React.FC = () => {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState<boolean>(false);
-  const [currentSection, setCurrentSection] = useState<string>('bulkSMS');
+  const [currentSection, setCurrentSection] = useState<'bulkSMS' | 'voiceCalls' | 'admin'>('bulkSMS');
   const [activeMainTab, setActiveMainTab] = useState<'messages' | 'scheduled' | 'international'>('messages');
   const [isCreateTemplateModalOpen, setIsCreateTemplateModalOpen] = useState<boolean>(false);
   const [isSendMessageOptionsModalOpen, setIsSendMessageOptionsModalOpen] = useState<boolean>(false);
@@ -32,12 +29,11 @@ const Dashboard: React.FC = () => {
   const [isScheduleToGroupModalOpen, setIsScheduleToGroupModalOpen] = useState<boolean>(false);
   const [isSendToGroupModalOpen, setIsSendToGroupModalOpen] = useState<boolean>(false);
   const [isScheduleMessageOptionsOpen, setIsScheduleMessageOptionsOpen] = useState<boolean>(false);
-  const [smsCampaigns, setSmsCampaigns] = useState([]);  // State to store fetched campaigns
-  const [userId, setUserId] = useState(null);
+  const [smsCampaigns, setSmsCampaigns] = useState([]); // State to store fetched campaigns
+  const [userId, setUserId] = useState<number | null>(null);
 
   // Fetch the userId from async storage
   useEffect(() => {
-    // Retrieve and parse the user ID from async storage
     const signInResponse = localStorage.getItem('signInResponse');
     if (signInResponse) {
       const parsedResponse = JSON.parse(signInResponse);
@@ -53,7 +49,7 @@ const Dashboard: React.FC = () => {
         const data = await fetchMessageTemplates(userId);
         setSmsCampaigns(data);
       };
-  
+
       getMessageTemplates();
     }
   }, [userId]);
@@ -111,6 +107,13 @@ const Dashboard: React.FC = () => {
 
   const handleScheduleToGroup = () => {
     setIsScheduleToGroupModalOpen(false);
+  };
+
+  const handleTemplateCreated = async () => {
+    if (userId) {
+      const data = await fetchMessageTemplates(userId);
+      setSmsCampaigns(data);
+    }
   };
 
   const renderActionButtons = () => {
@@ -190,7 +193,7 @@ const Dashboard: React.FC = () => {
       </div>
 
       {/* Render the modals */}
-      <CreateTemplateModal isOpen={isCreateTemplateModalOpen} onClose={() => setIsCreateTemplateModalOpen(false)} />
+      <CreateTemplateModal isOpen={isCreateTemplateModalOpen} onClose={() => setIsCreateTemplateModalOpen(false)} onTemplateCreated={handleTemplateCreated} />
       <SendMessageOptionsModal
         isOpen={isSendMessageOptionsModalOpen}
         onClose={() => setIsSendMessageOptionsModalOpen(false)}
@@ -200,22 +203,21 @@ const Dashboard: React.FC = () => {
       <QuickSMSModal
         isOpen={isQuickSMSModalOpen}
         onClose={() => setIsQuickSMSModalOpen(false)}
-        onNext={handleNextFromQuickSMS}
+        // onNext={handleNextFromQuickSMS}
       />
       <ScheduleQuickSms
         isOpen={isScheduleQuickSMSModalOpen}
-        onClose={() => setIsScheduleMessageOptionsOpen(false)}
-        onNext={handleScheduleQuickSmsClick}
+        onClose={() => setIsScheduleQuickSMSModalOpen(false)}
       />
       <SendToGroupModal
         isOpen={isSendToGroupModalOpen}
         onClose={() => setIsSendToGroupModalOpen(false)}
-        onSend={handleSendToGroup}
+        // onSend={handleSendToGroup}
       />
       <ScheduleToGroupStepper
         isOpen={isScheduleToGroupModalOpen}
         onClose={() => setIsScheduleToGroupModalOpen(false)}
-        onSend={handleScheduleToGroup}
+        // onSend={handleScheduleToGroup}
       />
       <ScheduleMessageOptions
         isOpen={isScheduleMessageOptionsOpen}
