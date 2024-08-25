@@ -9,12 +9,12 @@ import MessageTemplatesTable from '@/app/Components/Tables/MessageTemplateTable'
 import ScheduledMessageTable from '@/app/Components/Tables/ScheduledMessageTable';
 import InternationalMessagesTable from '@/app/Components/Tables/InternationalMessagesTable';
 import CreateTemplateModal from '@/app/Components/Modals/CreateTemplateModal';
-import SendMessageOptionsModal from '@/app/Components/Modals/SendMessageOptionsModal';
-import QuickSMSModal from '@/app/Components/Modals/SendQuicksms';
-import ScheduleQuickSms from '@/app/Components/Modals/ScheduleQuickSms';
-import SendToGroupModal from '@/app/Components/Modals/SendToGroupModal';
-import ScheduleToGroupStepper from '@/app/Components/Modals/ScheduleToGroupModal';
-import ScheduleMessageOptions from '@/app/Components/Modals/ScheduleMessageOptions';
+import SendMessageOptionsModal from '@/app/Components/Modals/MessageTemplate/SendMessageOptionsModal';
+import QuickSMSModal from '@/app/Components/Modals/MessageTemplate/SendQuicksms';
+import ScheduleQuickSms from '@/app/Components/Modals/ScheduleModal/ScheduleQuickSms';
+import SendToGroupModal from '@/app/Components/Modals/MessageTemplate/SendToGroupModal';
+import ScheduleToGroupStepper from '@/app/Components/Modals/ScheduleModal/ScheduleToGroupModal';
+import ScheduleMessageOptions from '@/app/Components/Modals/ScheduleModal/ScheduleMessageOptions';
 
 import { fetchMessageTemplates } from '@/app/lib/createTemplateUtils'; // Adjust the path as necessary
 

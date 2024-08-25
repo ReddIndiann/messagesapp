@@ -2,10 +2,10 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEye, faEdit, faTrash, faPlus, faFileExport, faUser, faUsers } from '@fortawesome/free-solid-svg-icons';
-import AddContact from '../Modals/AddContact';
-import AddGroup from '../Modals/AddGroup';
-import ViewContact from '../Modals/ViewContact'; 
-import ViewGroup from '../Modals/ViewGroup'; 
+import AddContact from '../Modals/GroupandContactModals/AddContact';
+import AddGroup from '../Modals/GroupandContactModals/AddGroup';
+import ViewContact from '../Modals/GroupandContactModals/ViewContact'; 
+import ViewGroup from '../Modals/GroupandContactModals/ViewGroup'; 
 import { fetchContacts } from '@/app/lib/contactUtil';
 import { fetchGroups } from '@/app/lib/grouputil';
 
