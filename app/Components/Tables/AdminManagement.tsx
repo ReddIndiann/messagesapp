@@ -83,7 +83,7 @@ const TableComponent: React.FC<TableComponentProps> = ({ section, userId }) => {
             number: item.number,
             role: item.role,
             walletbalance: item.walletbalance,
-            creditalance: item.creditalance,
+            creditalance: item.creditbalance,
             createdAt: new Date(item.createdAt).toLocaleString(),
           }));
           setData(formattedData);

@@ -1,9 +1,13 @@
+// groupService.ts
 import axios from 'axios';
 
-const createGroup = async (groupData: {
+export interface Group {
+  id: number;
   groupName: string;
-  userId: number | null;
-}) => {
+  memberCount: number;
+}
+
+export const createGroup = async (groupData: { groupName: string; userId: number | null }) => {
   if (groupData.userId === null) {
     throw new Error('User ID is not available.');
   }
@@ -17,9 +21,9 @@ const createGroup = async (groupData: {
   }
 };
 
-const fetchGroups = async (userId: number) => {
+export const fetchGroups = async (userId: number): Promise<Group[]> => {
   try {
-    const response = await axios.get(`http://localhost:5000/groups/user/${userId}`);
+    const response = await axios.get<Group[]>(`http://localhost:5000/groups/user/${userId}`);
     return response.data;
   } catch (error) {
     console.error('Error fetching groups:', error);
@@ -27,15 +31,12 @@ const fetchGroups = async (userId: number) => {
   }
 };
 
-
-const fetchAllGroups = async () => {
+export const fetchAllGroups = async (): Promise<Group[]> => {
   try {
-    const response = await axios.get(`http://localhost:5000/groups`);
+    const response = await axios.get<Group[]>(`http://localhost:5000/groups`);
     return response.data;
   } catch (error) {
     console.error('Error fetching groups:', error);
     throw error;
   }
 };
-
-export { createGroup, fetchGroups,fetchAllGroups };

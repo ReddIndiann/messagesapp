@@ -123,7 +123,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onCollapse, setCurrentSection }) => {
   const adminNavItems = [
     { href: "/Admin/Dashboard", icon: <FiGrid />, text: "Dashboard" },
     { href: "/Admin/ManageUsers", icon: <FiUsers />, text: "Manage Users" },
-    { href: "/Admin/Settings", icon: <FiSettings />, text: "Settings" },
+    { href: "/Admin/SenderIds", icon: <FiSettings />, text: "SenderIds" },
     { href: "/Admin/Reports", icon: <FiFileText />, text: "Reports" },
     { href: "/Admin/Help", icon: <FiHelpCircle />, text: "Help" },
   ];

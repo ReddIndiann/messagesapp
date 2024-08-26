@@ -17,6 +17,28 @@ export const fetchSenderIds = async (userId: number) => {
   }
 };
 
+
+
+// src/lib/senderIdUtils.ts
+
+// Function to fetch sender IDs and split them into approved and pending
+export const fetchallSenderIds = async () => {
+  try {
+    const response = await fetch(`http://localhost:5000/senders/user/`);
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.msg || 'Failed to fetch sender IDs');
+    }
+
+    return data; // Return the fetched sender IDs
+  } catch (err: any) {
+    console.error('Error fetching sender IDs:', err.message || 'An error occurred');
+    throw err;
+  }
+};
+
+
 // Function to delete a sender ID
 export const deleteSenderId = async (senderId: number) => {
   try {
@@ -26,7 +48,7 @@ export const deleteSenderId = async (senderId: number) => {
     if (!response.ok) {
       throw new Error(data.msg || 'Failed to delete Sender ID');
     }
-
+ 
     return data; // Return a success message or the deleted item details
   } catch (err: any) {
     console.error('Error deleting sender ID:', err.message || 'An error occurred');

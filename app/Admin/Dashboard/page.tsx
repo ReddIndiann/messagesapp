@@ -6,25 +6,32 @@ import Header from '@/app/Components/Header';
 import Sidebar from '@/app/Components/SideNav';
 import AddSenderIdModal from '@/app/Components/Modals/SenderIdModal';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faBullhorn, faAddressBook, faUsers, faCoins, faTrash } from '@fortawesome/free-solid-svg-icons';
+import { faBullhorn, faAddressBook, faUsers, faCoins, faTrash, faChartBar, faCogs } from '@fortawesome/free-solid-svg-icons';
 import BasicBars from '@/app/Components/Graph/Graph';
 import { fetchSenderIds, deleteSenderId } from '@/app/lib/senderIdUtils';
 import { fetchAllContacts } from '@/app/lib/contactUtil';
 import { fetchAllGroups } from '@/app/lib/grouputil';
 import { fetchAllUsers } from '@/app/lib/userlib';
 
+// Define types for User
+interface User {
+  id: number;
+  role: 'user' | 'admin';
+}
 
 const Dashboard: React.FC = () => {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [currentSection, setCurrentSection] = useState<'bulkSMS' | 'voiceCalls' | 'admin'>('bulkSMS');
-
+  
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [userId, setUserId] = useState<number | null>(null);
-  const [senderIds, setSenderIds] = useState<any[]>([]); // State to hold sender IDs
-  const [error, setError] = useState<string | null>(null); // State to hold error messages
-  const [contactCount, setContactCount] = useState<number>(0); 
-  const [userCount, setUserCount] = useState<number>(0); 
-  const [groupCount, setGroupCount] = useState<number>(0); // State to hold contact count
+  const [senderIds, setSenderIds] = useState<any[]>([]);
+  const [error, setError] = useState<string | null>(null);
+  const [contactCount, setContactCount] = useState<number>(0);
+  const [userCount, setUserCount] = useState<number>(0);
+  const [adminCount, setAdminCount] = useState<number>(0);
+  const [groupCount, setGroupCount] = useState<number>(0);
+
   useEffect(() => {
     const signInResponse = localStorage.getItem('signInResponse');
     if (signInResponse) {
@@ -35,17 +42,23 @@ const Dashboard: React.FC = () => {
         fetchSenderIds(extractedUserId)
           .then(data => setSenderIds(data))
           .catch(err => setError('Error fetching sender IDs: ' + err.message));
-        
+
         fetchAllContacts()
           .then(data => setContactCount(data.length))
           .catch(err => setError('Error fetching contacts: ' + err.message));
-          fetchAllUsers()
-          .then(data => setUserCount(data.length))
-          .catch(err => setError('Error fetching contacts: ' + err.message));
 
-          fetchAllGroups()
+        fetchAllUsers()
+          .then((data: User[]) => {
+            const users = data.filter(user => user.role === 'user');
+            const admins = data.filter(user => user.role === 'admin');
+            setUserCount(users.length);
+            setAdminCount(admins.length);
+          })
+          .catch(err => setError('Error fetching users: ' + err.message));
+
+        fetchAllGroups()
           .then(data => setGroupCount(data.length))
-          .catch(err => setError('Error fetching contacts: ' + err.message));
+          .catch(err => setError('Error fetching groups: ' + err.message));
       }
     }
   }, []);
@@ -55,20 +68,24 @@ const Dashboard: React.FC = () => {
       fetchSenderIds(userId)
         .then(data => setSenderIds(data))
         .catch(err => setError('Error fetching sender IDs: ' + err.message));
-        fetchAllGroups()
-    .then(data => setGroupCount(data.length))
-    .catch(err => setError('Error fetching contacts: ' + err.message));
-    fetchAllContacts()
+      
+      fetchAllGroups()
+        .then(data => setGroupCount(data.length))
+        .catch(err => setError('Error fetching groups: ' + err.message));
+
+      fetchAllContacts()
         .then(data => setContactCount(data.length))
         .catch(err => setError('Error fetching contacts: ' + err.message));
-        fetchAllUsers()
-        .then(data => setUserCount(data.length))
-        .catch(err => setError('Error fetching contacts: ' + err.message));
 
-
-
+      fetchAllUsers()
+        .then((data: User[]) => {
+          const users = data.filter(user => user.role === 'user');
+          const admins = data.filter(user => user.role === 'admin');
+          setUserCount(users.length);
+          setAdminCount(admins.length);
+        })
+        .catch(err => setError('Error fetching users: ' + err.message));
     }
-    
   };
 
   const handleDelete = async (senderId: number) => {
@@ -104,14 +121,14 @@ const Dashboard: React.FC = () => {
               transition={{ duration: 0.5 }}
             >
               {[
-                { value: userCount, label: 'All Users', icon: faBullhorn, color: 'bg-blue-500' },
-                { value: 0, label: 'Users', icon: faAddressBook, color: 'bg-green-500' },
-                { value: 1, label: 'Admin', icon: faUsers, color: 'bg-yellow-500' },
+                { value: userCount + adminCount, label: 'All Users', icon: faUsers, color: 'bg-blue-500' },
+                { value: userCount, label: 'Users', icon: faAddressBook, color: 'bg-green-500' },
+                { value: adminCount, label: 'Admins', icon: faCogs, color: 'bg-yellow-500' },
                 { value: 3, label: 'Credit Used', icon: faCoins, color: 'bg-orange-500' },
                 { value: 3, label: 'Total Credit Used', icon: faCoins, color: 'bg-orange-500' },
                 { value: 3, label: 'Amount Accumulated', icon: faCoins, color: 'bg-orange-500' },
                 { value: contactCount, label: 'All Contacts', icon: faAddressBook, color: 'bg-green-500' },
-                { value: groupCount, label: 'All Groups', icon: faCoins, color: 'bg-orange-500' },
+                { value: groupCount, label: 'All Groups', icon: faChartBar, color: 'bg-purple-500' },
               ].map((item, index) => (
                 <motion.div
                   key={index}
@@ -140,53 +157,6 @@ const Dashboard: React.FC = () => {
                 <h3 className="text-lg font-semibold mb-4 text-gray-600">Billing Summary</h3>
                 <BasicBars />
               </motion.div>
-
-              {/* <motion.div
-                className="bg-white shadow rounded-lg p-6 w-full lg:w-72 h-96 lg:flex-shrink-0"
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.5 }}
-              >
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-sm font-normal text-gray-500">Sender ID</h3>
-                  <button
-                    className="bg-blue-400 text-white px-3 py-1 rounded-md text-sm font-medium"
-                    onClick={() => setIsModalOpen(true)}
-                  >
-                    Add Sender ID
-                  </button>
-                </div>
-                <div className="mt-4 space-y-4">
-                  {senderIds.map((sender, index) => (
-                    <motion.div
-                      key={index}
-                      className="flex items-center justify-between"
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                    >
-                      <span className="text-slate-600">{sender.name}</span>
-                      <div className="flex items-center space-x-24">
-                        <div
-                          className={`rounded-full p-1 ${
-                            sender.status === 'pending' ? 'bg-yellow-500' : 'bg-green-500'
-                          } text-white`}
-                        >
-                          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
-                          </svg>
-                        </div>
-                        <button
-                        title='id'
-                          className="text-gray-400 hover:text-red-500 transition duration-200"
-                          onClick={() => handleDelete(sender.id)}
-                        >
-                          <FontAwesomeIcon icon={faTrash} />
-                        </button>
-                      </div>
-                    </motion.div>
-                  ))}
-                </div>
-              </motion.div> */}
             </div>
           </div>
         </main>
