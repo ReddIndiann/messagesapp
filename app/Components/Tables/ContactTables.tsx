@@ -2,12 +2,14 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEye, faEdit, faTrash, faPlus, faFileExport, faUser, faUsers } from '@fortawesome/free-solid-svg-icons';
-import AddContact from '../Modals/AddContact';
-import AddGroup from '../Modals/AddGroup';
-import ViewContact from '../Modals/ViewContact'; 
-import ViewGroup from '../Modals/ViewGroup'; 
-import { fetchContacts } from '@/app/lib/contactUtil';
-import { fetchGroups } from '@/app/lib/grouputil';
+import AddContact from '../Modals/GroupsandContacts/AddContact';
+import AddGroup from '../Modals/GroupsandContacts/AddGroup';
+import EditContact from '../Modals/GroupsandContacts/EditContact';
+import EditGroup from '../Modals/GroupsandContacts/EditGroup';
+import ViewContact from '../Modals/GroupsandContacts/ViewContact';
+import ViewGroup from '../Modals/GroupsandContacts/ViewGroup';
+import { fetchContacts ,deleteContact} from '@/app/lib/contactUtil';
+import { fetchGroups ,deleteGroup} from '@/app/lib/grouputil';
 
 const ContactsTables: React.FC = () => {
   const [contacts, setContacts] = useState<any[]>([]);
@@ -19,6 +21,9 @@ const ContactsTables: React.FC = () => {
   const [selectedGroup, setSelectedGroup] = useState<any>(null);
   const [isContactViewModalOpen, setIsContactViewModalOpen] = useState<boolean>(false);
   const [isGroupViewModalOpen, setIsGroupViewModalOpen] = useState<boolean>(false);
+  const [isContactEditModalOpen, setIsContactEditModalOpen] = useState<boolean>(false);
+  const [isGroupEditModalOpen, setIsGroupEditModalOpen] = useState<boolean>(false);
+
 
   useEffect(() => {
     const signInResponse = localStorage.getItem('signInResponse');
@@ -33,6 +38,33 @@ const ContactsTables: React.FC = () => {
       }
     }
   }, []);
+  const handleDeleteContact = async (contactId: number) => {
+    if (window.confirm('Are you sure you want to delete this contact?')) {
+      try {
+        await deleteContact(contactId);
+  
+        // Update the state by filtering out the deleted contact
+        setContacts(prevContacts => prevContacts.filter(contact => contact.id !== contactId));
+      } catch (err: any) {
+        console.error('Error deleting contact: ' + err.message);
+      }
+    }
+  };
+    
+
+  const handleDeleteGroup = async (groupId: number) => {
+    if (window.confirm('Are you sure you want to delete this group?')) {
+      try {
+        await deleteGroup(groupId);
+  
+        // Update the state by filtering out the deleted contact
+        setContacts(prevGroups => prevGroups.filter(group => group.id !== groupId));
+      } catch (err: any) {
+        console.error('Error deleting group: ' + err.message);
+      }
+    }
+  };
+  
 
   const getGroupCountForContact = (contactId: number) => {
     return groups.filter(group => group.contacts.some((contact: any) => contact.id === contactId)).length;
@@ -52,9 +84,20 @@ const ContactsTables: React.FC = () => {
     setIsGroupViewModalOpen(true);
   };
 
+  const handleEditContact = (contact: any) => {
+    setSelectedContact(contact);
+    setIsContactEditModalOpen(true);
+  };
+
+  const handleEditGroup = (group: any) => {
+    setSelectedGroup(group);
+    setIsGroupEditModalOpen(true);
+  };
+
   return (
     <div className="flex flex-col lg:flex-row space-y-8 lg:space-y-0 lg:space-x-8 p-6 bg-gray-100">
       <div className="w-full lg:w-3/5">
+        {/* Contacts Section */}
         <div className="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-4 sm:space-y-0">
           <h2 className="font-medium text-base text-gray-700">Contacts ({contacts.length})</h2>
           <div className="flex space-x-3">
@@ -102,12 +145,14 @@ const ContactsTables: React.FC = () => {
                       <button
                         title="edit"
                         className="text-gray-400 hover:text-gray-600 transition duration-200"
+                        onClick={() => handleEditContact(contact)}
                       >
                         <FontAwesomeIcon icon={faEdit} />
                       </button>
                       <button
                         title="delete"
                         className="text-gray-400 hover:text-red-500 transition duration-200"
+                        onClick={() => handleDeleteContact(contact.id)}
                       >
                         <FontAwesomeIcon icon={faTrash} />
                       </button>
@@ -121,6 +166,7 @@ const ContactsTables: React.FC = () => {
       </div>
 
       <div className="w-full lg:w-2/5">
+        {/* Groups Section */}
         <div className="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-4 sm:space-y-0">
           <h2 className="font-medium text-base text-gray-700">Groups ({groups.length})</h2>
           <div className="flex space-x-3">
@@ -166,12 +212,14 @@ const ContactsTables: React.FC = () => {
                       <button
                         title="edit"
                         className="text-gray-400 hover:text-gray-600 transition duration-200"
+                        onClick={() => handleEditGroup(group)}
                       >
                         <FontAwesomeIcon icon={faEdit} />
                       </button>
                       <button
                         title="delete"
                         className="text-gray-400 hover:text-red-500 transition duration-200"
+                        onClick={() => handleDeleteContact(group.id)}
                       >
                         <FontAwesomeIcon icon={faTrash} />
                       </button>
@@ -185,24 +233,12 @@ const ContactsTables: React.FC = () => {
       </div>
 
       {/* Modals */}
-      <AddContact
-        isOpen={isContactModalOpen}
-        onClose={() => setIsContactModalOpen(false)}
-      />
-      <AddGroup
-        isOpen={isGroupModalOpen}
-        onClose={() => setIsGroupModalOpen(false)}
-      />
-      <ViewContact
-        isOpen={isContactViewModalOpen}
-        onClose={() => setIsContactViewModalOpen(false)}
-        contact={selectedContact}
-      />
-      <ViewGroup
-        isOpen={isGroupViewModalOpen}
-        onClose={() => setIsGroupViewModalOpen(false)}
-        group={selectedGroup}
-      />
+      <AddContact isOpen={isContactModalOpen} onClose={() => setIsContactModalOpen(false)} />
+      <AddGroup isOpen={isGroupModalOpen} onClose={() => setIsGroupModalOpen(false)} />
+      <EditContact isOpen={isContactEditModalOpen} onClose={() => setIsContactEditModalOpen(false)} contact={selectedContact} />
+      <EditGroup isOpen={isGroupEditModalOpen} onClose={() => setIsGroupEditModalOpen(false)} group={selectedGroup} />
+      <ViewContact isOpen={isContactViewModalOpen} onClose={() => setIsContactViewModalOpen(false)} contact={selectedContact} />
+      <ViewGroup isOpen={isGroupViewModalOpen} onClose={() => setIsGroupViewModalOpen(false)} group={selectedGroup} />
     </div>
   );
 };

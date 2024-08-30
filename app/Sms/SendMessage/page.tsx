@@ -8,7 +8,7 @@ import { faPaperPlane, faPlus } from '@fortawesome/free-solid-svg-icons';
 import MessageTemplatesTable from '@/app/Components/Tables/MessageTemplateTable';
 import ScheduledMessageTable from '@/app/Components/Tables/ScheduledMessageTable';
 import InternationalMessagesTable from '@/app/Components/Tables/InternationalMessagesTable';
-import CreateTemplateModal from '@/app/Components/Modals/CreateTemplateModal';
+import CreateTemplateModal from '@/app/Components/Modals/MessageTemplate/CreateTemplateModal';
 import SendMessageOptionsModal from '@/app/Components/Modals/SendMessageOptionsModal';
 import QuickSMSModal from '@/app/Components/Modals/SendQuicksms';
 import ScheduleQuickSms from '@/app/Components/Modals/ScheduleQuickSms';
@@ -16,7 +16,11 @@ import SendToGroupModal from '@/app/Components/Modals/SendToGroupModal';
 import ScheduleToGroupStepper from '@/app/Components/Modals/ScheduleToGroupModal';
 import ScheduleMessageOptions from '@/app/Components/Modals/ScheduleMessageOptions';
 
-import { fetchMessageTemplates } from '@/app/lib/createTemplateUtils'; // Adjust the path as necessary
+import { fetchMessageTemplates,fetchScheduleMessage } from '@/app/lib/createTemplateUtils'; // Adjust the path as necessary
+
+
+
+
 
 const Dashboard: React.FC = () => {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState<boolean>(false);
@@ -30,6 +34,7 @@ const Dashboard: React.FC = () => {
   const [isSendToGroupModalOpen, setIsSendToGroupModalOpen] = useState<boolean>(false);
   const [isScheduleMessageOptionsOpen, setIsScheduleMessageOptionsOpen] = useState<boolean>(false);
   const [smsCampaigns, setSmsCampaigns] = useState([]); // State to store fetched campaigns
+  const [smsSchedule, setSmsSchedule] = useState([]); // State to store fetched campaigns
   const [userId, setUserId] = useState<number | null>(null);
 
   // Fetch the userId from async storage
@@ -53,10 +58,18 @@ const Dashboard: React.FC = () => {
       getMessageTemplates();
     }
   }, [userId]);
-
-  const scheduledMessages = [
-    { id: 1, title: 'Meeting Reminder', content: "Don't forget our meeting at 3 PM.", type: 'Scheduled', scheduled: 'Fri 2 Aug, 2024 1:12:22 pm', lastseen: 'Fri 2 Aug, 2024 1:12:22 pm', recipient: 'John Doe', status: 'COMPLETE', repeatperiod: 'None' },
-  ];
+  useEffect(() => {
+    if (userId) {
+      const getScheduleMessages = async () => {
+        const data = await fetchScheduleMessage(userId);
+        setSmsSchedule(data); // Store fetched scheduled messages in smsSchedule state
+      };
+  
+      getScheduleMessages();
+    }
+  }, [userId]);
+  
+ 
 
   const internationalMessages = [
     { country: 'USA', code: '+1', internationalRate: '0.10', localRate: '0.05' },
@@ -115,6 +128,12 @@ const Dashboard: React.FC = () => {
       setSmsCampaigns(data);
     }
   };
+  // const handleScheduleMessage = async () => {
+  //   if (userId) {
+  //     const data = await fetchMessageTemplates(userId);
+  //     setSmsCampaigns(data);
+  //   }
+  // };
 
   const renderActionButtons = () => {
     if (activeMainTab === 'messages') {
@@ -184,10 +203,11 @@ const Dashboard: React.FC = () => {
             </div>
 
             <div className="p-6 grid grid-cols-1 gap-6">
-              {activeMainTab === 'messages' && <MessageTemplatesTable campaigns={smsCampaigns} />}
-              {activeMainTab === 'scheduled' && <ScheduledMessageTable campaigns={scheduledMessages} />}
-              {activeMainTab === 'international' && <InternationalMessagesTable messages={internationalMessages} campaigns={internationalCampaigns} />}
-            </div>
+  {activeMainTab === 'messages' && <MessageTemplatesTable campaigns={smsCampaigns} />}
+  {activeMainTab === 'scheduled' && <ScheduledMessageTable campaigns={smsSchedule} />}
+  {activeMainTab === 'international' && <InternationalMessagesTable messages={internationalMessages} campaigns={internationalCampaigns} />}
+</div>
+
           </div>
         </main>
       </div>

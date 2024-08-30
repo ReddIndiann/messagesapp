@@ -1,54 +1,85 @@
-import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faTimes, faCalendar } from '@fortawesome/free-solid-svg-icons';
+import React, { useState, useEffect, useCallback } from 'react';
+import { fetchGroups, Group ,} from '@/app/lib/grouputil';
+import axios from 'axios';
 
-// Define the interface for form data
-interface FormData {
-  selectedSenderID: string;
-  newSenderID: string;
-  campaignTitle: string;
-  messageContent: string;
-  scheduledDate: string;
-  scheduledTime: string;
-}
-
-// Define props for StepIndicator
-interface StepIndicatorProps {
-  currentStep: number;
-  totalSteps: number;
-}
-
-// Define props for Step1
-interface Step1Props {
-  onNext: () => void;
-}
-
-// Define props for Step2
-interface Step2Props {
-  onNext: () => void;
-  onPrevious: () => void;
-  formData: FormData;
-  setFormData: React.Dispatch<React.SetStateAction<FormData>>;
-}
-
-// Define props for Step3
-interface Step3Props {
-  onPrevious: () => void;
-  formData: FormData;
-  setFormData: React.Dispatch<React.SetStateAction<FormData>>;
-  onSchedule: () => void;
-}
-
-// Define props for ScheduleQuickSms
-interface ScheduleQuickSmsProps {
+interface SendToGroupStepperProps {
   isOpen: boolean;
   onClose: () => void;
 }
+interface Contact {
+  phone: string;
+  // Add other properties as needed
+}
+const SendToGroupStepper: React.FC<SendToGroupStepperProps> = ({ isOpen, onClose }) => {
+  const [step, setStep] = useState<number>(1);
+  const [selectedGroups, setSelectedGroups] = useState<string[]>([]);
+  const [groups, setGroups] = useState<Group[]>([]);
+  const [selectedSenderID, setSelectedSenderID] = useState('');
+  const [newSenderID, setNewSenderID] = useState('');
+  const [campaignTitle, setCampaignTitle] = useState('');
+  const [messageContent, setMessageContent] = useState('');
+  const [scheduledDate, setScheduledDate] = useState('');
+  const [scheduledTime, setScheduledTime] = useState('');
 
-// StepIndicator component
-const StepIndicator: React.FC<StepIndicatorProps> = ({ currentStep, totalSteps }) => {
-  return (
+  useEffect(() => {
+    const fetchUserGroups = async () => {
+      const signInResponse = localStorage.getItem('signInResponse');
+      if (signInResponse) {
+        const parsedResponse = JSON.parse(signInResponse);
+        const userId = parsedResponse.user?.id;
+        if (userId) {
+          try {
+            const fetchedGroups = await fetchGroups(userId);
+            setGroups(fetchedGroups);
+          } catch (error) {
+            console.error('Error fetching groups:', error);
+          }
+        }
+      }
+    };
+
+    fetchUserGroups();
+  }, []);
+
+  const handleNext = useCallback(() => setStep((prevStep) => prevStep + 1), []);
+  const handlePrevious = useCallback(() => setStep((prevStep) => prevStep - 1), []);
+
+  const toggleGroupSelection = useCallback((groupName: string) => {
+    setSelectedGroups((prevSelectedGroups) =>
+      prevSelectedGroups.includes(groupName)
+        ? prevSelectedGroups.filter((group) => group !== groupName)
+        : [...prevSelectedGroups, groupName]
+    );
+  }, []);
+
+  const handleSendMessage = useCallback(async () => {
+    const recipients: string[] = selectedGroups.flatMap((groupName) => {
+      const group = groups.find((g) => g.groupName === groupName);
+      return group?.contacts.map((contact: Contact) => contact.phone) || [];
+    });
+
+    const payload = {
+      senderId: 1,
+      userId: 1,
+      campaignTitle,
+      content: messageContent,
+      messageType: 'text',
+      recursion: 'none',
+      recipients,
+      dateScheduled: scheduledDate,
+      timeScheduled: scheduledTime,
+    };
+
+    try {
+      await axios.post('http://localhost:5000/schedule-messages/create', payload);
+      console.log('Message scheduled successfully:', payload);
+      onClose();
+    } catch (error) {
+      console.error('Error scheduling message:', error);
+    }
+  }, [selectedGroups, groups, campaignTitle, messageContent, scheduledDate, scheduledTime, onClose]);
+
+  const StepIndicator: React.FC<{ currentStep: number; totalSteps: number }> = React.memo(({ currentStep, totalSteps }) => (
     <div className="flex justify-between items-center mb-8">
       {[...Array(totalSteps)].map((_, index) => (
         <React.Fragment key={index}>
@@ -61,7 +92,7 @@ const StepIndicator: React.FC<StepIndicatorProps> = ({ currentStep, totalSteps }
               {index + 1}
             </div>
             <span className="mt-2 text-xs text-gray-500">
-              {index === 0 ? 'Select' : index === 1 ? 'Compose' : 'Schedule'}
+              {index === 0 ? 'Select' : index === 1 ? 'Compose' : index === 2 ? 'Schedule' : 'Confirm'}
             </span>
           </div>
           {index < totalSteps - 1 && (
@@ -74,263 +105,253 @@ const StepIndicator: React.FC<StepIndicatorProps> = ({ currentStep, totalSteps }
         </React.Fragment>
       ))}
     </div>
-  );
-};
+  ));
 
-// Step1 component
-const Step1: React.FC<Step1Props> = ({ onNext }) => (
-  <motion.div
-    initial={{ opacity: 0, y: 20 }}
-    animate={{ opacity: 1, y: 0 }}
-    exit={{ opacity: 0, y: -20 }}
-    transition={{ duration: 0.3 }}
-  >
-    <h2 className="text-2xl font-semibold mb-6 text-gray-800">Select Recipient</h2>
-    <form onSubmit={(e) => { e.preventDefault(); onNext(); }}>
-      <div className="mb-6">
-        <label htmlFor="recipient" className="block text-sm font-medium text-gray-700 mb-2">Recipient</label>
-        <textarea
-          id="recipient"
-          className="w-full bg-white border border-gray-300 rounded-lg shadow-sm p-4 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-800 transition-all duration-200"
-          placeholder="Enter recipient's number or select from contacts"
-          rows={4}
-          required
-        ></textarea>
+  StepIndicator.displayName = 'StepIndicator';
+
+  const Step1: React.FC = React.memo(() => (
+    <div>
+      <h2 className="text-2xl font-semibold mb-6 text-gray-800">Select Groups to Send To</h2>
+      <div className="mb-6 space-y-4">
+        {groups.map((group) => (
+          <div key={group.id} className="flex justify-between items-center text-gray-800">
+            <label className="inline-flex items-center">
+              <input
+                type="checkbox"
+                className="form-checkbox h-5 w-5 text-blue-500"
+                checked={selectedGroups.includes(group.groupName)}
+                onChange={() => toggleGroupSelection(group.groupName)}
+              />
+              <span className="ml-2">{group.groupName}</span>
+            </label>
+            <span className="text-gray-600">{group.contacts.length} members</span>
+          </div>
+        ))}
+        {groups.length === 0 && <p className="text-gray-600 text-sm mt-2">No groups found. Please create a group first.</p>}
+        {groups.length > 0 && <p className="text-gray-600 text-sm mt-2">All groups loaded successfully</p>}
       </div>
       <button
-        type="submit"
-        className="w-full bg-blue-500 text-white px-6 py-3 rounded-lg text-sm font-medium hover:bg-blue-600 transition-colors duration-200"
+        className="w-full bg-blue-500 text-white py-3 rounded-lg text-sm font-medium hover:bg-blue-600 transition-colors duration-200"
+        onClick={handleNext}
+        disabled={selectedGroups.length === 0}
       >
         Next: Compose Message
       </button>
-    </form>
-  </motion.div>
-);
+    </div>
+  ));
 
-// Step2 component
-const Step2: React.FC<Step2Props> = ({ onNext, onPrevious, formData, setFormData }) => {
-  const handleAddSenderID = () => {
-    if (formData.newSenderID) {
-      setFormData({
-        ...formData,
-        selectedSenderID: formData.newSenderID,
-        newSenderID: '',
-      });
-    }
-  };
+  Step1.displayName = 'Step1';
 
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -20 }}
-      transition={{ duration: 0.3 }}
-    >
-      <h2 className="text-2xl font-semibold mb-6 text-gray-800">Compose Message</h2>
-      <form onSubmit={(e) => { e.preventDefault(); onNext(); }}>
-        <div className="mb-6">
-          <label htmlFor="senderID" className="block text-sm font-medium text-gray-700 mb-2">Sender ID</label>
-          <div className="flex items-center gap-2">
-            <select
-              id="senderID"
-              value={formData.selectedSenderID}
-              onChange={(e) => setFormData({ ...formData, selectedSenderID: e.target.value })}
-              className="flex-1 bg-white border border-gray-300 rounded-lg shadow-sm py-2 px-3 text-gray-800 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+  const Step2: React.FC = React.memo(() => {
+    const [localSenderID, setLocalSenderID] = useState(selectedSenderID);
+    const [localCampaignTitle, setLocalCampaignTitle] = useState(campaignTitle);
+    const [localMessageContent, setLocalMessageContent] = useState(messageContent);
+
+    const handleAddSenderID = () => {
+      if (newSenderID) {
+        setSelectedSenderID(newSenderID);
+        setNewSenderID('');
+      }
+    };
+
+    return (
+      <div>
+        <h2 className="text-2xl font-semibold mb-6 text-gray-800">Compose Message</h2>
+        <form onSubmit={(e) => { e.preventDefault(); handleNext(); }}>
+          <div className="mb-6">
+            <label htmlFor="senderID" className="block text-sm font-medium text-gray-700 mb-2">Sender ID</label>
+            <div className="flex items-center gap-2">
+              <select
+                id="senderID"
+                value={localSenderID}
+                onChange={(e) => setLocalSenderID(e.target.value)}
+                className="flex-1 bg-white border border-gray-300 rounded-lg shadow-sm py-2 px-3 text-gray-800 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+                required
+              >
+                <option value="" disabled>Select Sender ID</option>
+                <option value="12345">12345</option>
+                <option value="67890">67890</option>
+              </select>
+              <button
+                type="button"
+                className="bg-gray-100 text-gray-800 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors duration-200"
+                onClick={handleAddSenderID}
+              >
+                Add New
+              </button>
+            </div>
+          </div>
+
+          <div className="mb-6">
+            <label htmlFor="campaignTitle" className="block text-sm font-medium text-gray-700 mb-2">Campaign Title</label>
+            <input
+              id="campaignTitle"
+              type="text"
+              value={localCampaignTitle}
+              onChange={(e) => setLocalCampaignTitle(e.target.value)}
+              className="w-full bg-white border border-gray-300 rounded-lg shadow-sm py-2 px-3 text-gray-800 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+              placeholder="Enter Campaign Title"
               required
-            >
-              <option value="" disabled>Select Sender ID</option>
-              <option value="12345">12345</option>
-              <option value="67890">67890</option>
-            </select>
+            />
+          </div>
+
+          <div className="mb-6">
+            <label htmlFor="messageContent" className="block text-sm font-medium text-gray-700 mb-2">Message Content</label>
+            <textarea
+              id="messageContent"
+              value={localMessageContent}
+              onChange={(e) => setLocalMessageContent(e.target.value)}
+              className="w-full bg-white border border-gray-300 rounded-lg shadow-sm p-4 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-800 transition-all duration-200"
+              placeholder="Enter your message"
+              rows={6}
+              required
+            ></textarea>
+            <p className="mt-2 text-sm text-gray-600">Max 160 characters</p>
+          </div>
+
+          <div className="flex justify-between gap-4">
             <button
               type="button"
-              className="bg-gray-100 text-gray-800 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors duration-200"
-              onClick={handleAddSenderID}
+              className="w-full bg-gray-300 text-gray-700 py-3 rounded-lg text-sm font-medium hover:bg-gray-400 transition-colors duration-200"
+              onClick={handlePrevious}
             >
-              Add New
+              Back
+            </button>
+            <button
+              type="button"
+              className="w-full bg-blue-500 text-white py-3 rounded-lg text-sm font-medium hover:bg-blue-600 transition-colors duration-200"
+              onClick={() => {
+                setSelectedSenderID(localSenderID);
+                setCampaignTitle(localCampaignTitle);
+                setMessageContent(localMessageContent);
+                handleNext();
+              }}
+            >
+              Next: Schedule Message
             </button>
           </div>
-        </div>
-
-        <div className="mb-6">
-          <label htmlFor="campaignTitle" className="block text-sm font-medium text-gray-700 mb-2">Campaign Title</label>
-          <input
-            id="campaignTitle"
-            type="text"
-            value={formData.campaignTitle}
-            onChange={(e) => setFormData({ ...formData, campaignTitle: e.target.value })}
-            className="w-full bg-white border border-gray-300 rounded-lg shadow-sm py-2 px-3 text-gray-800 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
-            placeholder="Enter Campaign Title"
-            required
-          />
-        </div>
-
-        <div className="mb-6">
-          <label htmlFor="messageContent" className="block text-sm font-medium text-gray-700 mb-2">Message Content</label>
-          <textarea
-            id="messageContent"
-            value={formData.messageContent}
-            onChange={(e) => setFormData({ ...formData, messageContent: e.target.value })}
-            className="w-full bg-white border border-gray-300 rounded-lg shadow-sm p-4 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-800 transition-all duration-200"
-            placeholder="Enter your message"
-            rows={6}
-            required
-          ></textarea>
-          <p className="mt-2 text-sm text-gray-500">
-            Characters: {formData.messageContent.length} / 160
-          </p>
-        </div>
-
-        <div className="flex justify-between gap-4">
-          <button
-            type="button"
-            className="flex-1 bg-gray-100 text-gray-800 px-6 py-3 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors duration-200"
-            onClick={onPrevious}
-          >
-            Back
-          </button>
-          <button
-            type="submit"
-            className="flex-1 bg-blue-500 text-white px-6 py-3 rounded-lg text-sm font-medium hover:bg-blue-600 transition-colors duration-200"
-          >
-            Next: Schedule
-          </button>
-        </div>
-      </form>
-    </motion.div>
-  );
-};
-
-// Step3 component
-const Step3: React.FC<Step3Props> = ({ onPrevious, formData, setFormData, onSchedule }) => (
-  <motion.div
-    initial={{ opacity: 0, scale: 0.9 }}
-    animate={{ opacity: 1, scale: 1 }}
-    exit={{ opacity: 0, scale: 0.9 }}
-    transition={{ duration: 0.3 }}
-  >
-    <h2 className="text-2xl font-semibold mb-6 text-gray-800">Schedule Message</h2>
-    <form onSubmit={(e) => { e.preventDefault(); onSchedule(); }}>
-      <div className="space-y-4 mb-6">
-        <div>
-          <p className="text-sm font-medium text-gray-500">Sender ID</p>
-          <p className="text-lg text-gray-800">{formData.selectedSenderID}</p>
-        </div>
-        <div>
-          <p className="text-sm font-medium text-gray-500">Campaign Title</p>
-          <p className="text-lg text-gray-800">{formData.campaignTitle}</p>
-        </div>
-        <div>
-          <p className="text-sm font-medium text-gray-500">Message Content</p>
-          <p className="text-lg text-gray-800">{formData.messageContent}</p>
-        </div>
-        <div>
-          <p className="text-sm font-medium text-gray-500">Character Count</p>
-          <p className="text-lg text-gray-800">{formData.messageContent.length} / 160</p>
-        </div>
+        </form>
       </div>
+    );
+  });
+
+  Step2.displayName = 'Step2';
+
+  const ScheduleStep: React.FC = React.memo(() => (
+    <div>
+      <h2 className="text-2xl font-semibold mb-6 text-gray-800">Schedule Your Message</h2>
       <div className="mb-6">
-        <label htmlFor="scheduledDate" className="block text-sm font-medium text-gray-700 mb-2">Scheduled Date</label>
-        <div className="relative">
-          <input
-            id="scheduledDate"
-            type="date"
-            value={formData.scheduledDate}
-            onChange={(e) => setFormData({ ...formData, scheduledDate: e.target.value })}
-            className="w-full bg-white border border-gray-300 rounded-lg shadow-sm py-2 px-3 text-gray-800 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
-            required
-          />
-          <FontAwesomeIcon icon={faCalendar} className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-        </div>
-      </div>
-      <div className="mb-6">
-        <label htmlFor="scheduledTime" className="block text-sm font-medium text-gray-700 mb-2">Scheduled Time</label>
+        <label htmlFor="dateScheduled" className="block text-sm font-medium text-gray-700 mb-2">Date Scheduled</label>
         <input
-          id="scheduledTime"
-          type="time"
-          value={formData.scheduledTime}
-          onChange={(e) => setFormData({ ...formData, scheduledTime: e.target.value })}
+          id="dateScheduled"
+          type="date"
+          value={scheduledDate}
+          onChange={(e) => setScheduledDate(e.target.value)}
           className="w-full bg-white border border-gray-300 rounded-lg shadow-sm py-2 px-3 text-gray-800 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
           required
         />
       </div>
+
+      <div className="mb-6">
+        <label htmlFor="timeScheduled" className="block text-sm font-medium text-gray-700 mb-2">Time Scheduled</label>
+        <input
+          id="timeScheduled"
+          type="time"
+          value={scheduledTime}
+          onChange={(e) => setScheduledTime(e.target.value)}
+          className="w-full bg-white border border-gray-300 rounded-lg shadow-sm py-2 px-3 text-gray-800 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+          required
+        />
+      </div>
+
       <div className="flex justify-between gap-4">
         <button
           type="button"
-          className="flex-1 bg-gray-100 text-gray-800 px-6 py-3 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors duration-200"
-          onClick={onPrevious}
+          className="w-full bg-gray-300 text-gray-700 py-3 rounded-lg text-sm font-medium hover:bg-gray-400 transition-colors duration-200"
+          onClick={handlePrevious}
         >
           Back
         </button>
         <button
-          type="submit"
-          className="flex-1 bg-blue-500 text-white px-6 py-3 rounded-lg text-sm font-medium hover:bg-blue-600 transition-colors duration-200"
+          type="button"
+          className="w-full bg-blue-500 text-white py-3 rounded-lg text-sm font-medium hover:bg-blue-600 transition-colors duration-200"
+          onClick={handleNext}
         >
-          Schedule Message
+          Confirm
         </button>
-      </div>
-    </form>
-  </motion.div>
-);
-
-// ScheduleQuickSms component
-const ScheduleQuickSms: React.FC<ScheduleQuickSmsProps> = ({ isOpen, onClose }) => {
-  const [currentStep, setCurrentStep] = useState<number>(1);
-  const [formData, setFormData] = useState<FormData>({
-    selectedSenderID: '',
-    newSenderID: '',
-    campaignTitle: '',
-    messageContent: '',
-    scheduledDate: '',
-    scheduledTime: '',
-  });
-
-  const handleNext = () => setCurrentStep((prev) => prev + 1);
-  const handlePrevious = () => setCurrentStep((prev) => prev - 1);
-
-  const handleSchedule = () => {
-    console.log('Scheduled message:', formData);
-    onClose();
-  };
-
-  if (!isOpen) return null;
-
-  return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50">
-      <div className="bg-white p-8 rounded-xl shadow-2xl w-full max-w-md relative">
-        <button
-          aria-label="Close"
-          title="Close"
-          className="absolute top-4 right-4 text-gray-500 hover:text-gray-700"
-          onClick={onClose}
-        >
-          <FontAwesomeIcon icon={faTimes} />
-        </button>
-        <StepIndicator currentStep={currentStep} totalSteps={3} />
-        <AnimatePresence mode="wait">
-          {currentStep === 1 && <Step1 key="step1" onNext={handleNext} />}
-          {currentStep === 2 && (
-            <Step2
-              key="step2"
-              onNext={handleNext}
-              onPrevious={handlePrevious}
-              formData={formData}
-              setFormData={setFormData}
-            />
-          )}
-          {currentStep === 3 && (
-            <Step3
-              key="step3"
-              onPrevious={handlePrevious}
-              formData={formData}
-              setFormData={setFormData}
-              onSchedule={handleSchedule}
-            />
-          )}
-        </AnimatePresence>
       </div>
     </div>
+  ));
+
+  ScheduleStep.displayName = 'ScheduleStep';
+
+  const ConfirmationStep: React.FC = React.memo(() => (
+    <div>
+      <h2 className="text-2xl font-semibold mb-6 text-gray-800">Confirm Your Message</h2>
+      <div className="mb-4">
+        <p className="text-lg font-medium">Selected Groups:</p>
+        <ul className="list-disc pl-5">
+          {selectedGroups.map((group, index) => (
+            <li key={index} className="text-gray-700">{group}</li>
+          ))}
+        </ul>
+      </div>
+      <div className="mb-4">
+        <p className="text-lg font-medium">Sender ID:</p>
+        <p className="text-gray-700">{selectedSenderID}</p>
+      </div>
+      <div className="mb-4">
+        <p className="text-lg font-medium">Campaign Title:</p>
+        <p className="text-gray-700">{campaignTitle}</p>
+      </div>
+      <div className="mb-4">
+        <p className="text-lg font-medium">Message Content:</p>
+        <p className="text-gray-700">{messageContent}</p>
+      </div>
+      <div className="mb-4">
+        <p className="text-lg font-medium">Scheduled Date:</p>
+        <p className="text-gray-700">{scheduledDate}</p>
+      </div>
+      <div className="mb-4">
+        <p className="text-lg font-medium">Scheduled Time:</p>
+        <p className="text-gray-700">{scheduledTime}</p>
+      </div>
+      <div className="flex justify-between gap-4">
+        <button
+          type="button"
+          className="w-full bg-gray-300 text-gray-700 py-3 rounded-lg text-sm font-medium hover:bg-gray-400 transition-colors duration-200"
+          onClick={handlePrevious}
+        >
+          Back
+        </button>
+        <button
+          type="button"
+          className="w-full bg-blue-500 text-white py-3 rounded-lg text-sm font-medium hover:bg-blue-600 transition-colors duration-200"
+          onClick={handleSendMessage}
+        >
+          Send Message
+        </button>
+      </div>
+    </div>
+  ));
+
+  ConfirmationStep.displayName = 'ConfirmationStep';
+
+  return (
+    <>
+      {isOpen && (
+        <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-30">
+          <div className="bg-white rounded-lg shadow-lg p-8 max-w-lg w-full">
+            <StepIndicator currentStep={step} totalSteps={4} />
+            {step === 1 && <Step1 />}
+            {step === 2 && <Step2 />}
+            {step === 3 && <ScheduleStep />}
+            {step === 4 && <ConfirmationStep />}
+          </div>
+        </div>
+      )}
+    </>
   );
 };
 
-export default ScheduleQuickSms;
+export default SendToGroupStepper;

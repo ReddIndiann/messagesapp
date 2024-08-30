@@ -8,12 +8,14 @@ interface FormData {
   newSenderID: string;
   campaignTitle: string;
   messageContent: string;
-  recipients: string[]; // Change recipients to an array of strings
+  recipients: string[];
 }
 
 interface QuickSMSModalProps {
   isOpen: boolean;
   onClose: () => void;
+  initialTitle: string;
+  initialContent: string;
 }
 
 const StepIndicator: React.FC<{ currentStep: number; totalSteps: number }> = ({ currentStep, totalSteps }) => (
@@ -55,7 +57,6 @@ const Step1: React.FC<{ onNext: (data: Partial<FormData>) => void; onClose: () =
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Split input by commas and trim spaces to create an array of recipients
     const recipientsArray = recipientInput.split(',').map(recipient => recipient.trim()).filter(recipient => recipient !== '');
     onNext({ recipients: recipientsArray });
   };
@@ -213,14 +214,14 @@ const Step3: React.FC<{ formData: FormData; onPrevious: () => void; onSend: () =
   </motion.div>
 );
 
-const QuickSMSModal: React.FC<QuickSMSModalProps> = ({ isOpen, onClose }) => {
+const QuickSMSModal: React.FC<QuickSMSModalProps> = ({ isOpen, onClose, initialTitle, initialContent }) => {
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState<FormData>({
     selectedSenderID: '',
     newSenderID: '',
-    campaignTitle: '',
-    messageContent: '',
-    recipients: [], // Initialize as an empty array
+    campaignTitle: initialTitle,
+    messageContent: initialContent,
+    recipients: [],
   });
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const navigate = useRouter();
@@ -237,7 +238,7 @@ const QuickSMSModal: React.FC<QuickSMSModalProps> = ({ isOpen, onClose }) => {
   const handleSend = async () => {
     try {
       const response = await axios.post('http://localhost:5000/send-messages/create', {
-        recipients: formData.recipients, // Send as an array
+        recipients: formData.recipients,
         senderId: 1,
         userId: 1,
         content: formData.messageContent,
@@ -245,26 +246,21 @@ const QuickSMSModal: React.FC<QuickSMSModalProps> = ({ isOpen, onClose }) => {
         recursion: 'none',
       });
 
-      console.log('Full Response:', response);
-
       if (response.status === 201) {
-        const { status, code, message } = response.data;
-
-        console.log('Response Data:', response.data);
+        const { status, message } = response.data;
 
         if (status === 'success') {
           setShowSuccessModal(true);
           setTimeout(() => {
             onClose();
             // Redirect to another page
-          }, 2000); // Show success message for 2 seconds
+          }, 2000);
         } else {
           console.error('Failed to send SMS:', message || 'Unknown error');
           setShowSuccessModal(true);
           setTimeout(() => {
             onClose();
-          // Redirect to another page
-          }, 2000); // Show success message for 2 second
+          }, 2000);
         }
       } else {
         console.error('Failed to send SMS: HTTP status code', response.status);

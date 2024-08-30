@@ -11,7 +11,7 @@ import BasicBars from '@/app/Components/Graph/Graph';
 import { fetchSenderIds, deleteSenderId } from '@/app/lib/senderIdUtils';
 import { fetchContacts } from '@/app/lib/contactUtil';// Import the fetchContacts function
 import { fetchGroups } from '@/app/lib/grouputil';
-
+import { fetchList } from '@/app/lib/sendmessageUtil';
 
 const Dashboard: React.FC = () => {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState<boolean>(false);
@@ -21,6 +21,7 @@ const Dashboard: React.FC = () => {
   const [senderIds, setSenderIds] = useState<any[]>([]); // State to hold sender IDs
   const [contactCount, setContactCount] = useState<number>(0); 
   const [groupCount, setGroupCount] = useState<number>(0); // State to hold contact count
+  const [creditCount, setCreditCount] = useState<number>(0); // State to hold contact count
   const [error, setError] = useState<string | null>(null); // State to hold error messages
 
   useEffect(() => {
@@ -37,6 +38,10 @@ const Dashboard: React.FC = () => {
         fetchContacts(extractedUserId)
           .then(data => setContactCount(data.length))
           .catch(err => setError('Error fetching contacts: ' + err.message));
+
+          fetchList(extractedUserId)
+          .then(data => setCreditCount(data.length))
+          .catch(err => setError('Error fetching credits: ' + err.message));
 
           fetchGroups(extractedUserId)
           .then(data => setGroupCount(data.length))
@@ -55,6 +60,9 @@ const Dashboard: React.FC = () => {
     .catch(err => setError('Error fetching contacts: ' + err.message));
       fetchContacts(userId)
         .then(data => setContactCount(data.length))
+        .catch(err => setError('Error fetching contacts: ' + err.message));
+        fetchList(userId)
+        .then(data => setCreditCount(data.length))
         .catch(err => setError('Error fetching contacts: ' + err.message));
     }
     
@@ -80,11 +88,11 @@ const Dashboard: React.FC = () => {
           <div className="max-w-7xl mx-auto">
             <p className="text-red-500 text-sm mb-6">Overview page displays data from the past 3 days.</p>
 
-            {error && (
+            {/* {error && (
               <div className="bg-red-100 text-red-600 p-4 mb-4 rounded">
                 {error}
               </div>
-            )}
+            )} */}
 
             <motion.div
               className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-8"
@@ -96,7 +104,7 @@ const Dashboard: React.FC = () => {
                 { value: 2, label: 'Campaigns', icon: faBullhorn, color: 'bg-blue-500' },
                 { value: contactCount, label: 'Contacts', icon: faAddressBook, color: 'bg-green-500' }, // Use contactCount here
                 { value: groupCount, label: 'Groups', icon: faUsers, color: 'bg-yellow-500' },
-                { value: 3, label: 'Credit Used', icon: faCoins, color: 'bg-orange-500' },
+                { value: creditCount, label: 'Credit Used', icon: faCoins, color: 'bg-orange-500' },
               ].map((item, index) => (
                 <motion.div
                   key={index}

@@ -1,16 +1,24 @@
 import React, { useState, ChangeEvent, useEffect } from 'react';
 import { createGroup } from '@/app/lib/grouputil';
 
-interface AddGroupModalProps {
+
+interface EditGroupModalProps {
   isOpen: boolean;
   onClose: () => void;
+  group: any;
 }
 
-const AddGroup: React.FC<AddGroupModalProps> = ({ isOpen, onClose }) => {
-  const [groupName, setGroupName] = useState<string>('');
+const EditGroup: React.FC<EditGroupModalProps> = ({ isOpen, onClose, group }) => {
+  const [groupName, setGroupName] = useState<string>(group?.groupName ||'');
   const [userId, setUserId] = useState<number | null>(null);
   const [showSuccessModal, setShowSuccessModal] = useState<boolean>(false);
+  useEffect(() => {
+    if (group) {
+      setGroupName(group.groupName || '');
 
+      
+    }
+  }, [group]);
   useEffect(() => {
     // Retrieve and parse the user ID from local storage
     const signInResponse = localStorage.getItem('signInResponse');
@@ -23,39 +31,46 @@ const AddGroup: React.FC<AddGroupModalProps> = ({ isOpen, onClose }) => {
 
   if (!isOpen) return null;
 
-  const handleRegister = async () => {
-    if (userId === null) {
-      console.error('User ID is not available.');
+  const handleSaveChanges = async () => {
+    if (!group) {
+      console.error('No contact to edit.');
       return;
     }
 
     try {
-      await createGroup({
-        groupName,
-        userId
+      const response = await fetch(`http://localhost:5000/groups/${group.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+        groupName
+        }),
       });
 
-      setShowSuccessModal(true); // Show the success modal
+      if (!response.ok) {
+        throw new Error('Failed to update group.');
+      }
 
-      // Close the main modal after a short delay
+      setShowSuccessModal(true);
+
       setTimeout(() => {
         onClose();
-      }, 500); // Adjust the delay if needed
+      }, 500);
     } catch (error) {
-      console.error('Error registering group:', error);
+      console.error('Error updating group:', error);
     }
   };
 
   const handleCloseSuccessModal = () => {
     setShowSuccessModal(false);
   };
-
   return (
     <>
       <div className="fixed inset-0 flex items-center justify-center z-50">
         <div className="absolute inset-0 bg-gray-800 bg-opacity-70"></div>
         <div className="bg-white p-6 rounded-lg shadow-lg w-96 relative z-10">
-          <h2 className="text-xl font-medium mb-4 text-black">Register a new Group</h2>
+          <h2 className="text-xl font-medium mb-4 text-black">Edit Group</h2>
           <div className="mb-4">
             <label className="block text-black mb-2" htmlFor="group-name">
               Group Name
@@ -78,7 +93,7 @@ const AddGroup: React.FC<AddGroupModalProps> = ({ isOpen, onClose }) => {
             </button>
             <button
               className="bg-blue-400 text-white py-2 px-4 rounded hover:bg-blue-500"
-              onClick={handleRegister}
+              onClick={handleSaveChanges}
             >
               Register Group
             </button>
@@ -108,4 +123,4 @@ const AddGroup: React.FC<AddGroupModalProps> = ({ isOpen, onClose }) => {
   );
 };
 
-export default AddGroup;
+export default EditGroup;

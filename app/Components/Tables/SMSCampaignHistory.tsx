@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-
+import { fetchTableData } from '@/app/lib/sendmessageUtil';
 type CampaignHistoryItem = {
   name: string;
   totalRecipients: number;
@@ -35,43 +35,14 @@ const TableComponent: React.FC<TableComponentProps> = ({ section, userId }) => {
 
     setLoading(true);
 
-    const fetchData = async () => {
-      try {
-        const response = await fetch(`http://localhost:5000/send-messages/user/${userId}`);
-        const result = await response.json();
-
-        if (section === 'campaignHistory') {
-          // Format the data for campaign history
-          const formattedData = result.map((item: any) => ({
-            name: item.content,
-            totalRecipients: 1, // Placeholder
-            senderId: item.senderId,
-            dateTime: new Date(item.createdAt).toLocaleString(),
-            totalCreditUsed: 0, // Placeholder
-            walletBalanceUsed: 0, // Placeholder
-          }));
-          setData(formattedData);
-        } else if (section === 'deliveryReport') {
-          // Format the data for delivery report
-          const formattedData = result.map((item: any) => ({
-            id: item.id,
-            recipients: item.recipients,
-            senderId: item.senderId,
-            content: item.content,
-            messageType: item.messageType,
-            createdAt: new Date(item.createdAt).toLocaleString(),
-          }));
-          setData(formattedData);
-        }
-      } catch (error) {
-        console.error('Error fetching data:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchData();
+    fetchTableData({ section, userId })
+      .then((formattedData) => setData(formattedData))
+      .catch((error) => console.error('Error fetching data:', error))
+      .finally(() => setLoading(false));
   }, [section, userId]);
+
+  // The rest of your TableComponent remains the same
+  // ...
 
   const renderTableContent = () => {
     if (loading) {

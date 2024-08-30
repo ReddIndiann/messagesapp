@@ -10,6 +10,7 @@ interface FormData {
   messageContent: string;
   scheduledDate: string;
   scheduledTime: string;
+  recipients: string;
 }
 
 interface StepIndicatorProps {
@@ -49,9 +50,11 @@ const StepIndicator: React.FC<StepIndicatorProps> = ({ currentStep, totalSteps }
 
 interface Step1Props {
   onNext: () => void;
+  formData: FormData;
+  setFormData: React.Dispatch<React.SetStateAction<FormData>>;
 }
 
-const Step1: React.FC<Step1Props> = ({ onNext }) => (
+const Step1: React.FC<Step1Props> = ({ onNext, formData, setFormData }) => (
   <motion.div
     initial={{ opacity: 0, y: 20 }}
     animate={{ opacity: 1, y: 0 }}
@@ -64,6 +67,8 @@ const Step1: React.FC<Step1Props> = ({ onNext }) => (
         <label htmlFor="recipient" className="block text-sm font-medium text-gray-700 mb-2">Recipient</label>
         <textarea
           id="recipient"
+          value={formData.recipients}
+          onChange={(e) => setFormData({ ...formData, recipients: e.target.value })}
           className="w-full bg-white border border-gray-300 rounded-lg shadow-sm p-4 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-800 transition-all duration-200"
           placeholder="Enter recipient's number or select from contacts"
           rows={4}
@@ -79,6 +84,7 @@ const Step1: React.FC<Step1Props> = ({ onNext }) => (
     </form>
   </motion.div>
 );
+
 
 interface Step2Props {
   onNext: () => void;
@@ -272,15 +278,45 @@ const ScheduleQuickSms: React.FC<ScheduleQuickSmsProps> = ({ isOpen, onClose }) 
     messageContent: '',
     scheduledDate: '',
     scheduledTime: '',
+    recipients:''
   });
 
   const handleNext = () => setCurrentStep((prev) => prev + 1);
   const handlePrevious = () => setCurrentStep((prev) => prev - 1);
 
-  const handleSchedule = () => {
-    console.log('Scheduled message:', formData);
-    onClose();
+  const handleSchedule = async () => {
+    const payload = {
+      recipients: formData.recipients.split(',').map(recipient => recipient.trim()), // Assuming recipients are entered as a comma-separated list
+      senderId: 1, // Use the selected sender ID
+      userId: 2, // Replace with the actual user ID as needed
+      content: formData.messageContent,
+      messageType: "text",
+      dateScheduled: formData.scheduledDate,
+      timeScheduled: formData.scheduledTime,
+      recursion: "none", // Adjust if you need recursion
+    };
+  
+    try {
+      const response = await fetch('http://localhost:5000/schedule-messages/create', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      });
+  
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+  
+      const data = await response.json();
+      console.log('Scheduled message response:', data);
+      onClose(); // Close the modal after scheduling
+    } catch (error) {
+      console.error('Error scheduling message:', error);
+    }
   };
+  
 
   if (!isOpen) return null;
 
@@ -297,7 +333,8 @@ const ScheduleQuickSms: React.FC<ScheduleQuickSmsProps> = ({ isOpen, onClose }) 
         </button>
         <StepIndicator currentStep={currentStep} totalSteps={3} />
         <AnimatePresence mode="wait">
-          {currentStep === 1 && <Step1 key="step1" onNext={handleNext} />}
+          {currentStep === 1 && <Step1 key="step1" onNext={handleNext} formData={formData} setFormData={setFormData} />
+        }
           {currentStep === 2 && (
             <Step2
               key="step2"

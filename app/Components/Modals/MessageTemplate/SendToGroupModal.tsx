@@ -5,19 +5,20 @@ import axios from 'axios';
 interface SendToGroupStepperProps {
   isOpen: boolean;
   onClose: () => void;
+  initialTitle: string; // Added initialTitle prop
+  initialContent: string; // Added initialContent prop
+ 
+
 }
-interface Contact {
-  phone: string;
-  // Add other properties as needed
-}
-const SendToGroupStepper: React.FC<SendToGroupStepperProps> = ({ isOpen, onClose }) => {
+
+const SendToGroupStepper: React.FC<SendToGroupStepperProps> = ({ isOpen, onClose, initialTitle, initialContent }) => {
   const [step, setStep] = useState<number>(1);
   const [selectedGroups, setSelectedGroups] = useState<string[]>([]);
   const [groups, setGroups] = useState<Group[]>([]);
   const [selectedSenderID, setSelectedSenderID] = useState('');
   const [newSenderID, setNewSenderID] = useState('');
-  const [campaignTitle, setCampaignTitle] = useState('');
-  const [messageContent, setMessageContent] = useState('');
+  const [campaignTitle, setCampaignTitle] = useState(initialTitle); // Initialize with initialTitle
+  const [messageContent, setMessageContent] = useState(initialContent); // Initialize with initialContent
 
   useEffect(() => {
     const fetchUserGroups = async () => {
@@ -53,9 +54,9 @@ const SendToGroupStepper: React.FC<SendToGroupStepperProps> = ({ isOpen, onClose
   const handleSendMessage = useCallback(async () => {
     const recipients: string[] = selectedGroups.flatMap((groupName) => {
       const group = groups.find((g) => g.groupName === groupName);
-      return group?.contacts.map((contact: Contact) => contact.phone) || [];
+      return group?.contacts.map((contact:any) => contact.phone) || [];
     });
-  
+
     const payload = {
       senderId: 1,
       userId: 1,
@@ -65,7 +66,7 @@ const SendToGroupStepper: React.FC<SendToGroupStepperProps> = ({ isOpen, onClose
       recursion: 'none',
       recipients,
     };
-  
+
     try {
       await axios.post('http://localhost:5000/send-messages/create', payload);
       console.log('Message sent successfully:', payload);
@@ -74,6 +75,7 @@ const SendToGroupStepper: React.FC<SendToGroupStepperProps> = ({ isOpen, onClose
       console.error('Error sending message:', error);
     }
   }, [selectedGroups, groups, campaignTitle, messageContent, onClose]);
+
   const StepIndicator: React.FC<{ currentStep: number; totalSteps: number }> = React.memo(({ currentStep, totalSteps }) => (
     <div className="flex justify-between items-center mb-8">
       {[...Array(totalSteps)].map((_, index) => (
@@ -217,8 +219,8 @@ const SendToGroupStepper: React.FC<SendToGroupStepperProps> = ({ isOpen, onClose
               className="w-full bg-blue-500 text-white py-3 rounded-lg text-sm font-medium hover:bg-blue-600 transition-colors duration-200"
               onClick={() => {
                 setSelectedSenderID(localSenderID);
-                setCampaignTitle(localCampaignTitle);
-                setMessageContent(localMessageContent);
+                setCampaignTitle(localCampaignTitle); // Update state with localCampaignTitle
+                setMessageContent(localMessageContent); // Update state with localMessageContent
                 handleNext();
               }}
             >

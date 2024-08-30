@@ -9,20 +9,42 @@ import WalletHistoryTable from '@/app/Components/Tables/WalletHistoryTable';
 import BundleHistoryTable from '@/app/Components/Tables/BundleHistoryTable';
 import BundleOptions from '@/app/Components/Tables/BundleOptions';
 import { FaWallet, FaShoppingCart, FaHistory, FaPlus, FaMinus } from 'react-icons/fa';
-
+import { fetchUserById } from '@/app/lib/userlib';
 const Dashboard = () => {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [currentTab, setCurrentTab] = useState('PurchaseBundle');
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [walletBalance, setWalletBalance] = useState(0.00); // State to store wallet balance
+  const [userId, setUserId] = useState(null); // State to store user ID
 
   useEffect(() => {
     setCurrentTab('PurchaseBundle');
+
+    // Retrieve user ID from localStorage
+    const signInResponse = localStorage.getItem('signInResponse');
+    if (signInResponse) {
+      const parsedResponse = JSON.parse(signInResponse);
+      const extractedUserId = parsedResponse.user?.id || null;
+      setUserId(extractedUserId);
+    }
   }, []);
 
-  const handleAddSenderId = (newSenderId) => {
-    console.log('New Sender ID:', newSenderId);
-    // Implement sender ID addition logic here
-  };
+  useEffect(() => {
+    const loadWalletBalance = async () => {
+      if (userId !== null) {
+        try {
+          const userData = await fetchUserById(userId); // Fetch user data by ID
+          if (userData && userData.walletbalance !== undefined) {
+            setWalletBalance(userData.walletbalance); // Set wallet balance from fetched data
+          }
+        } catch (error) {
+          console.error('Error fetching wallet balance:', error);
+        }
+      }
+    };
+
+    loadWalletBalance();
+  }, [userId]); // Fetch wallet balance when userId changes
 
   const TabButton = ({ icon, label, isActive, onClick }) => (
     <button
@@ -129,7 +151,7 @@ const Dashboard = () => {
               <div className="bg-gradient-to-r from-blue-600 to-blue-800 p-8 text-white relative overflow-hidden">
                 <div className="relative z-10">
                   <h2 className="text-xl font-semibold mb-2">Wallet Balance</h2>
-                  <div className="text-4xl font-bold tracking-tight">GHS 0.00</div>
+                  <div className="text-4xl font-bold tracking-tight">GHS {walletBalance.toFixed(2)}</div>
                 </div>
                 <div className="absolute top-0 right-0 w-32 h-32 bg-white opacity-10 rounded-full -mr-16 -mt-16"></div>
                 <div className="absolute bottom-0 left-0 w-24 h-24 bg-white opacity-10 rounded-full -ml-12 -mb-12"></div>
@@ -190,12 +212,6 @@ const Dashboard = () => {
           )}
         </main>
       </div>
-
-      <AddSenderIdModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        onSubmit={handleAddSenderId}
-      />
     </div>
   );
 };

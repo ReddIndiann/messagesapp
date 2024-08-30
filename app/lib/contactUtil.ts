@@ -58,5 +58,17 @@ const fetchAllContacts = async () => {
     throw error;
   }
 };
+// Updated deleteContact function
+const deleteContact = async (contactId: number) => {
+  try {
+    // Perform the delete operation using axios
+    const response = await axios.delete(`http://localhost:5000/contacts/${contactId}`);
+    console.log('Contact deleted successfully:', response.data);
+    return response.data; // Return the response data if needed
+  } catch (error) {
+    console.error('Error deleting contact:', error);
+    throw error; // Rethrow the error to be handled by the caller
+  }
+};
 
-export { createContact, fetchContacts ,addContactToGroup ,fetchAllContacts};
+export { createContact, fetchContacts ,addContactToGroup ,fetchAllContacts,deleteContact};

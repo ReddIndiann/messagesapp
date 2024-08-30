@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation'; 
 import { deleteAuthCookie } from '../lib/storage';
-import Cookies from 'js-cookie';
+import { fetchUserById } from '../lib/userlib';
+
 interface HeaderProps {
   currentSection: 'bulkSMS' | 'voiceCalls' | 'admin';
 }
@@ -9,28 +10,39 @@ interface HeaderProps {
 const Header: React.FC<HeaderProps> = ({ currentSection }) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState<boolean>(false);
   const [username, setUsername] = useState<string | null>(null);
-  const [creditbalance, setCreditbalance] = useState<number | null>(null); // Ensure this is a number
+  const [creditbalance, setCreditbalance] = useState<number | null>(null);
+  const [userId, setUserId] = useState<number | null>(null);
   const router = useRouter(); 
 
   useEffect(() => {
-    // Retrieve and parse the signInResponse from localStorage
     const signInResponse = localStorage.getItem('signInResponse');
     if (signInResponse) {
       const parsedResponse = JSON.parse(signInResponse);
-      const extractedUsername = parsedResponse.user?.username || null;
-      const extractedCreditbalance = parsedResponse.user?.creditbalance ?? 7; // Use nullish coalescing operator to ensure a number or null
-      setUsername(extractedUsername);
-      setCreditbalance(extractedCreditbalance); // Ensure this is handled as a number
-      console.log('Extracted Username:', extractedUsername);
-      console.log('Extracted Credit Balance:', extractedCreditbalance); // Correct logging
+      const extractedUserId = parsedResponse.user?.id || null;
+      setUserId(extractedUserId);
     }
-
-    // Log all localStorage details
-    console.log('LocalStorage contents:', localStorage);
-
-    // Log specific details for clarity
-    console.log('SignIn Response:', signInResponse);
   }, []);
+
+  useEffect(() => {
+    const loadUserData = async () => {
+      if (userId !== null) {
+        try {
+          const userData = await fetchUserById(userId);
+
+          if (userData) {
+            setUsername(userData.username || null);
+            setCreditbalance(userData.creditbalance || null);
+            console.log('Extracted Username:', userData.username);
+            console.log('Extracted Credit Balance:', userData.creditbalance);
+          }
+        } catch (error) {
+          console.error('Error fetching user data:', error);
+        }
+      }
+    };
+
+    loadUserData();
+  }, [userId]); // Re-run this effect when userId changes
 
   const handleMouseEnter = () => {
     setIsDropdownOpen(true);
@@ -40,21 +52,11 @@ const Header: React.FC<HeaderProps> = ({ currentSection }) => {
     setIsDropdownOpen(false);
   };
 
-  
-// Example usage of deleteCookie and logCookies
-const handleLogout = async () => {
-  // Delete cookies using cookies() from Next.js
-  await deleteAuthCookie(); // Ensure the function is awaited if it is asynchronous
-
-  // Remove data from localStorage
-  localStorage.removeItem('signInResponse');
-  localStorage.removeItem('signUpResponse');
-  localStorage.removeItem('username');
-
-  // Redirect to the login page
-  router.push('/');
-};
-
+  const handleLogout = async () => {
+    await deleteAuthCookie();
+    localStorage.clear(); // Clear all localStorage data
+    router.push('/');
+  };
 
   return (
     <header className="bg-white shadow-md fixed top-0 left-0 right-0 z-10">
@@ -64,28 +66,26 @@ const handleLogout = async () => {
         </div>
         <div className="flex items-center space-x-4">
           {currentSection === 'bulkSMS' && (
-            <div className="flex items-center space-x-2">
-              <svg className="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-              </svg>
-            </div>
-          )}
-          {currentSection === 'bulkSMS' && (
-            <div className="text-center pr-2 hidden sm:block">
-              <div className="text-sm">
-                <span className="block text-xs text-gray-500 font-semibold">SMS Balance</span>
-                <span className="text-gray-500">{creditbalance !== null ? creditbalance.toFixed(0) : '0'}</span>
+            <>
+              <div className="flex items-center space-x-2">
+                <svg className="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                </svg>
               </div>
-            </div>
-          )}
-          {currentSection === 'bulkSMS' && (
-            <div className="text-center pr-2 hidden sm:block">
-              <div className="text-sm">
-                <span className="block text-xs text-gray-500 font-semibold mb-1">Bonus</span>
-                <span className="font-semibold bg-blue-500 text-white rounded-full px-2 py-1 mb-1">407</span>
-                <span className="block text-xs text-red-500">Expires on 2024-09-01</span>
+              <div className="text-center pr-2 hidden sm:block">
+                <div className="text-sm">
+                  <span className="block text-xs text-gray-500 font-semibold">SMS Balance</span>
+                  <span className="text-gray-500">{creditbalance !== null ? creditbalance.toFixed(0) : '0'}</span>
+                </div>
               </div>
-            </div>
+              <div className="text-center pr-2 hidden sm:block">
+                <div className="text-sm">
+                  <span className="block text-xs text-gray-500 font-semibold mb-1">Bonus</span>
+                  <span className="font-semibold bg-blue-500 text-white rounded-full px-2 py-1 mb-1">407</span>
+                  <span className="block text-xs text-red-500">Expires on 2024-09-01</span>
+                </div>
+              </div>
+            </>
           )}
           {currentSection === 'voiceCalls' && (
             <div className="text-center pr-2 hidden sm:block">

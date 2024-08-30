@@ -1,3 +1,5 @@
+import axios from 'axios';
+
 export const createTemplate = async (
     title: string,
     content: string,
@@ -55,5 +57,34 @@ export const fetchMessageTemplates = async (userId: number | null) => {
   } catch (error) {
     console.error('Error fetching message templates:', error);
     return [];  // Return an empty array in case of error
+  }
+};   
+export const fetchScheduleMessage = async (userId: number | null) => {
+  if (!userId) {
+    console.error('User ID not found.');
+    return [];
+  }
+
+  try {
+    const response = await fetch(`http://localhost:5000/schedule-messages/user/${userId}`);
+    if (!response.ok) {
+      throw new Error('Failed to fetch message templates');
+    }
+    const data = await response.json();
+    return data;  // Assuming the API response is an array of message templates
+  } catch (error) {
+    console.error('Error fetching message templates:', error);
+    return [];  // Return an empty array in case of error
+  }
+};
+export const deleteTemplate = async (contactId: number) => {
+  try {
+    // Perform the delete operation using axios
+    const response = await axios.delete(`http://localhost:5000/message-templates/${contactId}`);
+    console.log('Template deleted successfully:', response.data);
+    return response.data; // Return the response data if needed
+  } catch (error) {
+    console.error('Error deleting Template:', error);
+    throw error; // Rethrow the error to be handled by the caller
   }
 };

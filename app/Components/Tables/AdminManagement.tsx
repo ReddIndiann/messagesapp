@@ -1,4 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import EditUser from '../Modals/EditUser';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faPaperPlane, faEdit, faTrash } from '@fortawesome/free-solid-svg-icons';
 
 type CampaignHistoryItem = {
   name: string;
@@ -42,6 +45,8 @@ type TableComponentProps = {
 const TableComponent: React.FC<TableComponentProps> = ({ section, userId }) => {
   const [data, setData] = useState<CampaignHistoryItem[] | DeliveryReportItem[] | UserReportItems[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isEditOpen, setIsEditOpen] = useState<boolean>(false);
+  const [selectedUser, setSelectedUser] = useState<UserReportItems | null>(null);
 
   useEffect(() => {
     if (userId === null) return;
@@ -58,11 +63,11 @@ const TableComponent: React.FC<TableComponentProps> = ({ section, userId }) => {
         if (section === 'campaignHistory') {
           const formattedData = campresult.map((item: any) => ({
             name: item.content,
-            totalRecipients: 1, // Placeholder
+            totalRecipients: 1,
             senderId: item.senderId,
             dateTime: new Date(item.createdAt).toLocaleString(),
-            totalCreditUsed: 0, // Placeholder
-            walletBalanceUsed: 0, // Placeholder
+            totalCreditUsed: 0,
+            walletBalanceUsed: 0,
           }));
           setData(formattedData);
         } else if (section === 'deliveryReport') {
@@ -78,7 +83,7 @@ const TableComponent: React.FC<TableComponentProps> = ({ section, userId }) => {
         } else if (section === 'usersreport') {
           const formattedData = userresult.map((item: any) => ({
             id: item.id,
-            username: item.username, // Updated to match the API field
+            username: item.username,
             email: item.email,
             number: item.number,
             role: item.role,
@@ -97,6 +102,11 @@ const TableComponent: React.FC<TableComponentProps> = ({ section, userId }) => {
 
     fetchData();
   }, [section, userId]);
+
+  const handleEditClick = (user: UserReportItems) => {
+    setSelectedUser(user);
+    setIsEditOpen(true);
+  };
 
   const renderTableContent = () => {
     if (loading) {
@@ -159,6 +169,16 @@ const TableComponent: React.FC<TableComponentProps> = ({ section, userId }) => {
             <td className="py-4 px-4 text-gray-500 border-b">{item.walletbalance}</td>
             <td className="py-4 px-4 text-gray-500 border-b">{item.creditalance}</td>
             <td className="py-4 px-4 text-gray-500 border-b">{item.createdAt}</td>
+            <td className="py-4 px-4 flex space-x-2 border-b">
+              <button
+                title="edit"
+                className="text-gray-300 text-xl"
+                onClick={() => handleEditClick(item)}
+              >
+                <FontAwesomeIcon icon={faEdit} />
+              </button>
+              {/* Other buttons like Send and Delete */}
+            </td>
           </tr>
         ))
       ) : (
@@ -199,7 +219,7 @@ const TableComponent: React.FC<TableComponentProps> = ({ section, userId }) => {
                 <th className="py-2 px-4 text-left border-b">Content</th>
                 <th className="py-2 px-4 text-left border-b">Message Type</th>
               </>
-            ) : section === 'usersreport' ? (
+            ) : (
               <>
                 <th className="py-2 px-4 text-left border-b">ID</th>
                 <th className="py-2 px-4 text-left border-b">Username</th>
@@ -209,21 +229,18 @@ const TableComponent: React.FC<TableComponentProps> = ({ section, userId }) => {
                 <th className="py-2 px-4 text-left border-b">Wallet Balance</th>
                 <th className="py-2 px-4 text-left border-b">Credit Balance</th>
                 <th className="py-2 px-4 text-left border-b">Created At</th>
+                <th className="py-2 px-4 text-left border-b">Actions</th>
               </>
-            ) : null}
+            )}
           </tr>
         </thead>
-        <tbody>
-          {renderTableContent()}
-        </tbody>
+        <tbody>{renderTableContent()}</tbody>
       </table>
-      {section === 'campaignHistory' && (
-        <div className="flex justify-center mt-4">
-          <button className="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded text-sm">
-            1
-          </button>
-        </div>
-      )}
+      <EditUser
+        isOpen={isEditOpen}
+        onClose={() => setIsEditOpen(false)}
+        user={selectedUser}
+      />
     </div>
   );
 };
