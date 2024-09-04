@@ -8,14 +8,24 @@ import AddSenderIdModal from '@/app/Components/Modals/SenderIdModal';
 import WalletHistoryTable from '@/app/Components/Tables/WalletHistoryTable';
 import BundleHistoryTable from '@/app/Components/Tables/BundleHistoryTable';
 import BundleOptions from '@/app/Components/Tables/BundleOptions';
-import { FaWallet, FaShoppingCart, FaHistory, FaPlus, FaMinus } from 'react-icons/fa';
+import { FaWallet, FaShoppingCart, FaHistory } from 'react-icons/fa';
 import { fetchUserById } from '@/app/lib/userlib';
-const Dashboard = () => {
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+
+// Type for TabButton props
+type TabButtonProps = {
+  icon: React.ReactNode;
+  label: string;
+  isActive: boolean;
+  onClick: () => void;
+};
+
+const Dashboard: React.FC = () => {
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState<boolean>(false);
+  const [currentSection, setCurrentSection] = useState<'bulkSMS' | 'voiceCalls' | 'admin'>('bulkSMS');
   const [currentTab, setCurrentTab] = useState('PurchaseBundle');
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [walletBalance, setWalletBalance] = useState(0.00); // State to store wallet balance
-  const [userId, setUserId] = useState(null); // State to store user ID
+  const [walletBalance, setWalletBalance] = useState(0.0); // State to store wallet balance
+  const [userId, setUserId] = useState<number | null>(null); // State to store user ID as a number
 
   useEffect(() => {
     setCurrentTab('PurchaseBundle');
@@ -25,7 +35,7 @@ const Dashboard = () => {
     if (signInResponse) {
       const parsedResponse = JSON.parse(signInResponse);
       const extractedUserId = parsedResponse.user?.id || null;
-      setUserId(extractedUserId);
+      setUserId(extractedUserId ? Number(extractedUserId) : null); // Convert to number
     }
   }, []);
 
@@ -46,7 +56,7 @@ const Dashboard = () => {
     loadWalletBalance();
   }, [userId]); // Fetch wallet balance when userId changes
 
-  const TabButton = ({ icon, label, isActive, onClick }) => (
+  const TabButton: React.FC<TabButtonProps> = ({ icon, label, isActive, onClick }) => (
     <button
       className={`flex items-center px-4 py-3 text-sm font-medium transition-colors duration-200 border-b-2 ${
         isActive
@@ -85,16 +95,9 @@ const Dashboard = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
-      <Header
-        currentSection={currentTab}
-        className="sticky top-0 z-10 backdrop-filter backdrop-blur-lg bg-white bg-opacity-75 shadow-sm"
-      />
+      <Header currentSection={currentSection} />
       <div className="flex flex-1 pt-16">
-        <Sidebar
-          onCollapse={setIsSidebarCollapsed}
-          setCurrentSection={setCurrentTab}
-          className="bg-white shadow-md"
-        />
+        <Sidebar onCollapse={setIsSidebarCollapsed} setCurrentSection={setCurrentSection} />
         <main
           className={`flex-1 ${
             isSidebarCollapsed ? 'ml-20' : 'ml-64'
@@ -186,25 +189,13 @@ const Dashboard = () => {
                               <div className="text-sm font-medium text-gray-900">{transaction.label}</div>
                               <div className="text-sm text-gray-500">{transaction.date}</div>
                             </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-right">
-                              <span
-                                className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                                  transaction.amount >= 0 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                                }`}
-                              >
-                                {transaction.amount >= 0 ? <FaPlus className="mr-1 w-3 h-3" /> : <FaMinus className="mr-1 w-3 h-3" />}
-                                GHS {Math.abs(transaction.amount).toFixed(2)}
-                              </span>
+                            <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium text-gray-500">
+                              GHS {transaction.amount.toFixed(2)}
                             </td>
                           </tr>
                         ))}
                       </tbody>
                     </table>
-                  </div>
-                  <div className="mt-4 text-right">
-                    <button className="text-sm text-blue-600 hover:text-blue-800 font-medium">
-                      View all transactions
-                    </button>
                   </div>
                 </div>
               </div>

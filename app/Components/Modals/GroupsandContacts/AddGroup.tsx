@@ -10,7 +10,7 @@ const AddGroup: React.FC<AddGroupModalProps> = ({ isOpen, onClose }) => {
   const [groupName, setGroupName] = useState<string>('');
   const [userId, setUserId] = useState<number | null>(null);
   const [showSuccessModal, setShowSuccessModal] = useState<boolean>(false);
-  const router = useRouter();
+  const navigate = useRouter();
   useEffect(() => {
     // Retrieve and parse the user ID from local storage
     const signInResponse = localStorage.getItem('signInResponse');
@@ -40,9 +40,10 @@ const AddGroup: React.FC<AddGroupModalProps> = ({ isOpen, onClose }) => {
       // Close the main modal after a short delay
       setTimeout(() => {
         onClose();
+        navigate.push('/')
        
       }, 500); // Adjust the delay if needed
-       router.push('/Sms/Contacts'); 
+     
     } catch (error) {
       console.error('Error registering group:', error);
     }

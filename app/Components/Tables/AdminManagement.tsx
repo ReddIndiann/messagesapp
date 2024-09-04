@@ -38,7 +38,7 @@ type UserReportItems = {
 };
 
 type TableComponentProps = {
-  section: 'campaignHistory' | 'deliveryReport' | 'usersreport';
+  section: 'campaignHistory' | 'deliveryReport' | 'usersreport' | string;
   userId: number | null;
 };
 

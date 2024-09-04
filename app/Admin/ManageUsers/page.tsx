@@ -1,22 +1,23 @@
-'use client'
+'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, FC } from 'react';
 import { motion } from 'framer-motion';
 import Header from '@/app/Components/Header';
 import Sidebar from '@/app/Components/SideNav';
 import AddSenderIdModal from '@/app/Components/Modals/SenderIdModal';
 import TableComponent from '@/app/Components/Tables/AdminManagement';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faHistory, faFileAlt, faPlus } from '@fortawesome/free-solid-svg-icons';
+import { faHistory, faFileAlt, faPlus, IconDefinition } from '@fortawesome/free-solid-svg-icons';
 
-const Dashboard = () => {
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
-  const [currentSection, setCurrentSection] = useState('');
+const Dashboard: FC = () => {
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState<boolean>(false);
+  const [currentSection, setCurrentSection] = useState<'bulkSMS' | 'voiceCalls' | 'admin'>('bulkSMS');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [userId, setUserId] = useState<number | null>(null);
+  const [currentTabSection, setCurrentTabSection] = useState('');
 
   useEffect(() => {
-    setCurrentSection('campaignHistory');
+    setCurrentTabSection('campaignHistory');
     const signInResponse = localStorage.getItem('signInResponse');
     if (signInResponse) {
       const parsedResponse = JSON.parse(signInResponse);
@@ -25,17 +26,19 @@ const Dashboard = () => {
     }
   }, []);
 
-  const handleAddSenderId = (newSenderId) => {
-    console.log('New Sender ID:', newSenderId);
-    // Handle the new Sender ID submission here
-  };
+  // Define the prop types for TabButton using an interface
+  interface TabButtonProps {
+    icon: IconDefinition;
+    label: string;
+    isActive: boolean;
+    onClick: () => void;
+  }
 
-  const TabButton = ({ icon, label, isActive, onClick }) => (
+  // Define TabButton component with typed props
+  const TabButton: FC<TabButtonProps> = ({ icon, label, isActive, onClick }) => (
     <button
       className={`flex items-center px-6 py-3 text-sm font-medium transition-colors duration-200 ${
-        isActive
-          ? 'bg-blue-500 text-white'
-          : 'text-blue-500 hover:bg-blue-50'
+        isActive ? 'bg-blue-500 text-white' : 'text-blue-500 hover:bg-blue-50'
       }`}
       onClick={onClick}
     >
@@ -46,15 +49,11 @@ const Dashboard = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
-      <Header currentSection={currentSection} className="bg-white shadow-md" />
+      <Header currentSection={currentSection} />
       <div className="flex flex-1 pt-16">
-        <Sidebar
-          onCollapse={setIsSidebarCollapsed}
-          setCurrentSection={setCurrentSection}
-          className="bg-white shadow-md"
-        />
+        <Sidebar onCollapse={setIsSidebarCollapsed} setCurrentSection={setCurrentSection} />
         <main className={`flex-1 ${isSidebarCollapsed ? 'ml-20' : 'ml-64'} p-8 overflow-y-auto`}>
-          <motion.div 
+          <motion.div
             className="bg-white shadow-lg rounded-xl overflow-hidden"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -68,7 +67,7 @@ const Dashboard = () => {
                   className="bg-white text-blue-500 px-4 py-2 rounded-lg hover:bg-blue-50 transition duration-300 flex items-center"
                 >
                   <FontAwesomeIcon icon={faPlus} className="mr-2" />
-                  Add Sender ID
+                  Add User
                 </button>
               </div>
             </div>
@@ -78,21 +77,20 @@ const Dashboard = () => {
                 <TabButton
                   icon={faHistory}
                   label="Campaign History"
-                  isActive={currentSection === 'campaignHistory'}
-                  onClick={() => setCurrentSection('campaignHistory')}
+                  isActive={currentTabSection === 'campaignHistory'}
+                  onClick={() => setCurrentTabSection('campaignHistory')}
                 />
                 <TabButton
                   icon={faFileAlt}
                   label="Delivery Report"
-                  isActive={currentSection === 'deliveryReport'}
-                  onClick={() => setCurrentSection('deliveryReport')}
+                  isActive={currentTabSection === 'deliveryReport'}
+                  onClick={() => setCurrentTabSection('deliveryReport')}
                 />
-
-<TabButton
+                <TabButton
                   icon={faFileAlt}
                   label="Users"
-                  isActive={currentSection === 'usersreport'}
-                  onClick={() => setCurrentSection('usersreport')}
+                  isActive={currentTabSection === 'usersreport'}
+                  onClick={() => setCurrentTabSection('usersreport')}
                 />
               </div>
             </div>
@@ -105,22 +103,13 @@ const Dashboard = () => {
                 transition={{ duration: 0.3 }}
               >
                 {userId && (
-                  <TableComponent
-                    section={currentSection}
-                    userId={userId}
-                  />
+                  <TableComponent section={currentTabSection} userId={userId} />
                 )}
               </motion.div>
             </div>
           </motion.div>
         </main>
       </div>
-
-      <AddSenderIdModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        onSubmit={handleAddSenderId}
-      />
     </div>
   );
 };

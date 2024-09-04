@@ -1,7 +1,7 @@
 import React, { useState, ChangeEvent, useEffect } from 'react';
 import axios from 'axios';
 import { createContact, addContactToGroup } from '@/app/lib/contactUtil';
-
+import { useRouter } from 'next/navigation';
 interface AddContactModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -22,7 +22,7 @@ const AddContact: React.FC<AddContactModalProps> = ({ isOpen, onClose }) => {
   const [groups, setGroups] = useState<Group[]>([]);
   const [userId, setUserId] = useState<number | null>(null);
   const [showSuccessModal, setShowSuccessModal] = useState<boolean>(false);
-
+const navigate = useRouter();
   useEffect(() => {
     const signInResponse = localStorage.getItem('signInResponse');
     if (signInResponse) {
@@ -68,6 +68,7 @@ const AddContact: React.FC<AddContactModalProps> = ({ isOpen, onClose }) => {
       // Close the main modal after a short delay to allow success modal to appear
       setTimeout(() => {
         onClose();
+        navigate.push('/')
       }, 500); // Adjust the delay if needed
     } catch (error) {
       console.error('Error registering contact:', error);

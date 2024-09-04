@@ -1,15 +1,17 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { fetchGroups, Group ,} from '@/app/lib/grouputil';
+import { fetchGroups, Group } from '@/app/lib/grouputil';
 import axios from 'axios';
 
 interface SendToGroupStepperProps {
   isOpen: boolean;
   onClose: () => void;
 }
+
 interface Contact {
   phone: string;
   // Add other properties as needed
 }
+
 const SendToGroupStepper: React.FC<SendToGroupStepperProps> = ({ isOpen, onClose }) => {
   const [step, setStep] = useState<number>(1);
   const [selectedGroups, setSelectedGroups] = useState<string[]>([]);
@@ -79,6 +81,18 @@ const SendToGroupStepper: React.FC<SendToGroupStepperProps> = ({ isOpen, onClose
     }
   }, [selectedGroups, groups, campaignTitle, messageContent, scheduledDate, scheduledTime, onClose]);
 
+  const CloseButton: React.FC<{ onClose: () => void }> = ({ onClose }) => (
+    <button
+    title='q'
+      onClick={onClose}
+      className="absolute top-4 right-4 text-gray-600 hover:text-gray-800 focus:outline-none"
+    >
+      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
+      </svg>
+    </button>
+  );
+
   const StepIndicator: React.FC<{ currentStep: number; totalSteps: number }> = React.memo(({ currentStep, totalSteps }) => (
     <div className="flex justify-between items-center mb-8">
       {[...Array(totalSteps)].map((_, index) => (
@@ -97,9 +111,7 @@ const SendToGroupStepper: React.FC<SendToGroupStepperProps> = ({ isOpen, onClose
           </div>
           {index < totalSteps - 1 && (
             <div
-              className={`flex-1 h-1 ${
-                index + 1 < currentStep ? 'bg-blue-500' : 'bg-gray-200'
-              }`}
+              className={`flex-1 h-1 ${index + 1 < currentStep ? 'bg-blue-500' : 'bg-gray-200'}`}
             ></div>
           )}
         </React.Fragment>
@@ -190,7 +202,6 @@ const SendToGroupStepper: React.FC<SendToGroupStepperProps> = ({ isOpen, onClose
               value={localCampaignTitle}
               onChange={(e) => setLocalCampaignTitle(e.target.value)}
               className="w-full bg-white border border-gray-300 rounded-lg shadow-sm py-2 px-3 text-gray-800 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
-              placeholder="Enter Campaign Title"
               required
             />
           </div>
@@ -201,31 +212,23 @@ const SendToGroupStepper: React.FC<SendToGroupStepperProps> = ({ isOpen, onClose
               id="messageContent"
               value={localMessageContent}
               onChange={(e) => setLocalMessageContent(e.target.value)}
-              className="w-full bg-white border border-gray-300 rounded-lg shadow-sm p-4 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-800 transition-all duration-200"
-              placeholder="Enter your message"
-              rows={6}
+              className="w-full bg-white border border-gray-300 rounded-lg shadow-sm py-2 px-3 text-gray-800 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+              rows={4}
               required
-            ></textarea>
-            <p className="mt-2 text-sm text-gray-600">Max 160 characters</p>
+            />
           </div>
 
-          <div className="flex justify-between gap-4">
+          <div className="flex justify-between items-center">
             <button
               type="button"
-              className="w-full bg-gray-300 text-gray-700 py-3 rounded-lg text-sm font-medium hover:bg-gray-400 transition-colors duration-200"
               onClick={handlePrevious}
+              className="bg-gray-200 text-gray-800 py-3 px-6 rounded-lg text-sm font-medium hover:bg-gray-300 transition-colors duration-200"
             >
-              Back
+              Previous
             </button>
             <button
-              type="button"
-              className="w-full bg-blue-500 text-white py-3 rounded-lg text-sm font-medium hover:bg-blue-600 transition-colors duration-200"
-              onClick={() => {
-                setSelectedSenderID(localSenderID);
-                setCampaignTitle(localCampaignTitle);
-                setMessageContent(localMessageContent);
-                handleNext();
-              }}
+              type="submit"
+              className="bg-blue-500 text-white py-3 px-6 rounded-lg text-sm font-medium hover:bg-blue-600 transition-colors duration-200"
             >
               Next: Schedule Message
             </button>
@@ -237,13 +240,13 @@ const SendToGroupStepper: React.FC<SendToGroupStepperProps> = ({ isOpen, onClose
 
   Step2.displayName = 'Step2';
 
-  const ScheduleStep: React.FC = React.memo(() => (
+  const Step3: React.FC = React.memo(() => (
     <div>
-      <h2 className="text-2xl font-semibold mb-6 text-gray-800">Schedule Your Message</h2>
+      <h2 className="text-2xl font-semibold mb-6 text-gray-800">Schedule Message</h2>
       <div className="mb-6">
-        <label htmlFor="dateScheduled" className="block text-sm font-medium text-gray-700 mb-2">Date Scheduled</label>
+        <label htmlFor="scheduledDate" className="block text-sm font-medium text-gray-700 mb-2">Scheduled Date</label>
         <input
-          id="dateScheduled"
+          id="scheduledDate"
           type="date"
           value={scheduledDate}
           onChange={(e) => setScheduledDate(e.target.value)}
@@ -251,11 +254,10 @@ const SendToGroupStepper: React.FC<SendToGroupStepperProps> = ({ isOpen, onClose
           required
         />
       </div>
-
       <div className="mb-6">
-        <label htmlFor="timeScheduled" className="block text-sm font-medium text-gray-700 mb-2">Time Scheduled</label>
+        <label htmlFor="scheduledTime" className="block text-sm font-medium text-gray-700 mb-2">Scheduled Time</label>
         <input
-          id="timeScheduled"
+          id="scheduledTime"
           type="time"
           value={scheduledTime}
           onChange={(e) => setScheduledTime(e.target.value)}
@@ -263,71 +265,57 @@ const SendToGroupStepper: React.FC<SendToGroupStepperProps> = ({ isOpen, onClose
           required
         />
       </div>
-
-      <div className="flex justify-between gap-4">
+      <div className="flex justify-between items-center">
         <button
           type="button"
-          className="w-full bg-gray-300 text-gray-700 py-3 rounded-lg text-sm font-medium hover:bg-gray-400 transition-colors duration-200"
           onClick={handlePrevious}
+          className="bg-gray-200 text-gray-800 py-3 px-6 rounded-lg text-sm font-medium hover:bg-gray-300 transition-colors duration-200"
         >
-          Back
+          Previous
         </button>
         <button
           type="button"
-          className="w-full bg-blue-500 text-white py-3 rounded-lg text-sm font-medium hover:bg-blue-600 transition-colors duration-200"
           onClick={handleNext}
+          className="bg-blue-500 text-white py-3 px-6 rounded-lg text-sm font-medium hover:bg-blue-600 transition-colors duration-200"
         >
-          Confirm
+          Next: Confirm
         </button>
       </div>
     </div>
   ));
 
-  ScheduleStep.displayName = 'ScheduleStep';
+  Step3.displayName = 'Step3';
 
-  const ConfirmationStep: React.FC = React.memo(() => (
+  const Step4: React.FC = React.memo(() => (
     <div>
-      <h2 className="text-2xl font-semibold mb-6 text-gray-800">Confirm Your Message</h2>
-      <div className="mb-4">
-        <p className="text-lg font-medium">Selected Groups:</p>
-        <ul className="list-disc pl-5">
-          {selectedGroups.map((group, index) => (
-            <li key={index} className="text-gray-700">{group}</li>
+      <h2 className="text-2xl font-semibold mb-6 text-gray-800">Confirm and Send</h2>
+      <div className="mb-6">
+        <p className="text-gray-800 text-sm">You are about to send a message to the following groups:</p>
+        <ul className="list-disc ml-6 mt-2">
+          {selectedGroups.map((groupName) => (
+            <li key={groupName} className="text-gray-800">{groupName}</li>
           ))}
         </ul>
       </div>
-      <div className="mb-4">
-        <p className="text-lg font-medium">Sender ID:</p>
-        <p className="text-gray-700">{selectedSenderID}</p>
+      <div className="mb-6">
+        <p className="text-gray-800 text-sm"><strong>Sender ID:</strong> {selectedSenderID}</p>
+        <p className="text-gray-800 text-sm"><strong>Campaign Title:</strong> {campaignTitle}</p>
+        <p className="text-gray-800 text-sm"><strong>Message Content:</strong> {messageContent}</p>
+        <p className="text-gray-800 text-sm"><strong>Scheduled Date:</strong> {scheduledDate}</p>
+        <p className="text-gray-800 text-sm"><strong>Scheduled Time:</strong> {scheduledTime}</p>
       </div>
-      <div className="mb-4">
-        <p className="text-lg font-medium">Campaign Title:</p>
-        <p className="text-gray-700">{campaignTitle}</p>
-      </div>
-      <div className="mb-4">
-        <p className="text-lg font-medium">Message Content:</p>
-        <p className="text-gray-700">{messageContent}</p>
-      </div>
-      <div className="mb-4">
-        <p className="text-lg font-medium">Scheduled Date:</p>
-        <p className="text-gray-700">{scheduledDate}</p>
-      </div>
-      <div className="mb-4">
-        <p className="text-lg font-medium">Scheduled Time:</p>
-        <p className="text-gray-700">{scheduledTime}</p>
-      </div>
-      <div className="flex justify-between gap-4">
+      <div className="flex justify-between items-center">
         <button
           type="button"
-          className="w-full bg-gray-300 text-gray-700 py-3 rounded-lg text-sm font-medium hover:bg-gray-400 transition-colors duration-200"
           onClick={handlePrevious}
+          className="bg-gray-200 text-gray-800 py-3 px-6 rounded-lg text-sm font-medium hover:bg-gray-300 transition-colors duration-200"
         >
-          Back
+          Previous
         </button>
         <button
           type="button"
-          className="w-full bg-blue-500 text-white py-3 rounded-lg text-sm font-medium hover:bg-blue-600 transition-colors duration-200"
           onClick={handleSendMessage}
+          className="bg-blue-500 text-white py-3 px-6 rounded-lg text-sm font-medium hover:bg-blue-600 transition-colors duration-200"
         >
           Send Message
         </button>
@@ -335,23 +323,20 @@ const SendToGroupStepper: React.FC<SendToGroupStepperProps> = ({ isOpen, onClose
     </div>
   ));
 
-  ConfirmationStep.displayName = 'ConfirmationStep';
+  Step4.displayName = 'Step4';
 
-  return (
-    <>
-      {isOpen && (
-        <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-30">
-          <div className="bg-white rounded-lg shadow-lg p-8 max-w-lg w-full">
-            <StepIndicator currentStep={step} totalSteps={4} />
-            {step === 1 && <Step1 />}
-            {step === 2 && <Step2 />}
-            {step === 3 && <ScheduleStep />}
-            {step === 4 && <ConfirmationStep />}
-          </div>
-        </div>
-      )}
-    </>
-  );
+  return isOpen ? (
+    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+      <div className="relative bg-white rounded-lg shadow-lg p-8 w-full max-w-xl">
+        <CloseButton onClose={onClose} />
+        <StepIndicator currentStep={step} totalSteps={4} />
+        {step === 1 && <Step1 />}
+        {step === 2 && <Step2 />}
+        {step === 3 && <Step3 />}
+        {step === 4 && <Step4 />}
+      </div>
+    </div>
+  ) : null;
 };
 
 export default SendToGroupStepper;

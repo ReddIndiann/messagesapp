@@ -9,11 +9,29 @@ import TableComponent from '@/app/Components/Tables/SenderIdManagement';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faHistory, faPlus } from '@fortawesome/free-solid-svg-icons';
 
+interface TabButtonProps {
+  label: string;
+  isActive: boolean;
+  onClick: () => void;
+}
+
+const TabButton: React.FC<TabButtonProps> = ({ label, isActive, onClick }) => (
+  <button
+    className={`flex items-center px-6 py-3 text-sm font-medium transition-colors duration-200 ${
+      isActive ? 'bg-blue-500 text-white' : 'text-blue-500 hover:bg-blue-50'
+    }`}
+    onClick={onClick}
+  >
+    {label}
+  </button>
+);
+
 const Dashboard = () => {
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
-  const [currentSection, setCurrentSection] = useState<'pending' | 'approved'>('pending');
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState<boolean>(false);
+  const [currentSection, setCurrentSection] = useState<'bulkSMS' | 'voiceCalls' | 'admin'>('bulkSMS');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [userId, setUserId] = useState<number | null>(null);
+  const [currentTabSection, setCurrentTabSection] = useState<'pending' | 'approved'>('pending'); // Default to 'pending'
 
   useEffect(() => {
     const signInResponse = localStorage.getItem('signInResponse');
@@ -24,33 +42,11 @@ const Dashboard = () => {
     }
   }, []);
 
-  const handleAddSenderId = (newSenderId) => {
-    console.log('New Sender ID:', newSenderId);
-    // Handle the new Sender ID submission here
-  };
-
-  const TabButton = ({ label, isActive, onClick }) => (
-    <button
-      className={`flex items-center px-6 py-3 text-sm font-medium transition-colors duration-200 ${
-        isActive
-          ? 'bg-blue-500 text-white'
-          : 'text-blue-500 hover:bg-blue-50'
-      }`}
-      onClick={onClick}
-    >
-      {label}
-    </button>
-  );
-
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
-      <Header currentSection={currentSection} className="bg-white shadow-md" />
+      <Header currentSection={currentSection} />
       <div className="flex flex-1 pt-16">
-        <Sidebar
-          onCollapse={setIsSidebarCollapsed}
-          setCurrentSection={setCurrentSection}
-          className="bg-white shadow-md"
-        />
+        <Sidebar onCollapse={setIsSidebarCollapsed} setCurrentSection={setCurrentSection} />
         <main className={`flex-1 ${isSidebarCollapsed ? 'ml-20' : 'ml-64'} p-8 overflow-y-auto`}>
           <motion.div 
             className="bg-white shadow-lg rounded-xl overflow-hidden"
@@ -75,13 +71,13 @@ const Dashboard = () => {
               <div className="flex">
                 <TabButton
                   label="Pending"
-                  isActive={currentSection === 'pending'}
-                  onClick={() => setCurrentSection('pending')}
+                  isActive={currentTabSection === 'pending'}
+                  onClick={() => setCurrentTabSection('pending')}
                 />
                 <TabButton
                   label="Approved"
-                  isActive={currentSection === 'approved'}
-                  onClick={() => setCurrentSection('approved')}
+                  isActive={currentTabSection === 'approved'}
+                  onClick={() => setCurrentTabSection('approved')}
                 />
               </div>
             </div>
@@ -95,7 +91,7 @@ const Dashboard = () => {
               >
                 {userId && (
                   <TableComponent
-                    section={currentSection}
+                    section={currentTabSection}
                     userId={userId}
                   />
                 )}
@@ -104,12 +100,6 @@ const Dashboard = () => {
           </motion.div>
         </main>
       </div>
-
-      <AddSenderIdModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        onSubmit={handleAddSenderId}
-      />
     </div>
   );
 };

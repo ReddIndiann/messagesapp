@@ -22,7 +22,7 @@ type DeliveryReportItem = {
 };
 
 type TableComponentProps = {
-  section: 'campaignHistory' | 'deliveryReport';
+  section: 'campaignHistory' | 'deliveryReport' | any;
   userId: number | null;
 };
 

@@ -1,5 +1,6 @@
 'use client'
 import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation'; // Import useRouter
 import Cookies from 'js-cookie';
 import { motion } from 'framer-motion';
 import Header from '@/app/Components/Header';
@@ -9,20 +10,21 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faBullhorn, faAddressBook, faUsers, faCoins, faTrash } from '@fortawesome/free-solid-svg-icons';
 import BasicBars from '@/app/Components/Graph/Graph';
 import { fetchSenderIds, deleteSenderId } from '@/app/lib/senderIdUtils';
-import { fetchContacts } from '@/app/lib/contactUtil';// Import the fetchContacts function
+import { fetchContacts } from '@/app/lib/contactUtil';
 import { fetchGroups } from '@/app/lib/grouputil';
 import { fetchList } from '@/app/lib/sendmessageUtil';
 
 const Dashboard: React.FC = () => {
+  const router = useRouter(); // Initialize useRouter
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState<boolean>(false);
   const [currentSection, setCurrentSection] = useState<'bulkSMS' | 'voiceCalls' | 'admin'>('bulkSMS');
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [userId, setUserId] = useState<number | null>(null);
-  const [senderIds, setSenderIds] = useState<any[]>([]); // State to hold sender IDs
+  const [senderIds, setSenderIds] = useState<any[]>([]); 
   const [contactCount, setContactCount] = useState<number>(0); 
-  const [groupCount, setGroupCount] = useState<number>(0); // State to hold contact count
-  const [creditCount, setCreditCount] = useState<number>(0); // State to hold contact count
-  const [error, setError] = useState<string | null>(null); // State to hold error messages
+  const [groupCount, setGroupCount] = useState<number>(0); 
+  const [creditCount, setCreditCount] = useState<number>(0); 
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const signInResponse = localStorage.getItem('signInResponse');
@@ -39,11 +41,11 @@ const Dashboard: React.FC = () => {
           .then(data => setContactCount(data.length))
           .catch(err => setError('Error fetching contacts: ' + err.message));
 
-          fetchList(extractedUserId)
+        fetchList(extractedUserId)
           .then(data => setCreditCount(data.length))
           .catch(err => setError('Error fetching credits: ' + err.message));
 
-          fetchGroups(extractedUserId)
+        fetchGroups(extractedUserId)
           .then(data => setGroupCount(data.length))
           .catch(err => setError('Error fetching contacts: ' + err.message));
       }
@@ -55,17 +57,16 @@ const Dashboard: React.FC = () => {
       fetchSenderIds(userId)
         .then(data => setSenderIds(data))
         .catch(err => setError('Error fetching sender IDs: ' + err.message));
-        fetchGroups(userId)
-    .then(data => setGroupCount(data.length))
-    .catch(err => setError('Error fetching contacts: ' + err.message));
+      fetchGroups(userId)
+        .then(data => setGroupCount(data.length))
+        .catch(err => setError('Error fetching contacts: ' + err.message));
       fetchContacts(userId)
         .then(data => setContactCount(data.length))
         .catch(err => setError('Error fetching contacts: ' + err.message));
-        fetchList(userId)
+      fetchList(userId)
         .then(data => setCreditCount(data.length))
         .catch(err => setError('Error fetching contacts: ' + err.message));
     }
-    
   };
 
   const handleDelete = async (senderId: number) => {
@@ -77,6 +78,11 @@ const Dashboard: React.FC = () => {
         setError('Error deleting sender ID: ' + err.message);
       }
     }
+  };
+
+  // Function to navigate to a specific page
+  const handleCardClick = (page: string) => {
+    router.push(`/Sms/${page}`);
   };
 
   return (
@@ -101,16 +107,17 @@ const Dashboard: React.FC = () => {
               transition={{ duration: 0.5 }}
             >
               {[
-                { value: 2, label: 'Campaigns', icon: faBullhorn, color: 'bg-blue-500' },
-                { value: contactCount, label: 'Contacts', icon: faAddressBook, color: 'bg-green-500' }, // Use contactCount here
-                { value: groupCount, label: 'Groups', icon: faUsers, color: 'bg-yellow-500' },
-                { value: creditCount, label: 'Credit Used', icon: faCoins, color: 'bg-orange-500' },
+                { value: 2, label: 'Campaigns', icon: faBullhorn, color: 'bg-blue-500', page: 'CampaignHistory' },
+                { value: contactCount, label: 'Contacts', icon: faAddressBook, color: 'bg-green-500', page: 'Contacts' }, 
+                { value: groupCount, label: 'Groups', icon: faUsers, color: 'bg-yellow-500', page: 'Contacts' },
+                { value: creditCount, label: 'Credit Used', icon: faCoins, color: 'bg-orange-500', page: 'Wallet' },
               ].map((item, index) => (
                 <motion.div
                   key={index}
-                  className="flex items-center bg-white shadow-lg rounded-lg p-6"
+                  className="flex items-center bg-white shadow-lg rounded-lg p-6 cursor-pointer"
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
+                  onClick={() => handleCardClick(item.page)} // Add onClick event
                 >
                   <div className={`w-12 h-12 rounded-full flex items-center justify-center ${item.color} text-white`}>
                     <FontAwesomeIcon icon={item.icon} size="lg" />

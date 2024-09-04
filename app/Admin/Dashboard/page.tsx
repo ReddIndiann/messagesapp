@@ -1,5 +1,6 @@
 'use client';
 import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation'; // Import useRouter
 import Cookies from 'js-cookie';
 import { motion } from 'framer-motion';
 import Header from '@/app/Components/Header';
@@ -20,6 +21,7 @@ interface User {
 }
 
 const Dashboard: React.FC = () => {
+  const router = useRouter(); // Initialize useRouter
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [currentSection, setCurrentSection] = useState<'bulkSMS' | 'voiceCalls' | 'admin'>('bulkSMS');
   
@@ -99,6 +101,11 @@ const Dashboard: React.FC = () => {
     }
   };
 
+  // Function to navigate to a specific page
+  const handleCardClick = (page: string) => {
+    router.push(`/dashboard/${page}`);
+  };
+
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col">
       <Header currentSection={currentSection} />
@@ -121,20 +128,21 @@ const Dashboard: React.FC = () => {
               transition={{ duration: 0.5 }}
             >
               {[
-                { value: userCount + adminCount, label: 'All Users', icon: faUsers, color: 'bg-blue-500' },
-                { value: userCount, label: 'Users', icon: faAddressBook, color: 'bg-green-500' },
-                { value: adminCount, label: 'Admins', icon: faCogs, color: 'bg-yellow-500' },
-                { value: 3, label: 'Credit Used', icon: faCoins, color: 'bg-orange-500' },
-                { value: 3, label: 'Total Credit Used', icon: faCoins, color: 'bg-orange-500' },
-                { value: 3, label: 'Amount Accumulated', icon: faCoins, color: 'bg-orange-500' },
-                { value: contactCount, label: 'All Contacts', icon: faAddressBook, color: 'bg-green-500' },
-                { value: groupCount, label: 'All Groups', icon: faChartBar, color: 'bg-purple-500' },
+                { value: userCount + adminCount, label: 'All Users', icon: faUsers, color: 'bg-blue-500', page: 'users' },
+                { value: userCount, label: 'Users', icon: faAddressBook, color: 'bg-green-500', page: 'users' },
+                { value: adminCount, label: 'Admins', icon: faCogs, color: 'bg-yellow-500', page: 'admins' },
+                { value: contactCount, label: 'All Contacts', icon: faAddressBook, color: 'bg-green-500', page: 'contacts' },
+                { value: groupCount, label: 'All Groups', icon: faChartBar, color: 'bg-purple-500', page: 'groups' },
+                { value: 3, label: 'Credit Used', icon: faCoins, color: 'bg-orange-500', page: 'credits' },
+                { value: 3, label: 'Total Credit Used', icon: faCoins, color: 'bg-orange-500', page: 'credits' },
+                { value: 3, label: 'Amount Accumulated', icon: faCoins, color: 'bg-orange-500', page: 'credits' },
               ].map((item, index) => (
                 <motion.div
                   key={index}
-                  className="flex items-center bg-white shadow-lg rounded-lg p-6"
+                  className="flex items-center bg-white shadow-lg rounded-lg p-6 cursor-pointer"
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
+                  onClick={() => handleCardClick(item.page)} // Add onClick event
                 >
                   <div className={`w-12 h-12 rounded-full flex items-center justify-center ${item.color} text-white`}>
                     <FontAwesomeIcon icon={item.icon} size="lg" />

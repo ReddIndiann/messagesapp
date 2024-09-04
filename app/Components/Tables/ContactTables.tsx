@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEye, faEdit, faTrash, faPlus, faFileExport, faUser, faUsers } from '@fortawesome/free-solid-svg-icons';
 import AddContact from '../Modals/GroupsandContacts/AddContact';
@@ -8,8 +7,8 @@ import EditContact from '../Modals/GroupsandContacts/EditContact';
 import EditGroup from '../Modals/GroupsandContacts/EditGroup';
 import ViewContact from '../Modals/GroupsandContacts/ViewContact';
 import ViewGroup from '../Modals/GroupsandContacts/ViewGroup';
-import { fetchContacts ,deleteContact} from '@/app/lib/contactUtil';
-import { fetchGroups ,deleteGroup} from '@/app/lib/grouputil';
+import { fetchContacts, deleteContact } from '@/app/lib/contactUtil';
+import { fetchGroups, deleteGroup } from '@/app/lib/grouputil';
 
 const ContactsTables: React.FC = () => {
   const [contacts, setContacts] = useState<any[]>([]);
@@ -24,7 +23,6 @@ const ContactsTables: React.FC = () => {
   const [isContactEditModalOpen, setIsContactEditModalOpen] = useState<boolean>(false);
   const [isGroupEditModalOpen, setIsGroupEditModalOpen] = useState<boolean>(false);
 
-
   useEffect(() => {
     const signInResponse = localStorage.getItem('signInResponse');
     if (signInResponse) {
@@ -38,33 +36,28 @@ const ContactsTables: React.FC = () => {
       }
     }
   }, []);
+
   const handleDeleteContact = async (contactId: number) => {
     if (window.confirm('Are you sure you want to delete this contact?')) {
       try {
         await deleteContact(contactId);
-  
-        // Update the state by filtering out the deleted contact
         setContacts(prevContacts => prevContacts.filter(contact => contact.id !== contactId));
       } catch (err: any) {
         console.error('Error deleting contact: ' + err.message);
       }
     }
   };
-    
 
   const handleDeleteGroup = async (groupId: number) => {
     if (window.confirm('Are you sure you want to delete this group?')) {
       try {
         await deleteGroup(groupId);
-  
-        // Update the state by filtering out the deleted contact
-        setContacts(prevGroups => prevGroups.filter(group => group.id !== groupId));
+        setGroups(prevGroups => prevGroups.filter(group => group.id !== groupId));
       } catch (err: any) {
         console.error('Error deleting group: ' + err.message);
       }
     }
   };
-  
 
   const getGroupCountForContact = (contactId: number) => {
     return groups.filter(group => group.contacts.some((contact: any) => contact.id === contactId)).length;
@@ -130,7 +123,7 @@ const ContactsTables: React.FC = () => {
                   key={index}
                   className="border-b hover:bg-gray-50 transition duration-200 text-gray-700"
                 >
-                  <td className="py-4 px-6 font-medium">{contact.firstname}</td>
+                  <td className="py-4 px-6 font-medium">{contact.firstname} {contact.lastname}</td>
                   <td className="py-4 px-6">{contact.phone}</td>
                   <td className="py-4 px-6">{getGroupCountForContact(contact.id)} Groups</td>
                   <td className="py-4 px-6">
@@ -177,7 +170,7 @@ const ContactsTables: React.FC = () => {
               <FontAwesomeIcon icon={faPlus} className="mr-2" />
               <span>Add Group</span>
             </button>
-            <button className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition duration-300 flex items-center shadow-md">
+            <button className="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition duration-300 flex items-center shadow-md">
               <FontAwesomeIcon icon={faFileExport} className="mr-2" />
               <span>Export</span>
             </button>
@@ -219,7 +212,7 @@ const ContactsTables: React.FC = () => {
                       <button
                         title="delete"
                         className="text-gray-400 hover:text-red-500 transition duration-200"
-                        onClick={() => handleDeleteContact(group.id)}
+                        onClick={() => handleDeleteGroup(group.id)}
                       >
                         <FontAwesomeIcon icon={faTrash} />
                       </button>

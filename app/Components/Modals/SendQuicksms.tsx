@@ -8,7 +8,7 @@ interface FormData {
   newSenderID: string;
   campaignTitle: string;
   messageContent: string;
-  recipients: string[]; // Change recipients to an array of strings
+  recipients: string[];
 }
 
 interface QuickSMSModalProps {
@@ -21,9 +21,11 @@ const StepIndicator: React.FC<{ currentStep: number; totalSteps: number }> = ({ 
     {[...Array(totalSteps)].map((_, index) => (
       <React.Fragment key={index}>
         <div className="flex flex-col items-center">
-          <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-medium ${
-            index + 1 <= currentStep ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-500'
-          }`}>
+          <div
+            className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-medium ${
+              index + 1 <= currentStep ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-500'
+            }`}
+          >
             {index + 1}
           </div>
           <span className="mt-1 text-xs text-gray-500">
@@ -44,19 +46,30 @@ const CloseButton: React.FC<{ onClose: () => void }> = ({ onClose }) => (
     className="absolute top-2 right-2 text-gray-500 hover:text-gray-700 transition-colors duration-200"
     aria-label="Close"
   >
-    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+    <svg
+      className="w-5 h-5"
+      fill="none"
+      stroke="currentColor"
+      viewBox="0 0 24 24"
+      xmlns="http://www.w3.org/2000/svg"
+    >
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
     </svg>
   </button>
 );
 
-const Step1: React.FC<{ onNext: (data: Partial<FormData>) => void; onClose: () => void }> = ({ onNext, onClose }) => {
+const Step1: React.FC<{ onNext: (data: Partial<FormData>) => void; onClose: () => void }> = ({
+  onNext,
+  onClose,
+}) => {
   const [recipientInput, setRecipientInput] = useState('');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Split input by commas and trim spaces to create an array of recipients
-    const recipientsArray = recipientInput.split(',').map(recipient => recipient.trim()).filter(recipient => recipient !== '');
+    const recipientsArray = recipientInput
+      .split(',')
+      .map((recipient) => recipient.trim())
+      .filter((recipient) => recipient !== '');
     onNext({ recipients: recipientsArray });
   };
 
@@ -68,11 +81,12 @@ const Step1: React.FC<{ onNext: (data: Partial<FormData>) => void; onClose: () =
       transition={{ duration: 0.3 }}
       className="relative"
     >
-      <CloseButton onClose={onClose} />
       <h2 className="text-xl font-semibold mb-4 text-gray-800">Select Recipient</h2>
       <form onSubmit={handleSubmit}>
         <div className="mb-4">
-          <label htmlFor="recipient" className="block text-sm font-medium text-gray-700 mb-1">Recipient</label>
+          <label htmlFor="recipient" className="block text-sm font-medium text-gray-700 mb-1">
+            Recipient
+          </label>
           <textarea
             id="recipient"
             value={recipientInput}
@@ -94,7 +108,12 @@ const Step1: React.FC<{ onNext: (data: Partial<FormData>) => void; onClose: () =
   );
 };
 
-const Step2: React.FC<{ onNext: (data: Partial<FormData>) => void; onPrevious: () => void; formData: FormData; onClose: () => void }> = ({ onNext, onPrevious, formData, onClose }) => {
+const Step2: React.FC<{
+  onNext: (data: Partial<FormData>) => void;
+  onPrevious: () => void;
+  formData: FormData;
+  onClose: () => void;
+}> = ({ onNext, onPrevious, formData, onClose }) => {
   const [localFormData, setLocalFormData] = useState(formData);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -114,11 +133,12 @@ const Step2: React.FC<{ onNext: (data: Partial<FormData>) => void; onPrevious: (
       transition={{ duration: 0.3 }}
       className="relative"
     >
-      <CloseButton onClose={onClose} />
       <h2 className="text-xl font-semibold mb-4 text-gray-800">Compose Message</h2>
       <form onSubmit={handleSubmit}>
         <div className="mb-3">
-          <label htmlFor="selectedSenderID" className="block text-sm font-medium text-gray-700 mb-1">Sender ID</label>
+          <label htmlFor="selectedSenderID" className="block text-sm font-medium text-gray-700 mb-1">
+            Sender ID
+          </label>
           <select
             id="selectedSenderID"
             value={localFormData.selectedSenderID}
@@ -126,13 +146,17 @@ const Step2: React.FC<{ onNext: (data: Partial<FormData>) => void; onPrevious: (
             className="w-full bg-white border border-gray-300 rounded-lg shadow-sm py-1 px-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-800 transition-all duration-200"
             required
           >
-            <option value="" disabled>Select Sender ID</option>
+            <option value="" disabled>
+              Select Sender ID
+            </option>
             <option value="12345">12345</option>
             <option value="67890">67890</option>
           </select>
         </div>
         <div className="mb-3">
-          <label htmlFor="campaignTitle" className="block text-sm font-medium text-gray-700 mb-1">Campaign Title</label>
+          <label htmlFor="campaignTitle" className="block text-sm font-medium text-gray-700 mb-1">
+            Campaign Title
+          </label>
           <input
             id="campaignTitle"
             type="text"
@@ -144,7 +168,9 @@ const Step2: React.FC<{ onNext: (data: Partial<FormData>) => void; onPrevious: (
           />
         </div>
         <div className="mb-3">
-          <label htmlFor="messageContent" className="block text-sm font-medium text-gray-700 mb-1">Message Content</label>
+          <label htmlFor="messageContent" className="block text-sm font-medium text-gray-700 mb-1">
+            Message Content
+          </label>
           <textarea
             id="messageContent"
             value={localFormData.messageContent}
@@ -154,9 +180,7 @@ const Step2: React.FC<{ onNext: (data: Partial<FormData>) => void; onPrevious: (
             rows={4}
             required
           ></textarea>
-          <p className="mt-1 text-xs text-gray-500">
-            Characters: {localFormData.messageContent.length} / 160
-          </p>
+          <p className="mt-1 text-xs text-gray-500">Characters: {localFormData.messageContent.length} / 160</p>
         </div>
         <div className="flex justify-between gap-3">
           <button
@@ -178,7 +202,12 @@ const Step2: React.FC<{ onNext: (data: Partial<FormData>) => void; onPrevious: (
   );
 };
 
-const Step3: React.FC<{ formData: FormData; onPrevious: () => void; onSend: () => void; onClose: () => void }> = ({ formData, onPrevious, onSend, onClose }) => (
+const Step3: React.FC<{
+  formData: FormData;
+  onPrevious: () => void;
+  onSend: () => void;
+  onClose: () => void;
+}> = ({ formData, onPrevious, onSend, onClose }) => (
   <motion.div
     initial={{ opacity: 0, scale: 0.95 }}
     animate={{ opacity: 1, scale: 1 }}
@@ -186,13 +215,20 @@ const Step3: React.FC<{ formData: FormData; onPrevious: () => void; onSend: () =
     transition={{ duration: 0.3 }}
     className="relative"
   >
-    <CloseButton onClose={onClose} />
     <h2 className="text-xl font-semibold mb-4 text-gray-800">Confirm and Send</h2>
     <div className="space-y-2 mb-4">
-      <p className="text-sm text-gray-800"><strong>Recipient:</strong> {formData.recipients.join(', ')}</p>
-      <p className="text-sm text-gray-800"><strong>Sender ID:</strong> {formData.selectedSenderID || 'Not Selected'}</p>
-      <p className="text-sm text-gray-800"><strong>Campaign Title:</strong> {formData.campaignTitle}</p>
-      <p className="text-sm text-gray-800"><strong>Message Content:</strong> {formData.messageContent}</p>
+      <p className="text-sm text-gray-800">
+        <strong>Sender ID:</strong> {formData.selectedSenderID}
+      </p>
+      <p className="text-sm text-gray-800">
+        <strong>Campaign Title:</strong> {formData.campaignTitle}
+      </p>
+      <p className="text-sm text-gray-800">
+        <strong>Message:</strong> {formData.messageContent}
+      </p>
+      <p className="text-sm text-gray-800">
+        <strong>Recipients:</strong> {formData.recipients.join(', ')}
+      </p>
     </div>
     <div className="flex justify-between gap-3">
       <button
@@ -207,7 +243,7 @@ const Step3: React.FC<{ formData: FormData; onPrevious: () => void; onSend: () =
         onClick={onSend}
         className="flex-1 bg-blue-500 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-600 transition-colors duration-200"
       >
-        Send
+        Send Message
       </button>
     </div>
   </motion.div>
@@ -220,24 +256,24 @@ const QuickSMSModal: React.FC<QuickSMSModalProps> = ({ isOpen, onClose }) => {
     newSenderID: '',
     campaignTitle: '',
     messageContent: '',
-    recipients: [], // Initialize as an empty array
+    recipients: [],
   });
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const navigate = useRouter();
 
   const handleNext = (data: Partial<FormData>) => {
-    setFormData(prevData => ({ ...prevData, ...data }));
-    setCurrentStep(prevStep => prevStep + 1);
+    setFormData((prevData) => ({ ...prevData, ...data }));
+    setCurrentStep((prevStep) => prevStep + 1);
   };
 
   const handlePrevious = () => {
-    setCurrentStep(prevStep => prevStep - 1);
+    setCurrentStep((prevStep) => prevStep - 1);
   };
 
   const handleSend = async () => {
     try {
       const response = await axios.post('http://localhost:5000/send-messages/create', {
-        recipients: formData.recipients, // Send as an array
+        recipients: formData.recipients,
         senderId: 1,
         userId: 1,
         content: formData.messageContent,
@@ -245,26 +281,22 @@ const QuickSMSModal: React.FC<QuickSMSModalProps> = ({ isOpen, onClose }) => {
         recursion: 'none',
       });
 
-      console.log('Full Response:', response);
-
       if (response.status === 201) {
         const { status, code, message } = response.data;
-
-        console.log('Response Data:', response.data);
 
         if (status === 'success') {
           setShowSuccessModal(true);
           setTimeout(() => {
             onClose();
-            // Redirect to another page
-          }, 2000); // Show success message for 2 seconds
+            navigate.push('/Sms/CampaignHistory'); // Redirect to another page
+          }, 2000);
         } else {
           console.error('Failed to send SMS:', message || 'Unknown error');
           setShowSuccessModal(true);
           setTimeout(() => {
             onClose();
-          // Redirect to another page
-          }, 2000); // Show success message for 2 second
+            navigate.push('/');
+          }, 2000);
         }
       } else {
         console.error('Failed to send SMS: HTTP status code', response.status);
@@ -278,11 +310,14 @@ const QuickSMSModal: React.FC<QuickSMSModalProps> = ({ isOpen, onClose }) => {
     <>
       {isOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-lg shadow-lg w-96">
+          <div className="bg-white p-6 rounded-lg shadow-lg w-96 relative">
+            <CloseButton onClose={onClose} />
             <StepIndicator currentStep={currentStep} totalSteps={3} />
             <AnimatePresence>
               {currentStep === 1 && <Step1 onNext={handleNext} onClose={onClose} />}
-              {currentStep === 2 && <Step2 onNext={handleNext} onPrevious={handlePrevious} formData={formData} onClose={onClose} />}
+              {currentStep === 2 && (
+                <Step2 onNext={handleNext} onPrevious={handlePrevious} formData={formData} onClose={onClose} />
+              )}
               {currentStep === 3 && <Step3 formData={formData} onPrevious={handlePrevious} onSend={handleSend} onClose={onClose} />}
             </AnimatePresence>
             {showSuccessModal && (

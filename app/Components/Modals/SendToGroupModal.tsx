@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { fetchGroups, Group } from '@/app/lib/grouputil';
 import axios from 'axios';
-
+import { useRouter } from 'next/navigation';
 interface SendToGroupStepperProps {
   isOpen: boolean;
   onClose: () => void;
@@ -10,6 +10,20 @@ interface Contact {
   phone: string;
   // Add other properties as needed
 }
+
+const CloseButton: React.FC<{ onClose: () => void }> = ({ onClose }) => (
+  <button
+  title='q'
+    type="button"
+    onClick={onClose}
+    className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 focus:outline-none"
+  >
+    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+    </svg>
+  </button>
+);
+
 const SendToGroupStepper: React.FC<SendToGroupStepperProps> = ({ isOpen, onClose }) => {
   const [step, setStep] = useState<number>(1);
   const [selectedGroups, setSelectedGroups] = useState<string[]>([]);
@@ -18,7 +32,7 @@ const SendToGroupStepper: React.FC<SendToGroupStepperProps> = ({ isOpen, onClose
   const [newSenderID, setNewSenderID] = useState('');
   const [campaignTitle, setCampaignTitle] = useState('');
   const [messageContent, setMessageContent] = useState('');
-
+const navigate = useRouter();
   useEffect(() => {
     const fetchUserGroups = async () => {
       const signInResponse = localStorage.getItem('signInResponse');
@@ -70,10 +84,12 @@ const SendToGroupStepper: React.FC<SendToGroupStepperProps> = ({ isOpen, onClose
       await axios.post('http://localhost:5000/send-messages/create', payload);
       console.log('Message sent successfully:', payload);
       onClose();
+      navigate.push('/Sms/CampaignHistory'); 
     } catch (error) {
       console.error('Error sending message:', error);
     }
   }, [selectedGroups, groups, campaignTitle, messageContent, onClose]);
+
   const StepIndicator: React.FC<{ currentStep: number; totalSteps: number }> = React.memo(({ currentStep, totalSteps }) => (
     <div className="flex justify-between items-center mb-8">
       {[...Array(totalSteps)].map((_, index) => (
@@ -280,7 +296,8 @@ const SendToGroupStepper: React.FC<SendToGroupStepperProps> = ({ isOpen, onClose
     <>
       {isOpen && (
         <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-30">
-          <div className="bg-white rounded-lg shadow-lg p-8 max-w-lg w-full">
+          <div className="relative bg-white rounded-lg shadow-lg p-8 max-w-lg w-full">
+            <CloseButton onClose={onClose} />
             <StepIndicator currentStep={step} totalSteps={3} />
             {step === 1 && <Step1 />}
             {step === 2 && <Step2 />}

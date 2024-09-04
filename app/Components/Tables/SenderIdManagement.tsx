@@ -5,13 +5,13 @@ type SenderItem = {
   name: string;
   userId: number;
   purpose: string;
-  status: 'pending' | 'approved';
+  status: 'pending' | 'approved' | string;
   createdAt: string;
   updatedAt: string;
 };
 
 type TableComponentProps = {
-  section: 'pending' | 'approved';
+  section: 'pending' | 'approved' | string;
   userId: number | null;
 };
 
