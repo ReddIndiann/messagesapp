@@ -6,9 +6,10 @@ interface SendMessageOptionsModalProps {
   onClose: () => void;
   onQuickSMSClick: () => void;
   onSendToGroupClick: () => void;
+  onExportExcel: () => void;
 }
 
-const SendMessageOptionsModal: React.FC<SendMessageOptionsModalProps> = ({ isOpen, onClose, onQuickSMSClick, onSendToGroupClick }) => {
+const SendMessageOptionsModal: React.FC<SendMessageOptionsModalProps> = ({ isOpen, onClose, onQuickSMSClick, onSendToGroupClick,onExportExcel }) => {
   if (!isOpen) return null;
 
   return (
@@ -35,13 +36,20 @@ const SendMessageOptionsModal: React.FC<SendMessageOptionsModalProps> = ({ isOpe
           Send to Group
         </button>
         <button
+           onClick={() => {
+            onClose();
+            onExportExcel();
+          }}
           className="w-full bg-gray-100 text-gray-400 py-2 rounded mb-2 hover:bg-blue-100 hover:text-blue-400 text-sm sm:text-base"
         >
           Send using Excel Sheet
         </button>
         <button
           className="w-full sm:w-24 bg-gray-100 text-gray-800 py-2 mt-4 sm:mt-5 rounded text-sm sm:text-base"
-          onClick={onClose}
+          onClick={() => {
+            onClose();
+            
+          }}
         >
           Cancel
         </button>
@@ -49,5 +57,8 @@ const SendMessageOptionsModal: React.FC<SendMessageOptionsModalProps> = ({ isOpe
     </div>
   );
 };
+
+
+
 
 export default SendMessageOptionsModal;

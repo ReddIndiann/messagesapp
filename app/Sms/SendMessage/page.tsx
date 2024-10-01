@@ -15,9 +15,9 @@ import ScheduleQuickSms from '@/app/Components/Modals/ScheduleQuickSms';
 import SendToGroupModal from '@/app/Components/Modals/SendToGroupModal';
 import ScheduleToGroupStepper from '@/app/Components/Modals/ScheduleToGroupModal';
 import ScheduleMessageOptions from '@/app/Components/Modals/ScheduleMessageOptions';
-
+import ExportExcelContactStepper from '@/app/Components/Modals/ExportExcelSend';
 import { fetchMessageTemplates,fetchScheduleMessage } from '@/app/lib/createTemplateUtils'; // Adjust the path as necessary
-
+import ExcelUploadScheduleStepper from '@/app/Components/Modals/ExportExcelSchedule';
 
 
 
@@ -30,6 +30,8 @@ const Dashboard: React.FC = () => {
   const [isSendMessageOptionsModalOpen, setIsSendMessageOptionsModalOpen] = useState<boolean>(false);
   const [isQuickSMSModalOpen, setIsQuickSMSModalOpen] = useState<boolean>(false);
   const [isScheduleQuickSMSModalOpen, setIsScheduleQuickSMSModalOpen] = useState<boolean>(false);
+  const [isExportExcelOpen, setIsExportExcelModalOpen] = useState<boolean>(false);
+  const [isExportExcelScheduleOpen, setIsExportExceSchedulelModalOpen] = useState<boolean>(false);
   const [isScheduleToGroupModalOpen, setIsScheduleToGroupModalOpen] = useState<boolean>(false);
   const [isSendToGroupModalOpen, setIsSendToGroupModalOpen] = useState<boolean>(false);
   const [isScheduleMessageOptionsOpen, setIsScheduleMessageOptionsOpen] = useState<boolean>(false);
@@ -93,6 +95,7 @@ const Dashboard: React.FC = () => {
   const handleQuickSMSClick = () => {
     setIsSendMessageOptionsModalOpen(false);
     setIsQuickSMSModalOpen(true);
+    console.log('pressed')
   };
 
   const handleScheduleQuickSmsClick = () => {
@@ -103,38 +106,34 @@ const Dashboard: React.FC = () => {
   const handleSendToGroupClick = () => {
     setIsSendMessageOptionsModalOpen(false);
     setIsSendToGroupModalOpen(true);
+    console.log('pressed')
   };
+
+  const handleExportExcelClick = () => {
+    setIsSendMessageOptionsModalOpen(false);
+   setIsExportExcelModalOpen(true);
+    console.log('pressed')
+  };
+
+
 
   const handleScheduleToGroupClick = () => {
     setIsScheduleMessageOptionsOpen(false);
     setIsScheduleToGroupModalOpen(true);
   };
-
-  const handleNextFromQuickSMS = () => {
-    setIsQuickSMSModalOpen(false);
+  const handleExportExcelScheduleClick = () => {
+    setIsScheduleMessageOptionsOpen(false);
+    setIsExportExceSchedulelModalOpen(true);
   };
 
-  const handleSendToGroup = () => {
-    setIsSendToGroupModalOpen(false);
-  };
 
-  const handleScheduleToGroup = () => {
-    setIsScheduleToGroupModalOpen(false);
-  };
-
+ 
   const handleTemplateCreated = async () => {
     if (userId) {
       const data = await fetchMessageTemplates(userId);
       setSmsCampaigns(data);
     }
   };
-  // const handleScheduleMessage = async () => {
-  //   if (userId) {
-  //     const data = await fetchMessageTemplates(userId);
-  //     setSmsCampaigns(data);
-  //   }
-  // };
-
   const renderActionButtons = () => {
     if (activeMainTab === 'messages') {
       return (
@@ -219,6 +218,7 @@ const Dashboard: React.FC = () => {
         onClose={() => setIsSendMessageOptionsModalOpen(false)}
         onQuickSMSClick={handleQuickSMSClick}
         onSendToGroupClick={handleSendToGroupClick}
+        onExportExcel={handleExportExcelClick}
       />
       <QuickSMSModal
         isOpen={isQuickSMSModalOpen}
@@ -234,16 +234,28 @@ const Dashboard: React.FC = () => {
         onClose={() => setIsSendToGroupModalOpen(false)}
         // onSend={handleSendToGroup}
       />
+        <ExportExcelContactStepper
+        isOpen={isExportExcelOpen}
+        onClose={()=>setIsExportExcelModalOpen(false)}
+        // onSend={handleSendToGroup}
+      />
+  <ExcelUploadScheduleStepper
+        isOpen={isExportExcelScheduleOpen}
+        onClose={()=>setIsExportExceSchedulelModalOpen(false)}
+      />
+
       <ScheduleToGroupStepper
         isOpen={isScheduleToGroupModalOpen}
         onClose={() => setIsScheduleToGroupModalOpen(false)}
         // onSend={handleScheduleToGroup}
       />
+      
       <ScheduleMessageOptions
         isOpen={isScheduleMessageOptionsOpen}
         onClose={() => setIsScheduleMessageOptionsOpen(false)}
         onScheduleQuickSMSClick={handleScheduleQuickSmsClick}
         onScheduleToGroupClick={handleScheduleToGroupClick}
+        onExportExcel={handleExportExcelScheduleClick}
       />
     </div>
   );

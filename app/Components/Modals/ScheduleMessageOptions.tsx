@@ -8,6 +8,7 @@ interface ScheduleMessageOptionsProps {
   onClose: () => void;
   onScheduleQuickSMSClick: () => void;
   onScheduleToGroupClick: () => void;
+  onExportExcel: () => void;
 }
 
 const ScheduleMessageOptions: React.FC<ScheduleMessageOptionsProps> = ({
@@ -15,6 +16,7 @@ const ScheduleMessageOptions: React.FC<ScheduleMessageOptionsProps> = ({
   onClose,
   onScheduleQuickSMSClick,
   onScheduleToGroupClick,
+  onExportExcel
 }) => {
   if (!isOpen) return null;
 
@@ -65,7 +67,10 @@ const ScheduleMessageOptions: React.FC<ScheduleMessageOptionsProps> = ({
                 <span>Send to Group</span>
               </button>
               <button
-                className="w-full bg-white border border-gray-300 text-gray-800 py-3 px-4 rounded-lg shadow-sm hover:bg-blue-50 hover:border-blue-300 transition-colors duration-200 flex items-center"
+                className="w-full bg-white border border-gray-300 text-gray-800 py-3 px-4 rounded-lg shadow-sm hover:bg-blue-50 hover:border-blue-300 transition-colors duration-200 flex items-center"    onClick={() => {
+                  onClose();
+                  onExportExcel();
+                }}
               >
                 <FontAwesomeIcon icon={faFileExcel} className="mr-3 text-blue-500" />
                 <span>Send using Excel Sheet</span>
