@@ -260,7 +260,8 @@ const QuickSMSModal: React.FC<QuickSMSModalProps> = ({ isOpen, onClose }) => {
   });
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const navigate = useRouter();
-
+  const [showErrorModal, setShowErrorModal] = useState<boolean>(false);
+  const [errorMessage, setErrorMessage] = useState<string>('');
   const handleNext = (data: Partial<FormData>) => {
     setFormData((prevData) => ({ ...prevData, ...data }));
     setCurrentStep((prevStep) => prevStep + 1);
@@ -281,28 +282,29 @@ const QuickSMSModal: React.FC<QuickSMSModalProps> = ({ isOpen, onClose }) => {
         recursion: 'none',
       });
 
-      if (response.status === 201) {
-        const { status, code, message } = response.data;
+    
+      console.log('Message sent successfully:');
+      setShowSuccessModal(true);
 
-        if (status === 'success') {
-          setShowSuccessModal(true);
-          setTimeout(() => {
-            onClose();
-            navigate.push('/Sms/CampaignHistory'); // Redirect to another page
-          }, 2000);
-        } else {
-          console.error('Failed to send SMS:', message || 'Unknown error');
-          setShowSuccessModal(true);
-          setTimeout(() => {
-            onClose();
-            navigate.push('/');
-          }, 2000);
-        }
-      } else {
-        console.error('Failed to send SMS: HTTP status code', response.status);
-      }
+      setTimeout(() => {
+        setShowSuccessModal(false);
+        onClose();
+      }, 2000);
+      navigate.push('/Sms/CampaignHistory');
     } catch (error) {
       console.error('Error sending SMS:', error);
+      let errorMessage = 'An unexpected error occurred.';
+
+      if (axios.isAxiosError(error) && error.response) {
+        errorMessage = error.response.data.message || 'An error occurred while sending the message.';
+      }
+
+      setShowErrorModal(true);
+      setErrorMessage(errorMessage);
+
+      setTimeout(() => {
+        setShowErrorModal(false);
+      }, 2000);
     }
   };
 
@@ -321,13 +323,21 @@ const QuickSMSModal: React.FC<QuickSMSModalProps> = ({ isOpen, onClose }) => {
               {currentStep === 3 && <Step3 formData={formData} onPrevious={handlePrevious} onSend={handleSend} onClose={onClose} />}
             </AnimatePresence>
             {showSuccessModal && (
-              <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                <div className="bg-white p-6 rounded-lg shadow-lg w-96">
-                  <h2 className="text-xl font-medium text-green-600">Success!</h2>
-                  <p className="text-gray-700">Sender ID registered successfully.</p>
-                </div>
-              </div>
-            )}
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg w-96">
+            <h2 className="text-xl font-medium text-green-600">Success!</h2>
+            <p className="text-gray-700">Message Sent successfully.</p>
+          </div>
+        </div>
+      )}
+        {showErrorModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg w-96">
+            <h2 className="text-xl font-medium text-red-600">Error!</h2>
+            <p className="text-gray-700">{errorMessage}</p>
+          </div>
+        </div>
+      )}
           </div>
         </div>
       )}

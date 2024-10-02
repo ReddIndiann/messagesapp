@@ -5,10 +5,8 @@ import axios from 'axios';
 interface SendToGroupStepperProps {
   isOpen: boolean;
   onClose: () => void;
-  initialTitle: string; // Added initialTitle prop
-  initialContent: string; // Added initialContent prop
- 
-
+  initialTitle: string;
+  initialContent: string;
 }
 
 const SendToGroupStepper: React.FC<SendToGroupStepperProps> = ({ isOpen, onClose, initialTitle, initialContent }) => {
@@ -17,8 +15,11 @@ const SendToGroupStepper: React.FC<SendToGroupStepperProps> = ({ isOpen, onClose
   const [groups, setGroups] = useState<Group[]>([]);
   const [selectedSenderID, setSelectedSenderID] = useState('');
   const [newSenderID, setNewSenderID] = useState('');
-  const [campaignTitle, setCampaignTitle] = useState(initialTitle); // Initialize with initialTitle
-  const [messageContent, setMessageContent] = useState(initialContent); // Initialize with initialContent
+  const [campaignTitle, setCampaignTitle] = useState(initialTitle);
+  const [messageContent, setMessageContent] = useState(initialContent);
+  const [showSuccessModal, setShowSuccessModal] = useState<boolean>(false);
+  const [showErrorModal, setShowErrorModal] = useState<boolean>(false);
+  const [errorMessage, setErrorMessage] = useState<string>('');
 
   useEffect(() => {
     const fetchUserGroups = async () => {
@@ -54,7 +55,7 @@ const SendToGroupStepper: React.FC<SendToGroupStepperProps> = ({ isOpen, onClose
   const handleSendMessage = useCallback(async () => {
     const recipients: string[] = selectedGroups.flatMap((groupName) => {
       const group = groups.find((g) => g.groupName === groupName);
-      return group?.contacts.map((contact:any) => contact.phone) || [];
+      return group?.contacts.map((contact: any) => contact.phone) || [];
     });
 
     const payload = {
@@ -70,9 +71,25 @@ const SendToGroupStepper: React.FC<SendToGroupStepperProps> = ({ isOpen, onClose
     try {
       await axios.post('http://localhost:5000/send-messages/create', payload);
       console.log('Message sent successfully:', payload);
-      onClose();
+      setShowSuccessModal(true);
+
+      setTimeout(() => {
+        setShowSuccessModal(false);
+        onClose();
+      }, 2000);
     } catch (error) {
-      console.error('Error sending message:', error);
+      let errorMessage = 'An unexpected error occurred.';
+
+      if (axios.isAxiosError(error) && error.response) {
+        errorMessage = error.response.data.message || 'An error occurred while sending the message.';
+      }
+
+      setShowErrorModal(true);
+      setErrorMessage(errorMessage);
+
+      setTimeout(() => {
+        setShowErrorModal(false);
+      }, 2000);
     }
   }, [selectedGroups, groups, campaignTitle, messageContent, onClose]);
 
@@ -219,8 +236,8 @@ const SendToGroupStepper: React.FC<SendToGroupStepperProps> = ({ isOpen, onClose
               className="w-full bg-blue-500 text-white py-3 rounded-lg text-sm font-medium hover:bg-blue-600 transition-colors duration-200"
               onClick={() => {
                 setSelectedSenderID(localSenderID);
-                setCampaignTitle(localCampaignTitle); // Update state with localCampaignTitle
-                setMessageContent(localMessageContent); // Update state with localMessageContent
+                setCampaignTitle(localCampaignTitle);
+                setMessageContent(localMessageContent);
                 handleNext();
               }}
             >
@@ -273,6 +290,22 @@ const SendToGroupStepper: React.FC<SendToGroupStepperProps> = ({ isOpen, onClose
           Send Message
         </button>
       </div>
+      {showSuccessModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg w-96">
+            <h2 className="text-xl font-medium text-green-600">Success!</h2>
+            <p className="text-gray-700">Sender ID registered successfully.</p>
+          </div>
+        </div>
+      )}
+      {showErrorModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg w-96">
+            <h2 className="text-xl font-medium text-red-600">Error!</h2>
+            <p className="text-gray-700">{errorMessage}</p>
+          </div>
+        </div>
+      )}
     </div>
   ));
 
@@ -283,6 +316,14 @@ const SendToGroupStepper: React.FC<SendToGroupStepperProps> = ({ isOpen, onClose
       {isOpen && (
         <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-30">
           <div className="bg-white rounded-lg shadow-lg p-8 max-w-lg w-full">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-semibold">Send to Group</h2>
+              <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
+    </svg>
+              </button>
+            </div>
             <StepIndicator currentStep={step} totalSteps={3} />
             {step === 1 && <Step1 />}
             {step === 2 && <Step2 />}

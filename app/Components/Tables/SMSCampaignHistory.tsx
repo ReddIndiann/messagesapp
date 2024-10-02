@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { fetchTableData } from '@/app/lib/sendmessageUtil';
+
 type CampaignHistoryItem = {
   name: string;
   totalRecipients: number;
@@ -41,8 +42,9 @@ const TableComponent: React.FC<TableComponentProps> = ({ section, userId }) => {
       .finally(() => setLoading(false));
   }, [section, userId]);
 
-  // The rest of your TableComponent remains the same
-  // ...
+  const truncateContent = (content: string, maxLength: number = 30) => {
+    return content.length > maxLength ? content.substring(0, maxLength) + '...' : content;
+  };
 
   const renderTableContent = () => {
     if (loading) {
@@ -59,7 +61,7 @@ const TableComponent: React.FC<TableComponentProps> = ({ section, userId }) => {
       return (data as CampaignHistoryItem[]).length > 0 ? (
         (data as CampaignHistoryItem[]).map((item, index) => (
           <tr key={index} className="border-t">
-            <td className="py-4 px-4 text-gray-500 border-b">{item.name}</td>
+            <td className="py-4 px-4 text-gray-500 border-b">{truncateContent(item.name)}</td>
             <td className="py-4 px-4 text-gray-500 border-b">{item.totalRecipients}</td>
             <td className="py-4 px-4 text-gray-500 border-b">{item.senderId}</td>
             <td className="py-4 px-4 text-gray-500 border-b">{item.dateTime}</td>
@@ -79,10 +81,10 @@ const TableComponent: React.FC<TableComponentProps> = ({ section, userId }) => {
         (data as DeliveryReportItem[]).map((item, index) => (
           <tr key={index} className="border-t">
             <td className="py-4 px-4 text-gray-500 border-b">{item.id}</td>
-            <td className="py-4 px-4 text-gray-500 border-b">{item.recipients}</td>
+            <td className="py-4 px-4 text-gray-500 border-b">{truncateContent(item.recipients)}</td>
             <td className="py-4 px-4 text-gray-500 border-b">{item.senderId}</td>
             <td className="py-4 px-4 text-gray-500 border-b">{item.createdAt}</td>
-            <td className="py-4 px-4 text-gray-500 border-b">{item.content}</td>
+            <td className="py-4 px-4 text-gray-500 border-b">{truncateContent(item.content)}</td>
             <td className="py-4 px-4 text-gray-500 border-b">{item.messageType}</td>
           </tr>
         ))

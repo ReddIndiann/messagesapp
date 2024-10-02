@@ -19,33 +19,32 @@ const TableComponent: React.FC<TableComponentProps> = ({ section, userId }) => {
   const [data, setData] = useState<SenderItem[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
+  const fetchData = async () => {
     if (userId === null) return;
 
     setLoading(true);
+    try {
+      const response = await fetch('http://localhost:5000/senders');
+      const result = await response.json();
+      const filteredData = result.filter((item: any) => item.status === section);
+      const formattedData = filteredData.map((item: any) => ({
+        id: item.id,
+        name: item.name,
+        userId: item.userId,
+        purpose: item.purpose,
+        status: item.status,
+        createdAt: new Date(item.createdAt).toLocaleString(),
+        updatedAt: new Date(item.updatedAt).toLocaleString(),
+      }));
+      setData(formattedData);
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    const fetchData = async () => {
-      try {
-        const response = await fetch('http://localhost:5000/senders');
-        const result = await response.json();
-        const filteredData = result.filter((item: any) => item.status === section);
-        const formattedData = filteredData.map((item: any) => ({
-          id: item.id,
-          name: item.name,
-          userId: item.userId,
-          purpose: item.purpose,
-          status: item.status,
-          createdAt: new Date(item.createdAt).toLocaleString(),
-          updatedAt: new Date(item.updatedAt).toLocaleString(),
-        }));
-        setData(formattedData);
-      } catch (error) {
-        console.error('Error fetching data:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
+  useEffect(() => {
     fetchData();
   }, [section, userId]);
 
@@ -63,11 +62,11 @@ const TableComponent: React.FC<TableComponentProps> = ({ section, userId }) => {
         throw new Error('Failed to update status');
       }
 
-      // Refresh data after status update
-      const updatedData = data.map(item =>
-        item.id === id ? { ...item, status: newStatus } : item
-      );
-      setData(updatedData);
+      // Remove the item from the current section
+      setData(prevData => prevData.filter(item => item.id !== id));
+
+      // Refresh the data to update both sections
+      fetchData();
     } catch (error) {
       console.error('Error updating status:', error);
     }

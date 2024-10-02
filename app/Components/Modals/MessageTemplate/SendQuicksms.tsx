@@ -69,7 +69,6 @@ const Step1: React.FC<{ onNext: (data: Partial<FormData>) => void; onClose: () =
       transition={{ duration: 0.3 }}
       className="relative"
     >
-      <CloseButton onClose={onClose} />
       <h2 className="text-xl font-semibold mb-4 text-gray-800">Select Recipient</h2>
       <form onSubmit={handleSubmit}>
         <div className="mb-4">
@@ -115,7 +114,6 @@ const Step2: React.FC<{ onNext: (data: Partial<FormData>) => void; onPrevious: (
       transition={{ duration: 0.3 }}
       className="relative"
     >
-      <CloseButton onClose={onClose} />
       <h2 className="text-xl font-semibold mb-4 text-gray-800">Compose Message</h2>
       <form onSubmit={handleSubmit}>
         <div className="mb-3">
@@ -187,7 +185,6 @@ const Step3: React.FC<{ formData: FormData; onPrevious: () => void; onSend: () =
     transition={{ duration: 0.3 }}
     className="relative"
   >
-    <CloseButton onClose={onClose} />
     <h2 className="text-xl font-semibold mb-4 text-gray-800">Confirm and Send</h2>
     <div className="space-y-2 mb-4">
       <p className="text-sm text-gray-800"><strong>Recipient:</strong> {formData.recipients.join(', ')}</p>
@@ -223,7 +220,9 @@ const QuickSMSModal: React.FC<QuickSMSModalProps> = ({ isOpen, onClose, initialT
     messageContent: initialContent,
     recipients: [],
   });
-  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState<boolean>(false);
+  const [showErrorModal, setShowErrorModal] = useState<boolean>(false);
+  const [errorMessage, setErrorMessage] = useState<string>('');
   const navigate = useRouter();
 
   const handleNext = (data: Partial<FormData>) => {
@@ -246,27 +245,28 @@ const QuickSMSModal: React.FC<QuickSMSModalProps> = ({ isOpen, onClose, initialT
         recursion: 'none',
       });
 
-      if (response.status === 201) {
-        const { status, message } = response.data;
+      console.log('Message sent successfully:', response.data);
+      setShowSuccessModal(true);
 
-        if (status === 'success') {
-          setShowSuccessModal(true);
-          setTimeout(() => {
-            onClose();
-            // Redirect to another page
-          }, 2000);
-        } else {
-          console.error('Failed to send SMS:', message || 'Unknown error');
-          setShowSuccessModal(true);
-          setTimeout(() => {
-            onClose();
-          }, 2000);
-        }
-      } else {
-        console.error('Failed to send SMS: HTTP status code', response.status);
-      }
+      setTimeout(() => {
+        setShowSuccessModal(false);
+        onClose();
+      }, 2000);
+      navigate.push('/Sms/CampaignHistory');
     } catch (error) {
       console.error('Error sending SMS:', error);
+      let errorMessage = 'An unexpected error occurred.';
+
+      if (axios.isAxiosError(error) && error.response) {
+        errorMessage = error.response.data.message || 'An error occurred while sending the message.';
+      }
+
+      setShowErrorModal(true);
+      setErrorMessage(errorMessage);
+
+      setTimeout(() => {
+        setShowErrorModal(false);
+      }, 2000);
     }
   };
 
@@ -274,7 +274,8 @@ const QuickSMSModal: React.FC<QuickSMSModalProps> = ({ isOpen, onClose, initialT
     <>
       {isOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-lg shadow-lg w-96">
+          <div className="bg-white p-6 rounded-lg shadow-lg w-96 relative">
+            <CloseButton onClose={onClose} />
             <StepIndicator currentStep={currentStep} totalSteps={3} />
             <AnimatePresence>
               {currentStep === 1 && <Step1 onNext={handleNext} onClose={onClose} />}
@@ -285,7 +286,15 @@ const QuickSMSModal: React.FC<QuickSMSModalProps> = ({ isOpen, onClose, initialT
               <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
                 <div className="bg-white p-6 rounded-lg shadow-lg w-96">
                   <h2 className="text-xl font-medium text-green-600">Success!</h2>
-                  <p className="text-gray-700">Sender ID registered successfully.</p>
+                  <p className="text-gray-700">Message Sent successfully.</p>
+                </div>
+              </div>
+            )}
+            {showErrorModal && (
+              <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                <div className="bg-white p-6 rounded-lg shadow-lg w-96">
+                  <h2 className="text-xl font-medium text-red-600">Error!</h2>
+                  <p className="text-gray-700">{errorMessage}</p>
                 </div>
               </div>
             )}

@@ -6,10 +6,24 @@ import Sidebar from '@/app/Components/SideNav';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSearch, faUpload, faDownload, faPlus } from '@fortawesome/free-solid-svg-icons';
 import ContactsTables from '@/app/Components/Tables/ContactTables';
-
+import ExcelUploadStepper from '@/app/Components/Modals/GroupsandContacts/ExportExcelSend';
 const Dashboard = () => {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [currentSection, setCurrentSection] = useState<'bulkSMS' | 'voiceCalls' | 'admin'>('bulkSMS');
+  const [isExportExcelModalOpen, setIsExportExcelModalOpen] = useState<boolean>(false);
+
+
+
+  const handleExportExcelClick = () => {
+   
+    setIsExportExcelModalOpen(true);
+     console.log('pressed')
+   };
+
+
+
+
+
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col">
@@ -34,8 +48,10 @@ const Dashboard = () => {
                 </button>
               </div>
               <div className="flex space-x-4 w-full md:w-auto">
-                <button className="bg-green-500 text-white px-6 py-2 rounded-lg flex items-center hover:bg-green-600 transition duration-300">
-                  <FontAwesomeIcon icon={faDownload} className="w-4 h-4 mr-2" /> Import
+                <button className="bg-green-500 text-white px-6 py-2 rounded-lg flex items-center hover:bg-green-600 transition duration-300"
+                  onClick={() => {handleExportExcelClick() }}
+                >
+                  <FontAwesomeIcon icon={faDownload} className="w-4 h-4 mr-2" /> ImportTTTT
                 </button>
                
               </div>
@@ -46,6 +62,13 @@ const Dashboard = () => {
           </div>
         </main>
       </div>
+      <ExcelUploadStepper
+        isOpen={isExportExcelModalOpen}
+        onClose={() => setIsExportExcelModalOpen(false)}
+
+        // onNext={handleNextFromQuickSMS}
+      />
+    
     </div>
   );
 };

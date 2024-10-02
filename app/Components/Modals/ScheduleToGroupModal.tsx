@@ -5,11 +5,13 @@ import axios from 'axios';
 interface SendToGroupStepperProps {
   isOpen: boolean;
   onClose: () => void;
+  
+
 }
 
 interface Contact {
   phone: string;
-  // Add other properties as needed
+ 
 }
 
 const SendToGroupStepper: React.FC<SendToGroupStepperProps> = ({ isOpen, onClose }) => {
@@ -19,10 +21,14 @@ const SendToGroupStepper: React.FC<SendToGroupStepperProps> = ({ isOpen, onClose
   const [selectedSenderID, setSelectedSenderID] = useState('');
   const [newSenderID, setNewSenderID] = useState('');
   const [campaignTitle, setCampaignTitle] = useState('');
+  
   const [messageContent, setMessageContent] = useState('');
   const [scheduledDate, setScheduledDate] = useState('');
   const [scheduledTime, setScheduledTime] = useState('');
-
+  const [showSuccessModal, setShowSuccessModal] = useState<boolean>(false);
+  const [showErrorModal, setShowErrorModal] = useState<boolean>(false);
+  const [errorMessage, setErrorMessage] = useState<boolean>(false);
+ 
   useEffect(() => {
     const fetchUserGroups = async () => {
       const signInResponse = localStorage.getItem('signInResponse');
@@ -75,9 +81,47 @@ const SendToGroupStepper: React.FC<SendToGroupStepperProps> = ({ isOpen, onClose
     try {
       await axios.post('http://localhost:5000/schedule-messages/create', payload);
       console.log('Message scheduled successfully:', payload);
+      setShowSuccessModal(true);
+
+      // Call the onSuccess callback to refetch the list
+ 
+
+      // Close the modal after showing success
+      setTimeout(() => {
+        setShowSuccessModal(false);
+        onClose();
+      }, 2000);
       onClose();
     } catch (error) {
       console.error('Error scheduling message:', error);
+//       console.log(error.response.data)
+//       setShowErrorModal(true);
+// const Error = error.response.data
+//       // Call the onSuccess callback to refetch the list
+    
+
+//       // Close the modal after showing success
+//       setTimeout(() => {
+//         setShowSuccessModal(false);
+//         // onClose();
+//       }, 2000);
+//       // onClose();
+console.error('Error scheduling message:', error);
+let errorMessage = 'An unexpected error occurred.';
+
+if (axios.isAxiosError(error) && error.response) {
+  // Extract the error message from the response
+  errorMessage = error.response.data.message || 'An error occurred while sending the message.';
+}
+
+setShowErrorModal(true);
+setErrorMessage(errorMessage); // Store the error message for display
+
+// Optional: Close the modal after showing error
+setTimeout(() => {
+  setShowErrorModal(false);
+  // onClose();
+}, 2000);
     }
   }, [selectedGroups, groups, campaignTitle, messageContent, scheduledDate, scheduledTime, onClose]);
 
@@ -320,6 +364,22 @@ const SendToGroupStepper: React.FC<SendToGroupStepperProps> = ({ isOpen, onClose
           Send Message
         </button>
       </div>
+      {showSuccessModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg w-96">
+            <h2 className="text-xl font-medium text-green-600">Success!</h2>
+            <p className="text-gray-700">Sender ID registered successfully.</p>
+          </div>
+        </div>
+      )}
+        {showErrorModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg w-96">
+            <h2 className="text-xl font-medium text-red-600">Error!</h2>
+            <p className="text-gray-700">{errorMessage}</p>
+          </div>
+        </div>
+      )}
     </div>
   ));
 

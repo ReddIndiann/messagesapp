@@ -9,12 +9,13 @@ import ViewContact from '../Modals/GroupsandContacts/ViewContact';
 import ViewGroup from '../Modals/GroupsandContacts/ViewGroup';
 import { fetchContacts, deleteContact } from '@/app/lib/contactUtil';
 import { fetchGroups, deleteGroup } from '@/app/lib/grouputil';
-
+import ExcelUploadStepper from '../Modals/GroupsandContacts/ExportExcelSend';
 const ContactsTables: React.FC = () => {
   const [contacts, setContacts] = useState<any[]>([]);
   const [groups, setGroups] = useState<any[]>([]);
   const [userId, setUserId] = useState<number | null>(null);
   const [isContactModalOpen, setIsContactModalOpen] = useState<boolean>(false);
+  const [isExportExcelModalOpen, setIsExportExcelModalOpen] = useState<boolean>(false);
   const [isGroupModalOpen, setIsGroupModalOpen] = useState<boolean>(false);
   const [selectedContact, setSelectedContact] = useState<any>(null);
   const [selectedGroup, setSelectedGroup] = useState<any>(null);
@@ -85,6 +86,11 @@ const ContactsTables: React.FC = () => {
   const handleEditGroup = (group: any) => {
     setSelectedGroup(group);
     setIsGroupEditModalOpen(true);
+  };
+  const handleExportExcelClick = () => {
+   
+   setIsExportExcelModalOpen(true);
+    console.log('pressed')
   };
 
   return (
@@ -170,7 +176,11 @@ const ContactsTables: React.FC = () => {
               <FontAwesomeIcon icon={faPlus} className="mr-2" />
               <span>Add Group</span>
             </button>
-            <button className="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition duration-300 flex items-center shadow-md">
+            <button className="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition duration-300 flex items-center shadow-md"
+            
+          
+            
+            >
               <FontAwesomeIcon icon={faFileExport} className="mr-2" />
               <span>Export</span>
             </button>
@@ -223,6 +233,12 @@ const ContactsTables: React.FC = () => {
             </tbody>
           </table>
         </div>
+        <ExcelUploadStepper
+        isOpen={isExportExcelModalOpen}
+        onClose={() => setIsExportExcelModalOpen(false)}
+
+        // onNext={handleNextFromQuickSMS}
+      />
       </div>
 
       {/* Modals */}

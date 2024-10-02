@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTimes } from '@fortawesome/free-solid-svg-icons';
 import { createTemplate } from '@/app/lib/createTemplateUtils';
-
+import axios from 'axios';
 interface CreateTemplateModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -17,6 +17,8 @@ const CreateTemplateModal: React.FC<CreateTemplateModalProps> = ({ isOpen, onClo
   const [charCount, setCharCount] = useState(0);
   const [userId, setUserId] = useState<number | null>(null);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [showErrorModal, setShowErrorModal] = useState<boolean>(false);
+  const [errorMessage, setErrorMessage] = useState<string>('');
 
   useEffect(() => {
     const signInResponse = localStorage.getItem('signInResponse');
@@ -55,8 +57,19 @@ const CreateTemplateModal: React.FC<CreateTemplateModalProps> = ({ isOpen, onClo
       } else {
         console.error('User ID is not set.');
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error creating template:', error);
+      let errorMessage = 'An unexpected error occurred.';
+      if (axios.isAxiosError(error) && error.response) {
+        errorMessage = error.response.data.message || 'An error occurred while sending the message.';
+      }
+
+      setShowErrorModal(true);
+      setErrorMessage(errorMessage);
+
+      setTimeout(() => {
+        setShowErrorModal(false);
+      }, 2000);
     }
   };
 

@@ -6,8 +6,8 @@ import QuickSMSModal from '../Modals/MessageTemplate/SendQuicksms';
 import SendToGroupStepper from '../Modals/MessageTemplate/SendToGroupModal';
 import EditTemplateModal from '../Modals/MessageTemplate/EditTemplateModal';
 import { deleteTemplate } from '@/app/lib/createTemplateUtils';
+import ExcelUploadStepper from '../Modals/MessageTemplate/ExportExcelSend';
 
-// Define types for the campaign and state data
 interface Campaign {
   id: number;
   title: string;
@@ -25,9 +25,15 @@ const MessageTemplatesTable: React.FC<MessageTemplatesTableProps> = ({ campaigns
   const [selectedCampaign, setSelectedCampaign] = useState<Campaign | null>(null);
   const [isQuickSMSModalOpen, setIsQuickSMSModalOpen] = useState<boolean>(false);
   const [isSendtoGroupModalOpen, setIsSendtoGroupModalOpen] = useState<boolean>(false);
+  const [isExportExcelOpen, setIsExportExcelModalOpen] = useState<boolean>(false);
   const [isEditOpen, setIsEditOpen] = useState<boolean>(false);
   const [quickSMSData, setQuickSMSData] = useState<{ title: string; content: string }>({ title: '', content: '' });
   const [quickGroupData, setQuickGroupData] = useState<{ title: string; content: string }>({ title: '', content: '' });
+  const [exportExcelData, setExportExcelData] = useState<{ title: string; content: string }>({ title: '', content: '' });
+
+  const truncateText = (text: string, maxLength: number = 30) => {
+    return text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
+  };
 
   const handleSendClick = (campaign: Campaign) => {
     setSelectedCampaign(campaign);
@@ -43,8 +49,7 @@ const MessageTemplatesTable: React.FC<MessageTemplatesTableProps> = ({ campaigns
     if (window.confirm('Are you sure you want to delete this template?')) {
       try {
         await deleteTemplate(campaignId);
-        // Optionally, you might want to update the campaigns state here
-        // e.g., setCampaigns(campaigns.filter(campaign => campaign.id !== campaignId));
+        // Optionally, update the campaigns state here
       } catch (err: any) {
         console.error('Error deleting template: ' + err.message);
       }
@@ -52,9 +57,9 @@ const MessageTemplatesTable: React.FC<MessageTemplatesTableProps> = ({ campaigns
   };
 
   const handleQuickSMSClick = (campaign: Campaign) => {
-    setIsModalOpen(false); // Close the options modal if open
+    setIsModalOpen(false);
     setQuickSMSData({ title: campaign.title, content: campaign.content });
-    setIsQuickSMSModalOpen(true); // Open the QuickSMSModal
+    setIsQuickSMSModalOpen(true);
   };
 
   const handleCloseQuickSMSModal = () => {
@@ -62,17 +67,27 @@ const MessageTemplatesTable: React.FC<MessageTemplatesTableProps> = ({ campaigns
   };
 
   const handleSendToGroupClick = (campaign: Campaign) => {
-    setIsModalOpen(false); // Close the options modal if open
+    setIsModalOpen(false);
     setQuickGroupData({ title: campaign.title, content: campaign.content });
-    setIsSendtoGroupModalOpen(true); // Open the SendToGroupStepper modal
+    setIsSendtoGroupModalOpen(true);
   };
 
   const handleCloseSendToGroupModal = () => {
     setIsSendtoGroupModalOpen(false);
   };
 
+  const handleExcelExportClick = (campaign: Campaign) => {
+    setIsModalOpen(false);
+    setExportExcelData({ title: campaign.title, content: campaign.content });
+    setIsExportExcelModalOpen(true);
+  };
+
+  const handleCloseExcelExportModal = () => {
+    setIsExportExcelModalOpen(false);
+  };
+
   const handleEditClick = (campaign: Campaign) => {
-    setIsEditOpen(true); // Open the EditTemplateModal
+    setIsEditOpen(true);
     setSelectedCampaign(campaign);
   };
 
@@ -95,8 +110,12 @@ const MessageTemplatesTable: React.FC<MessageTemplatesTableProps> = ({ campaigns
         <tbody>
           {campaigns.map((campaign) => (
             <tr key={campaign.id} className="border-t">
-              <td className="py-4 px-4 text-gray-500 border-b">{campaign.title}</td>
-              <td className="py-4 px-4 text-gray-500 border-b">{campaign.content}</td>
+              <td className="py-4 px-4 text-gray-500 border-b" title={campaign.title}>
+                {truncateText(campaign.title)}
+              </td>
+              <td className="py-4 px-4 text-gray-500 border-b" title={campaign.content}>
+                {truncateText(campaign.content, 50)}
+              </td>
               <td className="py-4 px-4 text-gray-500 border-b">{campaign.messageCategory}</td>
               <td className="py-4 px-4 text-gray-500 border-b">{campaign.date}</td>
               <td className="py-4 px-4 flex space-x-2 border-b">
@@ -133,6 +152,7 @@ const MessageTemplatesTable: React.FC<MessageTemplatesTableProps> = ({ campaigns
           onClose={handleCloseModal}
           onQuickSMSClick={() => handleQuickSMSClick(selectedCampaign)}
           onSendToGroupClick={() => handleSendToGroupClick(selectedCampaign)}
+          onExportClick={() => handleExcelExportClick(selectedCampaign)}
           title={selectedCampaign.title}
           content={selectedCampaign.content}
         />
@@ -144,7 +164,6 @@ const MessageTemplatesTable: React.FC<MessageTemplatesTableProps> = ({ campaigns
           campaign={selectedCampaign}
         />
       )}
-
       {isQuickSMSModalOpen && (
         <QuickSMSModal
           isOpen={isQuickSMSModalOpen}
@@ -153,13 +172,20 @@ const MessageTemplatesTable: React.FC<MessageTemplatesTableProps> = ({ campaigns
           initialContent={quickSMSData.content}
         />
       )}
-
       {isSendtoGroupModalOpen && (
         <SendToGroupStepper
           isOpen={isSendtoGroupModalOpen}
           onClose={handleCloseSendToGroupModal}
           initialTitle={quickGroupData.title}
           initialContent={quickGroupData.content}
+        />
+      )}
+      {isExportExcelOpen && (
+        <ExcelUploadStepper
+          isOpen={isExportExcelOpen}
+          onClose={handleCloseExcelExportModal}
+          initialTitle={exportExcelData.title}
+          initialContent={exportExcelData.content}
         />
       )}
     </>

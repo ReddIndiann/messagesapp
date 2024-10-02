@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTimes, faCalendar } from '@fortawesome/free-solid-svg-icons';
+import axios from 'axios';
+
 
 interface FormData {
   selectedSenderID: string;
@@ -280,40 +282,49 @@ const ScheduleQuickSms: React.FC<ScheduleQuickSmsProps> = ({ isOpen, onClose }) 
     scheduledTime: '',
     recipients:''
   });
-
+  const [showSuccessModal, setShowSuccessModal] = useState<boolean>(false);
+  const [showErrorModal, setShowErrorModal] = useState<boolean>(false);
+  const [errorMessage, setErrorMessage] = useState<string>('');
   const handleNext = () => setCurrentStep((prev) => prev + 1);
   const handlePrevious = () => setCurrentStep((prev) => prev - 1);
 
+
   const handleSchedule = async () => {
     const payload = {
-      recipients: formData.recipients.split(',').map(recipient => recipient.trim()), // Assuming recipients are entered as a comma-separated list
-      senderId: 1, // Use the selected sender ID
-      userId: 2, // Replace with the actual user ID as needed
+      recipients: formData.recipients.split(',').map(recipient => recipient.trim()),
+      senderId: 1,
+      userId: 2,
+      campaignTitle: formData.campaignTitle,
       content: formData.messageContent,
       messageType: "text",
+      recursion: "none",
       dateScheduled: formData.scheduledDate,
       timeScheduled: formData.scheduledTime,
-      recursion: "none", // Adjust if you need recursion
     };
   
     try {
-      const response = await fetch('http://localhost:5000/schedule-messages/create', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(payload),
-      });
-  
-      if (!response.ok) {
-        throw new Error('Network response was not ok');
-      }
-  
-      const data = await response.json();
-      console.log('Scheduled message response:', data);
-      onClose(); // Close the modal after scheduling
+      const response = await axios.post('http://localhost:5000/schedule-messages/create', payload);
+      console.log('Message scheduled successfully:', response.data);
+      setShowSuccessModal(true);
+
+      setTimeout(() => {
+        setShowSuccessModal(false);
+        onClose();
+      }, 2000);
     } catch (error) {
       console.error('Error scheduling message:', error);
+      let errorMessage = 'An unexpected error occurred.';
+
+      if (axios.isAxiosError(error) && error.response) {
+        errorMessage = error.response.data.message || 'An error occurred while sending the message.';
+      }
+
+      setShowErrorModal(true);
+      setErrorMessage(errorMessage);
+
+      setTimeout(() => {
+        setShowErrorModal(false);
+      }, 2000);
     }
   };
   
@@ -355,6 +366,22 @@ const ScheduleQuickSms: React.FC<ScheduleQuickSmsProps> = ({ isOpen, onClose }) 
           )}
         </AnimatePresence>
       </div>
+      {showSuccessModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg w-96">
+            <h2 className="text-xl font-medium text-green-600">Success!</h2>
+            <p className="text-gray-700">Sender ID registered successfully.</p>
+          </div>
+        </div>
+      )}
+        {showErrorModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg w-96">
+            <h2 className="text-xl font-medium text-red-600">Error!</h2>
+            <p className="text-gray-700">{errorMessage}</p>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -6,6 +6,7 @@ interface TemplateMessageOptionsModalProps {
   onClose: () => void;
   onQuickSMSClick: () => void;
   onSendToGroupClick: () => void;
+  onExportClick: () => void;
   title: string; // Add title prop
   content: string; // Add content prop
 }
@@ -15,6 +16,7 @@ const TemplateMessageOptionsModal: React.FC<TemplateMessageOptionsModalProps> = 
   onClose,
   onQuickSMSClick,
   onSendToGroupClick,
+  onExportClick,
   title,
   content,
 }) => {
@@ -47,11 +49,16 @@ const TemplateMessageOptionsModal: React.FC<TemplateMessageOptionsModalProps> = 
         </button>
         <button
           className="w-full bg-gray-100 text-gray-400 py-2 rounded mb-2 hover:bg-blue-100 hover:text-blue-400 text-sm sm:text-base"
+          onClick={() => {
+            onClose();
+          onExportClick();
+          }}
         >
           Send using Excel Sheet
         </button>
         <button
           className="w-full sm:w-24 bg-gray-100 text-gray-800 py-2 mt-4 sm:mt-5 rounded text-sm sm:text-base"
+          
         >
           Cancel
         </button>

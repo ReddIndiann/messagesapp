@@ -32,6 +32,9 @@ const SendToGroupStepper: React.FC<SendToGroupStepperProps> = ({ isOpen, onClose
   const [newSenderID, setNewSenderID] = useState('');
   const [campaignTitle, setCampaignTitle] = useState('');
   const [messageContent, setMessageContent] = useState('');
+  const [showSuccessModal, setShowSuccessModal] = useState<boolean>(false);
+  const [showErrorModal, setShowErrorModal] = useState<boolean>(false);
+  const [errorMessage, setErrorMessage] = useState<string>('');
 const navigate = useRouter();
   useEffect(() => {
     const fetchUserGroups = async () => {
@@ -83,10 +86,26 @@ const navigate = useRouter();
     try {
       await axios.post('http://localhost:5000/send-messages/create', payload);
       console.log('Message sent successfully:', payload);
-      onClose();
+      setShowSuccessModal(true);
+
+      setTimeout(() => {
+        setShowSuccessModal(false);
+        onClose();
+      }, 2000);
       navigate.push('/Sms/CampaignHistory'); 
     } catch (error) {
-      console.error('Error sending message:', error);
+      let errorMessage = 'An unexpected error occurred.';
+
+      if (axios.isAxiosError(error) && error.response) {
+        errorMessage = error.response.data.message || 'An error occurred while sending the message.';
+      }
+
+      setShowErrorModal(true);
+      setErrorMessage(errorMessage);
+
+      setTimeout(() => {
+        setShowErrorModal(false);
+      }, 2000);
     }
   }, [selectedGroups, groups, campaignTitle, messageContent, onClose]);
 
@@ -287,6 +306,22 @@ const navigate = useRouter();
           Send Message
         </button>
       </div>
+      {showSuccessModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg w-96">
+            <h2 className="text-xl font-medium text-green-600">Success!</h2>
+            <p className="text-gray-700">Message Sent successfully.</p>
+          </div>
+        </div>
+      )}
+        {showErrorModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg w-96">
+            <h2 className="text-xl font-medium text-red-600">Error!</h2>
+            <p className="text-gray-700">{errorMessage}</p>
+          </div>
+        </div>
+      )}
     </div>
   ));
 

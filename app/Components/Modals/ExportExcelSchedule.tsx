@@ -26,6 +26,10 @@ const ExcelUploadScheduleStepper: React.FC<ExcelUploadScheduleStepperProps> = ({
   const [recipients, setRecipients] = useState<string[]>([]);
   const [scheduledDate, setScheduledDate] = useState<string>('');
   const [scheduledTime, setScheduledTime] = useState<string>('');
+  const [showSuccessModal, setShowSuccessModal] = useState<boolean>(false);
+  const [showErrorModal, setShowErrorModal] = useState<boolean>(false);
+  const [errorMessage, setErrorMessage] = useState<string>('');
+
   const router = useRouter();
 
   const handleFileChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
@@ -86,11 +90,27 @@ const ExcelUploadScheduleStepper: React.FC<ExcelUploadScheduleStepperProps> = ({
     try {
       const response = await axios.post('http://localhost:5000/schedule-messages/create', payload);
       console.log('Message scheduled successfully:', response.data);
-      onClose();
+      setShowSuccessModal(true);
+
+      setTimeout(() => {
+        setShowSuccessModal(false);
+        onClose();
+      }, 2000);
       router.push('/Sms/CampaignHistory');
     } catch (error) {
       console.error('Error scheduling message:', error);
-      alert('Error scheduling message. Please try again.');
+      let errorMessage = 'An unexpected error occurred.';
+
+      if (axios.isAxiosError(error) && error.response) {
+        errorMessage = error.response.data.message || 'An error occurred while sending the message.';
+      }
+
+      setShowErrorModal(true);
+      setErrorMessage(errorMessage);
+
+      setTimeout(() => {
+        setShowErrorModal(false);
+      }, 2000);
     }
   }, [campaignTitle, messageContent, recipients, scheduledDate, scheduledTime, onClose, router]);
 
@@ -311,6 +331,22 @@ const ExcelUploadScheduleStepper: React.FC<ExcelUploadScheduleStepperProps> = ({
                 Schedule Message
               </button>
             </div>
+            {showSuccessModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg w-96">
+            <h2 className="text-xl font-medium text-green-600">Success!</h2>
+            <p className="text-gray-700">Sender ID registered successfully.</p>
+          </div>
+        </div>
+      )}
+      {showErrorModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg w-96">
+            <h2 className="text-xl font-medium text-red-600">Error!</h2>
+            <p className="text-gray-700">{errorMessage}</p>
+          </div>
+        </div>
+      )}
           </div>
         )}
       </motion.div>

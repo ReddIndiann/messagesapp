@@ -7,6 +7,8 @@ import { useRouter } from 'next/navigation';
 interface ExcelUploadStepperProps {
   isOpen: boolean;
   onClose: () => void;
+  initialTitle: string;
+  initialContent: string;
 }
 
 interface ExcelData {
@@ -17,12 +19,12 @@ interface ExcelData {
   date_of_birth?: string;
 }
 
-const ExcelUploadStepper: React.FC<ExcelUploadStepperProps> = ({ isOpen, onClose }) => {
+const ExcelUploadStepper: React.FC<ExcelUploadStepperProps> = ({ isOpen, onClose,initialTitle, initialContent }) => {
   const [file, setFile] = useState<File | null>(null);
   const [data, setData] = useState<ExcelData[]>([]);
   const [step, setStep] = useState<number>(1);
-  const [campaignTitle, setCampaignTitle] = useState<string>('');
-  const [messageContent, setMessageContent] = useState<string>('');
+  const [campaignTitle, setCampaignTitle] = useState<string>(initialTitle);
+  const [messageContent, setMessageContent] = useState<string>(initialContent);
   const [recipients, setRecipients] = useState<string[]>([]);
   const [showSuccessModal, setShowSuccessModal] = useState<boolean>(false);
   const [showErrorModal, setShowErrorModal] = useState<boolean>(false);
