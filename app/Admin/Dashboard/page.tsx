@@ -115,11 +115,7 @@ const Dashboard: React.FC = () => {
           <div className="max-w-7xl mx-auto">
             <p className="text-red-500 text-sm mb-6">Overview page displays data from the past Month.</p>
 
-            {error && (
-              <div className="bg-red-100 text-red-600 p-4 mb-4 rounded">
-                {error}
-              </div>
-            )}
+           
 
             <motion.div
               className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-8"

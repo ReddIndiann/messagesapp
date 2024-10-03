@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
+import { fetchSenderIds } from '@/app/lib/senderIdUtils';
 
 interface FormData {
   selectedSenderID: string;
@@ -15,7 +16,10 @@ interface QuickSMSModalProps {
   isOpen: boolean;
   onClose: () => void;
 }
-
+interface Sender {
+  id: string;
+  name: string;
+}
 const StepIndicator: React.FC<{ currentStep: number; totalSteps: number }> = ({ currentStep, totalSteps }) => (
   <div className="flex justify-between items-center mb-6">
     {[...Array(totalSteps)].map((_, index) => (
@@ -107,13 +111,13 @@ const Step1: React.FC<{ onNext: (data: Partial<FormData>) => void; onClose: () =
     </motion.div>
   );
 };
-
 const Step2: React.FC<{
   onNext: (data: Partial<FormData>) => void;
   onPrevious: () => void;
   formData: FormData;
   onClose: () => void;
-}> = ({ onNext, onPrevious, formData, onClose }) => {
+  senders: Sender[];
+}> = ({ onNext, onPrevious, formData, onClose, senders }) => {
   const [localFormData, setLocalFormData] = useState(formData);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -149,8 +153,17 @@ const Step2: React.FC<{
             <option value="" disabled>
               Select Sender ID
             </option>
-            <option value="12345">12345</option>
-            <option value="67890">67890</option>
+            {senders && senders.length > 0 ? (
+              senders.map((sender) => (
+                <option key={sender.id} value={sender.id}>
+                  {sender.name} ({sender.id})
+                </option>
+              ))
+            ) : (
+              <option value="" disabled>
+                No Sender IDs available
+              </option>
+            )}
           </select>
         </div>
         <div className="mb-3">
@@ -205,7 +218,7 @@ const Step2: React.FC<{
 const Step3: React.FC<{
   formData: FormData;
   onPrevious: () => void;
-  onSend: () => void;
+  onSend: (senderId: string, userId: number) => void;
   onClose: () => void;
 }> = ({ formData, onPrevious, onSend, onClose }) => (
   <motion.div
@@ -240,7 +253,7 @@ const Step3: React.FC<{
       </button>
       <button
         type="button"
-        onClick={onSend}
+        onClick={() => onSend(formData.selectedSenderID, 1)} // Pass the selectedSenderID and userId
         className="flex-1 bg-blue-500 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-600 transition-colors duration-200"
       >
         Send Message
@@ -258,10 +271,40 @@ const QuickSMSModal: React.FC<QuickSMSModalProps> = ({ isOpen, onClose }) => {
     messageContent: '',
     recipients: [],
   });
+  const [senderIds, setSenderIds] = useState<string[]>([]);
+  const [userId, setUserId] = useState<number | null>(null);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
-  const navigate = useRouter();
   const [showErrorModal, setShowErrorModal] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string>('');
+  const router = useRouter();
+  const [senders, setSenders] = useState<Sender[]>([]);
+
+  useEffect(() => {
+    const signInResponse = localStorage.getItem('signInResponse');
+    if (signInResponse) {
+      const parsedResponse = JSON.parse(signInResponse);
+      const extractedUserId = parsedResponse.user?.id || null;
+      setUserId(extractedUserId);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (userId) {
+      const getSenderIds = async () => {
+        try {
+          const data = await fetchSenderIds(userId);
+          setSenders(data.map((sender: any) => ({ id: sender.id, name: sender.name })));
+        } catch (error) {
+          console.error('Error fetching sender IDs:', error);
+        }
+      };
+
+      getSenderIds();
+    }
+  }, [userId]);
+
+  console.log('Sender IDs:', senderIds); // Add this line for debugging
+
   const handleNext = (data: Partial<FormData>) => {
     setFormData((prevData) => ({ ...prevData, ...data }));
     setCurrentStep((prevStep) => prevStep + 1);
@@ -271,26 +314,25 @@ const QuickSMSModal: React.FC<QuickSMSModalProps> = ({ isOpen, onClose }) => {
     setCurrentStep((prevStep) => prevStep - 1);
   };
 
-  const handleSend = async () => {
+  const handleSend = async (selectedSenderID: string, userId: number) => {
     try {
       const response = await axios.post('http://localhost:5000/send-messages/create', {
         recipients: formData.recipients,
-        senderId: 1,
-        userId: 1,
+        senderId: selectedSenderID, // Use selected sender ID
+        userId: userId, // Include user ID
         content: formData.messageContent,
         messageType: 'text',
         recursion: 'none',
       });
 
-    
-      console.log('Message sent successfully:');
+      console.log('Message sent successfully:', response.data);
       setShowSuccessModal(true);
 
       setTimeout(() => {
         setShowSuccessModal(false);
         onClose();
       }, 2000);
-      navigate.push('/Sms/CampaignHistory');
+      // navigate.push('/Sms/CampaignHistory');
     } catch (error) {
       console.error('Error sending SMS:', error);
       let errorMessage = 'An unexpected error occurred.';
@@ -318,9 +360,15 @@ const QuickSMSModal: React.FC<QuickSMSModalProps> = ({ isOpen, onClose }) => {
             <AnimatePresence>
               {currentStep === 1 && <Step1 onNext={handleNext} onClose={onClose} />}
               {currentStep === 2 && (
-                <Step2 onNext={handleNext} onPrevious={handlePrevious} formData={formData} onClose={onClose} />
+                <Step2 
+                  onNext={handleNext} 
+                  onPrevious={handlePrevious} 
+                  formData={formData} 
+                  onClose={onClose} 
+                  senders={senders} // Pass senderIds to Step2
+                />
               )}
-              {currentStep === 3 && <Step3 formData={formData} onPrevious={handlePrevious} onSend={handleSend} onClose={onClose} />}
+              {currentStep === 3 && <Step3 formData={formData} onPrevious={handlePrevious} onSend={handleSend} onClose={onClose}   senders={senders} />}
             </AnimatePresence>
             {showSuccessModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">

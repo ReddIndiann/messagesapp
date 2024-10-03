@@ -370,14 +370,14 @@ const ScheduleQuickSms: React.FC<ScheduleQuickSmsProps> = ({ isOpen, onClose }) 
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white p-6 rounded-lg shadow-lg w-96">
             <h2 className="text-xl font-medium text-green-600">Success!</h2>
-            <p className="text-gray-700">Sender ID registered successfully.</p>
+            <p className="text-gray-700">Message Scheduled successfully.</p>
           </div>
         </div>
       )}
         {showErrorModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white p-6 rounded-lg shadow-lg w-96">
-            <h2 className="text-xl font-medium text-red-600">Error!</h2>
+            <h2 className="text-xl font-medium text-red-600">Error Scheduling Message!</h2>
             <p className="text-gray-700">{errorMessage}</p>
           </div>
         </div>

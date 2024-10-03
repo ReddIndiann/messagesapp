@@ -1,14 +1,19 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState,useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import * as XLSX from 'xlsx';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
+import { fetchSenderIds } from '@/app/lib/senderIdUtils';
+
 
 interface ExcelUploadStepperProps {
   isOpen: boolean;
   onClose: () => void;
 }
-
+interface Sender {
+  id: string;
+  name: string;
+}
 interface ExcelData {
   firstname?: string;
   lastname?: string;
@@ -27,8 +32,38 @@ const ExcelUploadStepper: React.FC<ExcelUploadStepperProps> = ({ isOpen, onClose
   const [showSuccessModal, setShowSuccessModal] = useState<boolean>(false);
   const [showErrorModal, setShowErrorModal] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string>('');
+  const [senders, setSenders] = useState<Sender[]>([]);
+  const [selectedSenderId, setSelectedSenderId] = useState<string>('');
+  const [userId, setUserId] = useState<number | null>(null);
 
   const router = useRouter();
+
+
+
+  useEffect(() => {
+    const signInResponse = localStorage.getItem('signInResponse');
+    if (signInResponse) {
+      const parsedResponse = JSON.parse(signInResponse);
+      const extractedUserId = parsedResponse.user?.id || null;
+      setUserId(extractedUserId);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (userId) {
+      const getSenderIds = async () => {
+        try {
+          const data = await fetchSenderIds(userId);
+          setSenders(data.map((sender: any) => ({ id: sender.id, name: sender.name })));
+        } catch (error) {
+          console.error('Error fetching sender IDs:', error);
+        }
+      };
+
+      getSenderIds();
+    }
+  }, [userId]);
+
 
   const handleFileChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
     setFile(event.target.files ? event.target.files[0] : null);
@@ -71,14 +106,15 @@ const ExcelUploadStepper: React.FC<ExcelUploadStepperProps> = ({ isOpen, onClose
 
   const handleSendMessage = useCallback(async () => {
     const payload = {
-      senderId: 1, // You might want to get this from the user's session or input
-      userId: 1, // You might want to get this from the user's session
+      senderId: selectedSenderId,
+      userId: userId,
       campaignTitle,
       content: messageContent,
       messageType: 'text',
       recursion: 'none',
       recipients,
     };
+
 
     try {
       const response = await axios.post('http://localhost:5000/send-messages/create', payload);
@@ -105,7 +141,7 @@ const ExcelUploadStepper: React.FC<ExcelUploadStepperProps> = ({ isOpen, onClose
         setShowErrorModal(false);
       }, 2000);
     }
-  }, [campaignTitle, messageContent, recipients, onClose, router]);
+  }, [selectedSenderId, userId, campaignTitle, messageContent, recipients, onClose, router]);
 
   if (!isOpen) return null;
 
@@ -226,6 +262,23 @@ const ExcelUploadStepper: React.FC<ExcelUploadStepperProps> = ({ isOpen, onClose
             {data.length > 5 && (
               <p className="mt-2 text-gray-600 text-sm">Showing first 5 rows of {data.length} total rows.</p>
             )}
+           <div className="mb-4">
+              <label htmlFor="senderId" className="block text-sm font-medium text-gray-700 mb-2">Sender ID</label>
+              <select
+                id="senderId"
+                value={selectedSenderId}
+                onChange={(e) => setSelectedSenderId(e.target.value)}
+                className="w-full bg-white border border-gray-300 rounded-lg shadow-sm py-2 px-3 text-gray-800 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+                required
+              >
+                <option value="">Select Sender ID</option>
+                {senders.map((sender) => (
+                  <option key={sender.id} value={sender.id}>
+                    {sender.name} ({sender.id})
+                  </option>
+                ))}
+              </select>
+            </div>
             <div className="mb-4">
               <label htmlFor="campaignTitle" className="block text-sm font-medium text-gray-700 mb-2">Campaign Title</label>
               <input
@@ -268,20 +321,24 @@ const ExcelUploadStepper: React.FC<ExcelUploadStepperProps> = ({ isOpen, onClose
         )}
 
         {step === 3 && (
-          <div>
-            <h2 className="text-2xl font-semibold mb-6 text-gray-800">Confirm Your Message</h2>
-            <div className="mb-4">
-              <p className="text-lg font-medium">Campaign Title:</p>
-              <p className="text-gray-700">{campaignTitle}</p>
-            </div>
-            <div className="mb-4">
-              <p className="text-lg font-medium">Message Content:</p>
-              <p className="text-gray-700">{messageContent}</p>
-            </div>
-            <div className="mb-4">
-              <p className="text-lg font-medium">Recipients:</p>
-              <p className="text-gray-700">{recipients.length} contacts</p>
-            </div>
+           <div>
+           <h2 className="text-2xl font-semibold mb-6 text-gray-800">Confirm Your Message</h2>
+           <div className="mb-4">
+             <p className="text-lg font-medium">Sender ID:</p>
+             <p className="text-gray-700">{senders.find(sender => sender.id === selectedSenderId)?.name || selectedSenderId}</p>
+           </div>
+           <div className="mb-4">
+             <p className="text-lg font-medium">Campaign Title:</p>
+             <p className="text-gray-700">{campaignTitle}</p>
+           </div>
+           <div className="mb-4">
+             <p className="text-lg font-medium">Message Content:</p>
+             <p className="text-gray-700">{messageContent}</p>
+           </div>
+           <div className="mb-4">
+             <p className="text-lg font-medium">Recipients:</p>
+             <p className="text-gray-700">{recipients.length} contacts</p>
+           </div>
             <div className="flex justify-between gap-4">
               <button
                 onClick={() => setStep(2)}

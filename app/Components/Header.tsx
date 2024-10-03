@@ -111,7 +111,9 @@ const Header: React.FC<HeaderProps> = ({ currentSection }) => {
               <div className="absolute right-0 mt-44 bg-white border border-gray-300 rounded-lg shadow-lg w-48">
                 <ul className="list-none p-0 m-0">
                   <li className="hover:bg-gray-100 cursor-pointer px-4 py-2 transition duration-200 ease-in-out">Profile</li>
-                  <li className="hover:bg-gray-100 cursor-pointer px-4 py-2 transition duration-200 ease-in-out">Developer</li>
+                  <li className="hover:bg-gray-100 cursor-pointer px-4 py-2 transition duration-200 ease-in-out"
+                   onClick={()=>{router.push('/Developer/ApiKeyCreation')}}
+                  >Developer</li>
                   <li className="hover:bg-gray-100 cursor-pointer px-4 py-2 transition duration-200 ease-in-out">Referral</li>
                   <li className="hover:bg-gray-100 cursor-pointer px-4 py-2 transition duration-200 ease-in-out">Marketplace</li>
                   <li

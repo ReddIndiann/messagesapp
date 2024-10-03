@@ -2,6 +2,8 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { fetchGroups, Group } from '@/app/lib/grouputil';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
+import { fetchSenderIds } from '@/app/lib/senderIdUtils';
+
 interface SendToGroupStepperProps {
   isOpen: boolean;
   onClose: () => void;
@@ -32,6 +34,12 @@ const SendToGroupStepper: React.FC<SendToGroupStepperProps> = ({ isOpen, onClose
   const [newSenderID, setNewSenderID] = useState('');
   const [campaignTitle, setCampaignTitle] = useState('');
   const [messageContent, setMessageContent] = useState('');
+  const [senderIds, setSenderIds] = useState<string[]>([]);
+  const [sendernames, setSendernames] = useState<string[]>([]);
+  const [senders, setSenders] = useState<{ id: string; name: string }[]>([]);
+
+  
+  const [userId, setUserId] = useState<number | null>(null);
   const [showSuccessModal, setShowSuccessModal] = useState<boolean>(false);
   const [showErrorModal, setShowErrorModal] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string>('');
@@ -56,6 +64,33 @@ const navigate = useRouter();
     fetchUserGroups();
   }, []);
 
+  useEffect(() => {
+    const signInResponse = localStorage.getItem('signInResponse');
+    if (signInResponse) {
+      const parsedResponse = JSON.parse(signInResponse);
+      const extractedUserId = parsedResponse.user?.id || null;
+      setUserId(extractedUserId);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (userId) {
+      const getSenderIds = async () => {
+        try {
+          const data = await fetchSenderIds(userId);
+          setSenders(data.map((sender: any) => ({ id: sender.id, name: sender.name })));
+        } catch (error) {
+          console.error('Error fetching sender IDs:', error);
+        }
+      };
+
+      getSenderIds();
+    }
+  }, [userId]);
+
+  console.log('Sender IDs:', selectedSenderID); 
+  console.log('user:', userId); // Add this line for debugging
+
   const handleNext = useCallback(() => setStep((prevStep) => prevStep + 1), []);
   const handlePrevious = useCallback(() => setStep((prevStep) => prevStep - 1), []);
 
@@ -74,8 +109,8 @@ const navigate = useRouter();
     });
   
     const payload = {
-      senderId: 1,
-      userId: 1,
+      senderId: selectedSenderID,
+      userId: userId,
       campaignTitle,
       content: messageContent,
       messageType: 'text',
@@ -183,7 +218,7 @@ const navigate = useRouter();
         setNewSenderID('');
       }
     };
-
+console.log(`id : ${selectedSenderID}`)
     return (
       <div>
         <h2 className="text-2xl font-semibold mb-6 text-gray-800">Compose Message</h2>
@@ -191,16 +226,23 @@ const navigate = useRouter();
           <div className="mb-6">
             <label htmlFor="senderID" className="block text-sm font-medium text-gray-700 mb-2">Sender ID</label>
             <div className="flex items-center gap-2">
-              <select
-                id="senderID"
-                value={localSenderID}
-                onChange={(e) => setLocalSenderID(e.target.value)}
-                className="flex-1 bg-white border border-gray-300 rounded-lg shadow-sm py-2 px-3 text-gray-800 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+            <select
+                id="selectedSenderID"
+                value={selectedSenderID}
+                onChange={(e) => setSelectedSenderID(e.target.value)}
+                className="w-full bg-white border border-gray-300 rounded-lg shadow-sm py-1 px-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-800 transition-all duration-200"
                 required
               >
                 <option value="" disabled>Select Sender ID</option>
-                <option value="12345">12345</option>
-                <option value="67890">67890</option>
+                {senders.length > 0 ? (
+                  senders.map((sender) => (
+                    <option key={sender.id} value={sender.id}>
+                      {sender.name}
+                    </option>
+                  ))
+                ) : (
+                  <option value="" disabled>No Sender IDs available</option>
+                )}
               </select>
               <button
                 type="button"
