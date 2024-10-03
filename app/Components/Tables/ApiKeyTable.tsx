@@ -94,9 +94,9 @@ const TableComponent: React.FC<TableComponentProps> = ({ userId }) => {
               <span className="mr-2">{item.status}</span>
               <button onClick={() => toggleStatus(item.id)}>
                 {item.status === 'enabled' ? (
-                  <FiToggleRight size={20} color="green" />
+                  <FiToggleRight size={30} color="green" />
                 ) : (
-                  <FiToggleLeft size={20} color="red" />
+                  <FiToggleLeft size={30} color="red" />
                 )}
               </button>
             </div>

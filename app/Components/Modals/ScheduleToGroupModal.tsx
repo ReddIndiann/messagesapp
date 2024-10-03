@@ -1,8 +1,10 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { fetchGroups, Group } from '@/app/lib/grouputil';
 import axios from 'axios';
+import { useRouter } from 'next/navigation';
+import { fetchSenderIds } from '@/app/lib/senderIdUtils';
 
-interface SendToGroupStepperProps {
+interface ScheduleToGroupstepperProps {
   isOpen: boolean;
   onClose: () => void;
   
@@ -14,21 +16,23 @@ interface Contact {
  
 }
 
-const SendToGroupStepper: React.FC<SendToGroupStepperProps> = ({ isOpen, onClose }) => {
+const ScheduleToGroupstepper: React.FC<ScheduleToGroupstepperProps> = ({ isOpen, onClose }) => {
   const [step, setStep] = useState<number>(1);
   const [selectedGroups, setSelectedGroups] = useState<string[]>([]);
   const [groups, setGroups] = useState<Group[]>([]);
   const [selectedSenderID, setSelectedSenderID] = useState('');
   const [newSenderID, setNewSenderID] = useState('');
   const [campaignTitle, setCampaignTitle] = useState('');
-  
+  const [senders, setSenders] = useState<{ id: string; name: string }[]>([]);
+  const [userId, setUserId] = useState<number | null>(null);
   const [messageContent, setMessageContent] = useState('');
   const [scheduledDate, setScheduledDate] = useState('');
   const [scheduledTime, setScheduledTime] = useState('');
   const [showSuccessModal, setShowSuccessModal] = useState<boolean>(false);
   const [showErrorModal, setShowErrorModal] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string>('');
- 
+  const navigate = useRouter();
+
   useEffect(() => {
     const fetchUserGroups = async () => {
       const signInResponse = localStorage.getItem('signInResponse');
@@ -49,6 +53,52 @@ const SendToGroupStepper: React.FC<SendToGroupStepperProps> = ({ isOpen, onClose
     fetchUserGroups();
   }, []);
 
+  useEffect(() => {
+    const signInResponse = localStorage.getItem('signInResponse');
+    if (signInResponse) {
+      const parsedResponse = JSON.parse(signInResponse);
+      const extractedUserId = parsedResponse.user?.id || null;
+      setUserId(extractedUserId);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (userId) {
+      const getSenderIds = async () => {
+        try {
+          const data = await fetchSenderIds(userId);
+          setSenders(data.map((sender: any) => ({ id: sender.id, name: sender.name })));
+        } catch (error) {
+          console.error('Error fetching sender IDs:', error);
+        }
+      };
+
+      getSenderIds();
+    }
+  }, [userId]);
+
+  useEffect(() => {
+    const fetchUserGroups = async () => {
+      const signInResponse = localStorage.getItem('signInResponse');
+      if (signInResponse) {
+        const parsedResponse = JSON.parse(signInResponse);
+        const userId = parsedResponse.user?.id;
+        if (userId) {
+          try {
+            const fetchedGroups = await fetchGroups(userId);
+            setGroups(fetchedGroups);
+          } catch (error) {
+            console.error('Error fetching groups:', error);
+          }
+        }
+      }
+    };
+
+    fetchUserGroups();
+  }, []);
+
+
+
   const handleNext = useCallback(() => setStep((prevStep) => prevStep + 1), []);
   const handlePrevious = useCallback(() => setStep((prevStep) => prevStep - 1), []);
 
@@ -67,8 +117,8 @@ const SendToGroupStepper: React.FC<SendToGroupStepperProps> = ({ isOpen, onClose
     });
 
     const payload = {
-      senderId: 1,
-      userId: 1,
+      senderId: selectedSenderID,
+      userId: userId,
       campaignTitle,
       content: messageContent,
       messageType: 'text',
@@ -83,47 +133,26 @@ const SendToGroupStepper: React.FC<SendToGroupStepperProps> = ({ isOpen, onClose
       console.log('Message scheduled successfully:', payload);
       setShowSuccessModal(true);
 
-      // Call the onSuccess callback to refetch the list
- 
-
-      // Close the modal after showing success
       setTimeout(() => {
         setShowSuccessModal(false);
         onClose();
       }, 2000);
-      onClose();
+      navigate.push('/Sms/CampaignHistory');
     } catch (error) {
-      console.error('Error scheduling message:', error);
-//       console.log(error.response.data)
-//       setShowErrorModal(true);
-// const Error = error.response.data
-//       // Call the onSuccess callback to refetch the list
-    
+      let errorMessage = 'An unexpected error occurred.';
 
-//       // Close the modal after showing success
-//       setTimeout(() => {
-//         setShowSuccessModal(false);
-//         // onClose();
-//       }, 2000);
-//       // onClose();
-console.error('Error scheduling message:', error);
-let errorMessage = 'An unexpected error occurred.';
+      if (axios.isAxiosError(error) && error.response) {
+        errorMessage = error.response.data.message || 'An error occurred while scheduling the message.';
+      }
 
-if (axios.isAxiosError(error) && error.response) {
-  // Extract the error message from the response
-  errorMessage = error.response.data.message || 'An error occurred while sending the message.';
-}
+      setShowErrorModal(true);
+      setErrorMessage(errorMessage);
 
-setShowErrorModal(true);
-setErrorMessage(errorMessage); // Store the error message for display
-
-// Optional: Close the modal after showing error
-setTimeout(() => {
-  setShowErrorModal(false);
-  // onClose();
-}, 2000);
+      setTimeout(() => {
+        setShowErrorModal(false);
+      }, 2000);
     }
-  }, [selectedGroups, groups, campaignTitle, messageContent, scheduledDate, scheduledTime, onClose]);
+  }, [selectedGroups, groups, selectedSenderID, userId, campaignTitle, messageContent, scheduledDate, scheduledTime, onClose, navigate]);
 
   const CloseButton: React.FC<{ onClose: () => void }> = ({ onClose }) => (
     <button
@@ -212,75 +241,82 @@ setTimeout(() => {
 
     return (
       <div>
-        <h2 className="text-2xl font-semibold mb-6 text-gray-800">Compose Message</h2>
-        <form onSubmit={(e) => { e.preventDefault(); handleNext(); }}>
-          <div className="mb-6">
-            <label htmlFor="senderID" className="block text-sm font-medium text-gray-700 mb-2">Sender ID</label>
-            <div className="flex items-center gap-2">
-              <select
-                id="senderID"
-                value={localSenderID}
-                onChange={(e) => setLocalSenderID(e.target.value)}
-                className="flex-1 bg-white border border-gray-300 rounded-lg shadow-sm py-2 px-3 text-gray-800 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
-                required
-              >
-                <option value="" disabled>Select Sender ID</option>
-                <option value="12345">12345</option>
-                <option value="67890">67890</option>
-              </select>
-              <button
-                type="button"
-                className="bg-gray-100 text-gray-800 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors duration-200"
-                onClick={handleAddSenderID}
-              >
-                Add New
-              </button>
-            </div>
-          </div>
-
-          <div className="mb-6">
-            <label htmlFor="campaignTitle" className="block text-sm font-medium text-gray-700 mb-2">Campaign Title</label>
-            <input
-              id="campaignTitle"
-              type="text"
-              value={localCampaignTitle}
-              onChange={(e) => setLocalCampaignTitle(e.target.value)}
-              className="w-full bg-white border border-gray-300 rounded-lg shadow-sm py-2 px-3 text-gray-800 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+      <h2 className="text-2xl font-semibold mb-6 text-gray-800">Compose Message</h2>
+      <form onSubmit={(e) => { e.preventDefault(); handleNext(); }}>
+        <div className="mb-6">
+          <label htmlFor="senderID" className="block text-sm font-medium text-gray-700 mb-2">Sender ID</label>
+          <div className="flex items-center gap-2">
+            <select
+              id="selectedSenderID"
+              value={selectedSenderID}
+              onChange={(e) => setSelectedSenderID(e.target.value)}
+              className="w-full bg-white border border-gray-300 rounded-lg shadow-sm py-1 px-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-800 transition-all duration-200"
               required
-            />
-          </div>
-
-          <div className="mb-6">
-            <label htmlFor="messageContent" className="block text-sm font-medium text-gray-700 mb-2">Message Content</label>
-            <textarea
-              id="messageContent"
-              value={localMessageContent}
-              onChange={(e) => setLocalMessageContent(e.target.value)}
-              className="w-full bg-white border border-gray-300 rounded-lg shadow-sm py-2 px-3 text-gray-800 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
-              rows={4}
-              required
-            />
-          </div>
-
-          <div className="flex justify-between items-center">
+            >
+              <option value="" disabled>Select Sender ID</option>
+              {senders.length > 0 ? (
+                senders.map((sender) => (
+                  <option key={sender.id} value={sender.id}>
+                    {sender.name}
+                  </option>
+                ))
+              ) : (
+                <option value="" disabled>No Sender IDs available</option>
+              )}
+            </select>
             <button
               type="button"
-              onClick={handlePrevious}
-              className="bg-gray-200 text-gray-800 py-3 px-6 rounded-lg text-sm font-medium hover:bg-gray-300 transition-colors duration-200"
+              className="bg-gray-100 text-gray-800 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors duration-200"
+              onClick={handleAddSenderID}
             >
-              Previous
-            </button>
-            <button
-              type="submit"
-              className="bg-blue-500 text-white py-3 px-6 rounded-lg text-sm font-medium hover:bg-blue-600 transition-colors duration-200"
-            >
-              Next: Schedule Message
+              Add New
             </button>
           </div>
-        </form>
-      </div>
-    );
-  });
+        </div>
+
+        <div className="mb-6">
+          <label htmlFor="campaignTitle" className="block text-sm font-medium text-gray-700 mb-2">Campaign Title</label>
+          <input
+            id="campaignTitle"
+            type="text"
+            value={localCampaignTitle}
+            onChange={(e) => setLocalCampaignTitle(e.target.value)}
+            className="w-full bg-white border border-gray-300 rounded-lg shadow-sm py-2 px-3 text-gray-800 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+            required
+          />
+        </div>
+
+        <div className="mb-6">
+          <label htmlFor="messageContent" className="block text-sm font-medium text-gray-700 mb-2">Message Content</label>
+          <textarea
+            id="messageContent"
+            value={localMessageContent}
+            onChange={(e) => setLocalMessageContent(e.target.value)}
+            className="w-full bg-white border border-gray-300 rounded-lg shadow-sm py-2 px-3 text-gray-800 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+            rows={4}
+            required
+          />
+        </div>
+
+        <div className="flex justify-between items-center">
+          <button
+            type="button"
+            onClick={handlePrevious}
+            className="bg-gray-200 text-gray-800 py-3 px-6 rounded-lg text-sm font-medium hover:bg-gray-300 transition-colors duration-200"
+          >
+            Previous
+          </button>
+          <button
+            type="submit"
+            className="bg-blue-500 text-white py-3 px-6 rounded-lg text-sm font-medium hover:bg-blue-600 transition-colors duration-200"
+          >
+            Next: Schedule Message
+          </button>
+        </div>
+      </form>
+    </div>
+  );
+});
 
   Step2.displayName = 'Step2';
 
@@ -399,4 +435,4 @@ setTimeout(() => {
   ) : null;
 };
 
-export default SendToGroupStepper;
+export default ScheduleToGroupstepper;
