@@ -27,7 +27,7 @@ const SendToGroupStepper: React.FC<SendToGroupStepperProps> = ({ isOpen, onClose
   const [scheduledTime, setScheduledTime] = useState('');
   const [showSuccessModal, setShowSuccessModal] = useState<boolean>(false);
   const [showErrorModal, setShowErrorModal] = useState<boolean>(false);
-  const [errorMessage, setErrorMessage] = useState<boolean>(false);
+  const [errorMessage, setErrorMessage] = useState<string>('');
  
   useEffect(() => {
     const fetchUserGroups = async () => {
