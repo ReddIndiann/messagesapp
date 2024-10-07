@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { fetchGroups, Group } from '@/app/lib/grouputil';
 import axios from 'axios';
+import { fetchSenderIds } from '@/app/lib/senderIdUtils';
 
 interface SendToGroupStepperProps {
   isOpen: boolean;
@@ -20,6 +21,9 @@ const SendToGroupStepper: React.FC<SendToGroupStepperProps> = ({ isOpen, onClose
   const [showSuccessModal, setShowSuccessModal] = useState<boolean>(false);
   const [showErrorModal, setShowErrorModal] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string>('');
+  const [senders, setSenders] = useState<{ id: string; name: string }[]>([]);
+  const [userId, setUserId] = useState<number | null>(null);
+
 
   useEffect(() => {
     const fetchUserGroups = async () => {
@@ -40,7 +44,20 @@ const SendToGroupStepper: React.FC<SendToGroupStepperProps> = ({ isOpen, onClose
 
     fetchUserGroups();
   }, []);
+  useEffect(() => {
+    if (userId) {
+      const getSenderIds = async () => {
+        try {
+          const data = await fetchSenderIds(userId);
+          setSenders(data.map((sender: any) => ({ id: sender.id, name: sender.name })));
+        } catch (error) {
+          console.error('Error fetching sender IDs:', error);
+        }
+      };
 
+      getSenderIds();
+    }
+  }, [userId]);
   const handleNext = useCallback(() => setStep((prevStep) => prevStep + 1), []);
   const handlePrevious = useCallback(() => setStep((prevStep) => prevStep - 1), []);
 
@@ -59,8 +76,8 @@ const SendToGroupStepper: React.FC<SendToGroupStepperProps> = ({ isOpen, onClose
     });
 
     const payload = {
-      senderId: 1,
-      userId: 1,
+      senderId: selectedSenderID,
+      userId: userId,
       campaignTitle,
       content: messageContent,
       messageType: 'text',
@@ -91,7 +108,7 @@ const SendToGroupStepper: React.FC<SendToGroupStepperProps> = ({ isOpen, onClose
         setShowErrorModal(false);
       }, 2000);
     }
-  }, [selectedGroups, groups, campaignTitle, messageContent, onClose]);
+  }, [selectedGroups, groups, campaignTitle, messageContent, selectedSenderID, userId, onClose]);
 
   const StepIndicator: React.FC<{ currentStep: number; totalSteps: number }> = React.memo(({ currentStep, totalSteps }) => (
     <div className="flex justify-between items-center mb-8">
@@ -160,14 +177,19 @@ const SendToGroupStepper: React.FC<SendToGroupStepperProps> = ({ isOpen, onClose
     const [localSenderID, setLocalSenderID] = useState(selectedSenderID);
     const [localCampaignTitle, setLocalCampaignTitle] = useState(campaignTitle);
     const [localMessageContent, setLocalMessageContent] = useState(messageContent);
-
+  
+    // Sync the local state with props
+    useEffect(() => {
+      setLocalSenderID(selectedSenderID);
+    }, [selectedSenderID]);
+  
     const handleAddSenderID = () => {
       if (newSenderID) {
         setSelectedSenderID(newSenderID);
         setNewSenderID('');
       }
     };
-
+  
     return (
       <div>
         <h2 className="text-2xl font-semibold mb-6 text-gray-800">Compose Message</h2>
@@ -175,27 +197,34 @@ const SendToGroupStepper: React.FC<SendToGroupStepperProps> = ({ isOpen, onClose
           <div className="mb-6">
             <label htmlFor="senderID" className="block text-sm font-medium text-gray-700 mb-2">Sender ID</label>
             <div className="flex items-center gap-2">
-              <select
-                id="senderID"
-                value={localSenderID}
-                onChange={(e) => setLocalSenderID(e.target.value)}
-                className="flex-1 bg-white border border-gray-300 rounded-lg shadow-sm py-2 px-3 text-gray-800 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
-                required
-              >
-                <option value="" disabled>Select Sender ID</option>
-                <option value="12345">12345</option>
-                <option value="67890">67890</option>
-              </select>
-              <button
-                type="button"
-                className="bg-gray-100 text-gray-800 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors duration-200"
-                onClick={handleAddSenderID}
-              >
-                Add New
-              </button>
-            </div>
+            <select
+              id="selectedSenderID"
+              value={selectedSenderID}
+              onChange={(e) => setSelectedSenderID(e.target.value)}
+              className="w-full bg-white border border-gray-300 rounded-lg shadow-sm py-1 px-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-800 transition-all duration-200"
+              required
+            >
+              <option value="" disabled>Select Sender ID</option>
+              {senders.length > 0 ? (
+                senders.map((sender) => (
+                  <option key={sender.id} value={sender.id}>
+                    {sender.name}
+                  </option>
+                ))
+              ) : (
+                <option value="" disabled>No Sender IDs available</option>
+              )}
+            </select>
+            <button
+              type="button"
+              className="bg-gray-100 text-gray-800 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors duration-200"
+              onClick={handleAddSenderID}
+            >
+              Add New
+            </button>
           </div>
-
+          </div>
+  
           <div className="mb-6">
             <label htmlFor="campaignTitle" className="block text-sm font-medium text-gray-700 mb-2">Campaign Title</label>
             <input
@@ -208,7 +237,7 @@ const SendToGroupStepper: React.FC<SendToGroupStepperProps> = ({ isOpen, onClose
               required
             />
           </div>
-
+  
           <div className="mb-6">
             <label htmlFor="messageContent" className="block text-sm font-medium text-gray-700 mb-2">Message Content</label>
             <textarea
@@ -222,7 +251,7 @@ const SendToGroupStepper: React.FC<SendToGroupStepperProps> = ({ isOpen, onClose
             ></textarea>
             <p className="mt-2 text-sm text-gray-600">Max 160 characters</p>
           </div>
-
+  
           <div className="flex justify-between gap-4">
             <button
               type="button"
@@ -248,11 +277,13 @@ const SendToGroupStepper: React.FC<SendToGroupStepperProps> = ({ isOpen, onClose
       </div>
     );
   });
-
+  
   Step2.displayName = 'Step2';
 
   const ConfirmationStep: React.FC = React.memo(() => (
+    
     <div>
+      
       <h2 className="text-2xl font-semibold mb-6 text-gray-800">Confirm Your Message</h2>
       <div className="mb-4">
         <p className="text-lg font-medium">Selected Groups:</p>
