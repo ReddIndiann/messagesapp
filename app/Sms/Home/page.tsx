@@ -10,6 +10,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faBullhorn, faAddressBook, faUsers, faCoins, faTrash } from '@fortawesome/free-solid-svg-icons';
 import BasicBars from '@/app/Components/Graph/Graph';
 import { fetchSenderIds, deleteSenderId } from '@/app/lib/senderIdUtils';
+import { fetchGraph } from '@/app/lib/sendmessageUtil';
 import { fetchContacts } from '@/app/lib/contactUtil';
 import { fetchGroups } from '@/app/lib/grouputil';
 import { fetchList } from '@/app/lib/sendmessageUtil';
@@ -24,6 +25,7 @@ const Dashboard: React.FC = () => {
   const [contactCount, setContactCount] = useState<number>(0); 
   const [groupCount, setGroupCount] = useState<number>(0); 
   const [creditCount, setCreditCount] = useState<number>(0); 
+  const [campaignCount, setCampaignCount] = useState<number>(0); 
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -32,26 +34,37 @@ const Dashboard: React.FC = () => {
       const parsedResponse = JSON.parse(signInResponse);
       const extractedUserId = parsedResponse.user?.id || null;
       setUserId(extractedUserId);
+      console.log(`logger ${extractedUserId}`)
       if (extractedUserId) {
         fetchSenderIds(extractedUserId)
           .then(data => setSenderIds(data))
           .catch(err => setError('Error fetching sender IDs: ' + err.message));
-        
+    
         fetchContacts(extractedUserId)
           .then(data => setContactCount(data.length))
           .catch(err => setError('Error fetching contacts: ' + err.message));
-
+    
         fetchList(extractedUserId)
           .then(data => setCreditCount(data.length))
           .catch(err => setError('Error fetching credits: ' + err.message));
-
+    
         fetchGroups(extractedUserId)
           .then(data => setGroupCount(data.length))
-          .catch(err => setError('Error fetching contacts: ' + err.message));
+          .catch(err => setError('Error fetching groups: ' + err.message));
+    
+        // Fetch Graph data
+        fetchGraph(extractedUserId)
+          .then(data => {
+            console.log("Graph Data:", data); // Log the fetched data
+            // Assuming the structure is correct and it has the needed properties
+            setCampaignCount(data.totalMessagesSent || 0); // Use a fallback if undefined
+          })
+          .catch(err => setError('Error fetching campaign data: ' + err.message));
       }
     }
   }, []);
-
+  console.log(`log ${userId}`)
+  
   const handleSuccess = () => {
     if (userId) {
       fetchSenderIds(userId)
@@ -59,15 +72,23 @@ const Dashboard: React.FC = () => {
         .catch(err => setError('Error fetching sender IDs: ' + err.message));
       fetchGroups(userId)
         .then(data => setGroupCount(data.length))
-        .catch(err => setError('Error fetching contacts: ' + err.message));
+        .catch(err => setError('Error fetching groups: ' + err.message));
       fetchContacts(userId)
         .then(data => setContactCount(data.length))
         .catch(err => setError('Error fetching contacts: ' + err.message));
       fetchList(userId)
         .then(data => setCreditCount(data.length))
-        .catch(err => setError('Error fetching contacts: ' + err.message));
+        .catch(err => setError('Error fetching credits: ' + err.message));
+      
+      // Fetch Graph data again
+      fetchGraph(userId)
+        .then(data => {
+          setCampaignCount(data.totalMessagesSent || 0); // Use a fallback if undefined
+        })
+        .catch(err => setError('Error fetching campaign data: ' + err.message));
     }
   };
+  
 
   const handleDelete = async (senderId: number) => {
     if (window.confirm('Are you sure you want to delete this Sender ID?')) {
@@ -100,35 +121,37 @@ const Dashboard: React.FC = () => {
               </div>
             )} */}
 
-            <motion.div
-              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-8"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
-            >
-              {[
-                { value: 2, label: 'Campaigns', icon: faBullhorn, color: 'bg-blue-500', page: 'CampaignHistory' },
-                { value: contactCount, label: 'Contacts', icon: faAddressBook, color: 'bg-green-500', page: 'Contacts' }, 
-                { value: groupCount, label: 'Groups', icon: faUsers, color: 'bg-yellow-500', page: 'Contacts' },
-                { value: creditCount, label: 'Credit Used', icon: faCoins, color: 'bg-orange-500', page: 'Wallet' },
-              ].map((item, index) => (
-                <motion.div
-                  key={index}
-                  className="flex items-center bg-white shadow-lg rounded-lg p-6 cursor-pointer"
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={() => handleCardClick(item.page)} // Add onClick event
-                >
-                  <div className={`w-12 h-12 rounded-full flex items-center justify-center ${item.color} text-white`}>
-                    <FontAwesomeIcon icon={item.icon} size="lg" />
-                  </div>
-                  <div className="ml-4">
-                    <div className="text-3xl font-semibold text-gray-700">{item.value}</div>
-                    <div className="text-sm text-gray-500">{item.label}</div>
-                  </div>
-                </motion.div>
-              ))}
-            </motion.div>
+<motion.div
+  className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-8"
+  initial={{ opacity: 0, y: 20 }}
+  animate={{ opacity: 1, y: 0 }}
+  transition={{ duration: 0.5 }}
+>
+  {[
+    { value: campaignCount, label: 'Campaigns', icon: faBullhorn, color: 'bg-blue-500', page: 'CampaignHistory' },
+    { value: contactCount, label: 'Contacts', icon: faAddressBook, color: 'bg-green-500', page: 'Contacts' }, 
+    { value: groupCount, label: 'Groups', icon: faUsers, color: 'bg-yellow-500', page: 'Contacts' },
+    { value: creditCount, label: 'Credit Used', icon: faCoins, color: 'bg-orange-500', page: 'Wallet' },
+  ].map((item, index) => (
+    <motion.div
+      key={index}
+      className="flex items-center bg-white shadow-lg rounded-lg p-6 cursor-pointer"
+      whileHover={{ scale: 1.05 }}
+      whileTap={{ scale: 0.95 }}
+      onClick={() => handleCardClick(item.page)}
+    >
+      <div className={`w-12 h-12 rounded-full flex items-center justify-center ${item.color} text-white`}>
+        <FontAwesomeIcon icon={item.icon} size="lg" />
+      </div>
+      <div className="ml-4">
+        <div className="text-3xl font-semibold text-gray-700">{item.value}</div>
+        <div className="text-sm text-gray-500">{item.label}</div>
+      </div>
+    </motion.div>
+  ))}
+</motion.div>
+
+
 
             <div className="flex flex-col lg:flex-row space-y-6 lg:space-y-0 lg:space-x-6">
               <motion.div
@@ -138,7 +161,12 @@ const Dashboard: React.FC = () => {
                 transition={{ duration: 0.5 }}
               >
                 <h3 className="text-lg font-semibold mb-4 text-gray-600">Billing Summary</h3>
-                <BasicBars />
+                 {/* Conditionally render the BasicBars component if userId is not null */}
+        {userId ? (
+          <BasicBars  />
+        ) : (
+          <p>Loading user data...</p> // You can show a loader or fallback content here
+        )}
               </motion.div>
 
               <motion.div

@@ -9,12 +9,14 @@ export function middleware(request: NextRequest) {
     (pathname === "/" || pathname === "/auth/signup") &&
     request.cookies.has("signInResponse")
   )
+
     return NextResponse.redirect(new URL("/Sms/Home", request.url));
 
   if (
     (pathname === "/Sms/Home" || pathname === "/Sms/SendMessage") &&
     !request.cookies.has("signInResponse")
   )
+  
     return NextResponse.redirect(new URL("/", request.url));
 
   return NextResponse.next();

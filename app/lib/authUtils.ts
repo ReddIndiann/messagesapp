@@ -1,3 +1,4 @@
+import axios from 'axios';
 import { saveToCookies, getFromCookies } from "./storage";
 
 export const signUp = async (formData: {
@@ -9,19 +10,15 @@ export const signUp = async (formData: {
   const { username, number, email, password } = formData;
 
   try {
-    const response = await fetch('http://localhost:5000/auth/signup', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ username, email, password, number }),
+    const response = await axios.post('http://localhost:5000/auth/signup', {
+      username,
+      email,
+      password,
+      number,
     });
 
-    const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(data.msg || 'Registration failed');
-    }
+    // No need to parse response data as axios does this for us
+    const data = response.data;
 
     // Save the response data to cookies
     await saveToCookies(); // Expires in 1 day
@@ -36,7 +33,7 @@ export const signUp = async (formData: {
     return data;
   } catch (err: any) {
     console.error('Sign-Up Error:', err);
-    throw new Error(err.message || 'An error occurred');
+    throw new Error(err.response?.data.msg || 'Registration failed');
   }
 };
 
@@ -47,22 +44,16 @@ export const signIn = async (formData: {
   const { email, password } = formData;
 
   try {
-    const response = await fetch('http://localhost:5000/auth/signin', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ email, password })
+    const response = await axios.post('http://localhost:5000/auth/signin', {
+      email,
+      password,
     });
 
-    const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(data.msg || 'Login failed');
-    }
+    // No need to parse response data as axios does this for us
+    const data = response.data;
 
     // Save the response data to cookies
-    saveToCookies(); // Expires in 1 day
+    await saveToCookies(); // Expires in 1 day
 
     // Save the response data to localStorage
     localStorage.setItem('signInResponse', JSON.stringify(data));
@@ -74,6 +65,40 @@ export const signIn = async (formData: {
     return data;
   } catch (err: any) {
     console.error('Sign-In Error:', err);
-    throw new Error(err.message || 'An error occurred');
+    console.log(err.response?.data.msg )
+    throw new Error(err.response?.data.msg || 'Login failed');
+  }
+};
+
+
+
+export const userdetails = async (userId: number) => {
+  try {
+    const response = await axios.get(`http://localhost:5000/auth/${userId}`);
+    
+    return response.data; // Return the fetched API keys
+  } catch (err: any) {
+    console.error('Error fetching user details:', err.response?.data?.msg || 'An error occurred');
+    throw err;
+  }
+};export const updateUserDetails = async (
+  userId: number, 
+  userData: { username: string; email: string; number: string }
+) => {
+  try {
+    const response = await axios.put(`http://localhost:5000/auth/update/${userId}`, userData);
+
+    // Clear localStorage
+    localStorage.removeItem('signInResponse');
+
+    // Save the updated user data to localStorage
+    localStorage.setItem('signInResponse', JSON.stringify(response.data));
+
+    console.log('Updated User Data:', response.data);
+
+    return response.data; // Return the updated user data
+  } catch (err: any) {
+    console.error('Error updating user details:', err.response?.data?.msg || 'An error occurred');
+    throw err; // Rethrow the error for further handling
   }
 };

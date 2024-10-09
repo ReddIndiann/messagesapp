@@ -51,3 +51,14 @@ export type FetchTableDataProps = {
       throw error;
     }
   };
+
+  export const fetchGraph = async (userId: number) => {
+    try {
+      const response = await axios.get(`http://localhost:5000/send-messages/getlist/${userId}`);
+      return response.data; // Ensure this returns the required data structure
+    } catch (error) {
+      console.error('Error fetching campaign data:', error);
+      throw error;
+    }
+  };
+  

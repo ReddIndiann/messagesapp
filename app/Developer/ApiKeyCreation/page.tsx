@@ -46,7 +46,7 @@ const Dashboard = () => {
                   className="bg-white text-blue-500 px-4 py-2 rounded-lg hover:bg-blue-50 transition duration-300 flex items-center"
                 >
                   <FontAwesomeIcon icon={faPlus} className="mr-2" />
-                  Create Api keys
+                  Create ApiKeys
                 </button>
               </div>
             </div>
@@ -59,7 +59,7 @@ const Dashboard = () => {
                 className='text-gray-900 text-lg mt-5'
                 onClick={() => router.push('/Developer/Documentation')}
               >
-                Visit the <span className='text-sky-500'>documentation page</span>
+                Visit the <span className='text-sky-500'>documentation page....</span>
               </button>
             </div>
           </motion.div>

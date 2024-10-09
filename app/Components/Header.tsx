@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation'; 
 import { deleteAuthCookie } from '../lib/storage';
 import { fetchUserById } from '../lib/userlib';
+import { userdetails } from '../lib/authUtils';
+
 
 interface HeaderProps {
   currentSection: 'bulkSMS' | 'voiceCalls' | 'admin';
@@ -13,7 +15,7 @@ const Header: React.FC<HeaderProps> = ({ currentSection }) => {
   const [creditbalance, setCreditbalance] = useState<number | null>(null);
   const [userId, setUserId] = useState<number | null>(null);
   const router = useRouter(); 
-
+  const [loading, setLoading] = useState<boolean>(true);
   useEffect(() => {
     const signInResponse = localStorage.getItem('signInResponse');
     if (signInResponse) {
@@ -22,7 +24,23 @@ const Header: React.FC<HeaderProps> = ({ currentSection }) => {
       setUserId(extractedUserId);
     }
   }, []);
+  useEffect(() => {
+    const fetchUserData = async () => {
+      if (userId) {
+        try {
+          setLoading(true);
+          const data = await userdetails(userId);
+          setCreditbalance(data.creditbalance);
+        } catch (error) {
+          console.error('Error fetching user data:', error);
+        } finally {
+          setLoading(false);
+        }
+      }
+    };
 
+    fetchUserData();
+  }, [userId]);
   useEffect(() => {
     const loadUserData = async () => {
       if (userId !== null) {
@@ -31,7 +49,7 @@ const Header: React.FC<HeaderProps> = ({ currentSection }) => {
 
           if (userData) {
             setUsername(userData.username || null);
-            setCreditbalance(userData.creditbalance || null);
+          
             console.log('Extracted Username:', userData.username);
             console.log('Extracted Credit Balance:', userData.creditbalance);
           }

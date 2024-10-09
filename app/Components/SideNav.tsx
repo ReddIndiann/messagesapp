@@ -105,27 +105,27 @@ const Sidebar: React.FC<SidebarProps> = ({ onCollapse, setCurrentSection }) => {
     { href: "/Sms/Home", icon: <FiGrid />, text: "Overview" },
     { href: "/Sms/SendMessage", icon: <FiMessageSquare />, text: "Send Message" },
     { href: "/Sms/Contacts", icon: <FiUsers />, text: "Contacts" },
-    { href: "/Sms/BirthdayApp", icon: <FiGift />, text: "Birthday App" },
+    // { href: "/Sms/BirthdayApp", icon: <FiGift />, text: "Birthday App" },
     { href: "/Sms/Wallet", icon: <FiCreditCard />, text: "Wallet", badge: <span className="text-xs bg-green-500 text-white px-2 py-0.5 rounded-full">GHS 0.00</span> },
     { href: "/Sms/CampaignHistory", icon: <FiFileText />, text: "Campaign History" },
-    { href: "/Sms/GetHelp", icon: <FiHelpCircle />, text: "Get Help", badge: <span className="w-2 h-2 bg-orange-500 rounded-full"></span> },
+    { href: "/Help", icon: <FiHelpCircle />, text: "Get Help", badge: <span className="w-2 h-2 bg-orange-500 rounded-full"></span> },
   ];
 
   const voiceNavItems = [
     { href: "/Voice/VoiceHome", icon: <FiGrid />, text: "Overview" },
     { href: "/Voice/Sendcall", icon: <FiPhone />, text: "Send Voice" },
     { href: "/Voice/VoiceContacts", icon: <FiUsers />, text: "Contacts" },
-    { href: "/Voice/VoiceTemplates", icon: <FiGift />, text: "Birthday App" },
+    // { href: "/Voice/VoiceTemplates", icon: <FiGift />, text: "Birthday App" },
     { href: "/Voice/VoiceWallet", icon: <FiCreditCard />, text: "Wallet", badge: <span className="text-xs bg-blue-500 text-white px-2 py-0.5 rounded-full">GHS 0.00</span> },
     { href: "/Voice/VoiceHistory", icon: <FiClock />, text: "Campaign History" },
-    { href: "/Voice/VoiceHelp", icon: <FiHelpCircle />, text: "Help", badge: <span className="w-2 h-2 bg-orange-500 rounded-full"></span> },
+    { href: "/Help", icon: <FiHelpCircle />, text: "Help", badge: <span className="w-2 h-2 bg-orange-500 rounded-full"></span> },
   ];
   const adminNavItems = [
     { href: "/Admin/Dashboard", icon: <FiGrid />, text: "Dashboard" },
     { href: "/Admin/ManageUsers", icon: <FiUsers />, text: "Manage Users" },
     { href: "/Admin/SenderIds", icon: <FiSettings />, text: "SenderIds" },
     { href: "/Admin/Reports", icon: <FiFileText />, text: "Reports" },
-    { href: "/Admin/Help", icon: <FiHelpCircle />, text: "Help" },
+    { href: "/Help", icon: <FiHelpCircle />, text: "Help" },
   ];
   
   const currentNavItems = activeChannel === 'bulkSMS' ? smsNavItems

@@ -4,34 +4,18 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import Header from '@/app/Components/Header';
 import Sidebar from '@/app/Components/SideNav';
-import AddSenderIdModal from '@/app/Components/Modals/SenderIdModal';
 import TableComponent from '@/app/Components/Tables/SenderIdManagement';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faHistory, faPlus } from '@fortawesome/free-solid-svg-icons';
-
-interface TabButtonProps {
-  label: string;
-  isActive: boolean;
-  onClick: () => void;
-}
-
-const TabButton: React.FC<TabButtonProps> = ({ label, isActive, onClick }) => (
-  <button
-    className={`flex items-center px-6 py-3 text-sm font-medium transition-colors duration-200 ${
-      isActive ? 'bg-blue-500 text-white' : 'text-blue-500 hover:bg-blue-50'
-    }`}
-    onClick={onClick}
-  >
-    {label}
-  </button>
-);
+import { faPlus } from '@fortawesome/free-solid-svg-icons';
+import { useRouter } from 'next/navigation';
+import ApiKeyCreation from '@/app/Components/Modals/ApiKeyModal';
 
 const Dashboard = () => {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState<boolean>(false);
   const [currentSection, setCurrentSection] = useState<'bulkSMS' | 'voiceCalls' | 'admin'>('bulkSMS');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [userId, setUserId] = useState<number | null>(null);
-  const [currentTabSection, setCurrentTabSection] = useState<'pending' | 'approved'>('pending'); // Default to 'pending'
+  const router = useRouter();
 
   useEffect(() => {
     const signInResponse = localStorage.getItem('signInResponse');
@@ -56,50 +40,36 @@ const Dashboard = () => {
           >
             <div className="bg-gradient-to-r from-blue-400 to-blue-900 p-6">
               <div className="flex justify-between items-center">
-                <h1 className="text-2xl font-bold text-white">Manage Sender IDs</h1>
-                <button
+                <h1 className="text-2xl font-bold text-white">SENDER IDS</h1>
+                {/* <button
                   onClick={() => setIsModalOpen(true)}
                   className="bg-white text-blue-500 px-4 py-2 rounded-lg hover:bg-blue-50 transition duration-300 flex items-center"
                 >
                   <FontAwesomeIcon icon={faPlus} className="mr-2" />
-                  Add Sender ID
-                </button>
-              </div>
-            </div>
-
-            <div className="border-b border-gray-200">
-              <div className="flex">
-                <TabButton
-                  label="Pending"
-                  isActive={currentTabSection === 'pending'}
-                  onClick={() => setCurrentTabSection('pending')}
-                />
-                <TabButton
-                  label="Approved"
-                  isActive={currentTabSection === 'approved'}
-                  onClick={() => setCurrentTabSection('approved')}
-                />
+                  Create Api keys
+                </button> */}
               </div>
             </div>
 
             <div className="p-6">
-              <motion.div
-                key={currentSection}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.3 }}
+              {userId && (
+                <TableComponent userId={userId} />
+              )}
+              <button
+                className='text-gray-900 text-lg mt-5'
+                onClick={() => router.push('/Developer/Documentation')}
               >
-                {userId && (
-                  <TableComponent
-                    section={currentTabSection}
-                    userId={userId}
-                  />
-                )}
-              </motion.div>
+                Visit the <span className='text-sky-500'>documentation page</span>
+              </button>
             </div>
           </motion.div>
         </main>
       </div>
+      <ApiKeyCreation
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        userId={userId}
+      />
     </div>
   );
 };

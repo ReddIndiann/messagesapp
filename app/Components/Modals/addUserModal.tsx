@@ -1,14 +1,13 @@
 import React, { useState, ChangeEvent } from 'react';
-import { registerSenderId } from '@/app/lib/senderIdUtils';
-
-interface SenderIdRegistrarionModalProps {
+import { signUp } from '@/app/lib/authUtils';
+interface AddUserModalProps {
   isOpen: boolean;
   onClose: () => void;
   userId: number | null;
   onSuccess: () => void; // Callback to trigger refetch after successful registration
 }
 
-const SenderIdRegistrarion: React.FC<SenderIdRegistrarionModalProps> = ({ isOpen, onClose, userId, onSuccess }) => {
+const AddUser: React.FC<AddUserModalProps> = ({ isOpen, onClose, userId, onSuccess }) => {
   const [senderID, setSenderID] = useState<string>('');
   const [purpose, setPurpose] = useState<string>('');
   const [showSuccessModal, setShowSuccessModal] = useState<boolean>(false);
@@ -21,7 +20,7 @@ const SenderIdRegistrarion: React.FC<SenderIdRegistrarionModalProps> = ({ isOpen
     if (!userId) return;
 
     try {
-      await registerSenderId(senderID, userId, purpose);
+      await signUp(senderID, userId, purpose);
 
       // Show success modal
       setShowSuccessModal(true);
@@ -110,4 +109,4 @@ const SenderIdRegistrarion: React.FC<SenderIdRegistrarionModalProps> = ({ isOpen
   );
 };
 
-export default SenderIdRegistrarion;
+export default AddUser;
