@@ -4,14 +4,12 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import Header from '@/app/Components/Header';
 import Sidebar from '@/app/Components/SideNav';
-import AddSenderIdModal from '@/app/Components/Modals/SenderIdModal';
 import WalletHistoryTable from '@/app/Components/Tables/WalletHistoryTable';
 import BundleHistoryTable from '@/app/Components/Tables/BundleHistoryTable';
 import BundleOptions from '@/app/Components/Tables/BundleOptions';
 import { FaWallet, FaShoppingCart, FaHistory } from 'react-icons/fa';
 import { fetchUserById } from '@/app/lib/userlib';
 
-// Type for TabButton props
 type TabButtonProps = {
   icon: React.ReactNode;
   label: string;
@@ -21,21 +19,18 @@ type TabButtonProps = {
 
 const Dashboard: React.FC = () => {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState<boolean>(false);
-  const [currentSection, setCurrentSection] = useState<'bulkSMS' | 'voiceCalls' | 'admin'>('bulkSMS');
+  const [currentSection, setCurrentSection] = useState<'bulkSMS' | 'Developer' | 'admin'>('bulkSMS');
   const [currentTab, setCurrentTab] = useState('PurchaseBundle');
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [walletBalance, setWalletBalance] = useState(0.0); // State to store wallet balance
-  const [userId, setUserId] = useState<number | null>(null); // State to store user ID as a number
+  const [walletBalance, setWalletBalance] = useState(0.0);
+  const [userId, setUserId] = useState<number | null>(null);
 
   useEffect(() => {
     setCurrentTab('PurchaseBundle');
-
-    // Retrieve user ID from localStorage
     const signInResponse = localStorage.getItem('signInResponse');
     if (signInResponse) {
       const parsedResponse = JSON.parse(signInResponse);
       const extractedUserId = parsedResponse.user?.id || null;
-      setUserId(extractedUserId ? Number(extractedUserId) : null); // Convert to number
+      setUserId(extractedUserId ? Number(extractedUserId) : null);
     }
   }, []);
 
@@ -43,9 +38,9 @@ const Dashboard: React.FC = () => {
     const loadWalletBalance = async () => {
       if (userId !== null) {
         try {
-          const userData = await fetchUserById(userId); // Fetch user data by ID
+          const userData = await fetchUserById(userId);
           if (userData && userData.walletbalance !== undefined) {
-            setWalletBalance(userData.walletbalance); // Set wallet balance from fetched data
+            setWalletBalance(userData.walletbalance);
           }
         } catch (error) {
           console.error('Error fetching wallet balance:', error);
@@ -54,11 +49,11 @@ const Dashboard: React.FC = () => {
     };
 
     loadWalletBalance();
-  }, [userId]); // Fetch wallet balance when userId changes
+  }, [userId]);
 
   const TabButton: React.FC<TabButtonProps> = ({ icon, label, isActive, onClick }) => (
     <button
-      className={`flex items-center px-4 py-3 text-sm font-medium transition-colors duration-200 border-b-2 ${
+      className={`flex items-center px-2 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm font-medium transition-colors duration-200 border-b-2 ${
         isActive
           ? 'text-blue-600 border-blue-600'
           : 'text-gray-500 border-transparent hover:text-gray-700 hover:border-gray-300'
@@ -66,7 +61,7 @@ const Dashboard: React.FC = () => {
       onClick={onClick}
     >
       {icon}
-      <span className="ml-2">{label}</span>
+      <span className="ml-1 sm:ml-2">{label}</span>
     </button>
   );
 
@@ -79,8 +74,8 @@ const Dashboard: React.FC = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
           >
-            <h2 className="text-2xl font-bold text-gray-800 mb-4">SMS Bundles</h2>
-            <p className="text-gray-600 mb-6">Please select a bundle offer</p>
+            <h2 className="text-xl sm:text-2xl font-bold text-gray-800 mb-4">SMS Bundles</h2>
+            <p className="text-sm sm:text-base text-gray-600 mb-6">Please select a bundle offer</p>
             <BundleOptions />
           </motion.div>
         );
@@ -100,18 +95,18 @@ const Dashboard: React.FC = () => {
         <Sidebar onCollapse={setIsSidebarCollapsed} setCurrentSection={setCurrentSection} />
         <main
           className={`flex-1 ${
-            isSidebarCollapsed ? 'ml-20' : 'ml-64'
-          } p-8 overflow-y-auto flex`}
+            isSidebarCollapsed ? 'ml-20' : 'ml-0 sm:ml-64'
+          } p-4 sm:p-8 overflow-y-auto flex flex-col lg:flex-row`}
         >
           <motion.div
-            className="flex-1 bg-white shadow-lg rounded-lg overflow-hidden"
+            className="flex-1 bg-white shadow-lg rounded-lg overflow-hidden mb-4 lg:mb-0 lg:mr-4"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
           >
-            <div className="flex justify-between items-center border-b border-gray-200 bg-gray-50">
-              <h2 className="text-2xl font-bold text-gray-800 px-6 py-3">Dashboard</h2>
-              <div className="flex bg-white">
+            <div className="flex flex-col sm:flex-row justify-between items-center border-b border-gray-200 bg-gray-50">
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-800 px-4 sm:px-6 py-3">Dashboard</h2>
+              <div className="flex bg-white w-full sm:w-auto overflow-x-auto">
                 <TabButton
                   icon={<FaShoppingCart className="w-4 h-4" />}
                   label="Purchase Bundle"
@@ -132,7 +127,7 @@ const Dashboard: React.FC = () => {
                 />
               </div>
             </div>
-            <div className="p-6">
+            <div className="p-4 sm:p-6">
               <motion.div
                 key={currentTab}
                 initial={{ opacity: 0 }}
@@ -146,34 +141,34 @@ const Dashboard: React.FC = () => {
 
           {currentTab === 'PurchaseBundle' && (
             <motion.div
-              className="w-1/3 bg-white shadow-lg rounded-lg overflow-hidden ml-8"
+              className="w-full lg:w-1/3 bg-white shadow-lg rounded-lg overflow-hidden"
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.5, delay: 0.2 }}
             >
-              <div className="bg-gradient-to-r from-blue-600 to-blue-800 p-8 text-white relative overflow-hidden">
+              <div className="bg-gradient-to-r from-blue-600 to-blue-800 p-6 sm:p-8 text-white relative overflow-hidden">
                 <div className="relative z-10">
-                  <h2 className="text-xl font-semibold mb-2">Wallet Balance</h2>
-                  <div className="text-4xl font-bold tracking-tight">GHS {walletBalance.toFixed(2)}</div>
+                  <h2 className="text-lg sm:text-xl font-semibold mb-2">Wallet Balance</h2>
+                  <div className="text-3xl sm:text-4xl font-bold tracking-tight">GHS {walletBalance.toFixed(2)}</div>
                 </div>
-                <div className="absolute top-0 right-0 w-32 h-32 bg-white opacity-10 rounded-full -mr-16 -mt-16"></div>
-                <div className="absolute bottom-0 left-0 w-24 h-24 bg-white opacity-10 rounded-full -ml-12 -mb-12"></div>
+                <div className="absolute top-0 right-0 w-24 sm:w-32 h-24 sm:h-32 bg-white opacity-10 rounded-full -mr-12 sm:-mr-16 -mt-12 sm:-mt-16"></div>
+                <div className="absolute bottom-0 left-0 w-20 sm:w-24 h-20 sm:h-24 bg-white opacity-10 rounded-full -ml-10 sm:-ml-12 -mb-10 sm:-mb-12"></div>
               </div>
-              <div className="p-6">
-                <button className="bg-blue-600 hover:bg-blue-700 text-white py-3 px-6 rounded-lg w-full transition duration-300 ease-in-out transform hover:scale-105 shadow-md flex items-center justify-center">
+              <div className="p-4 sm:p-6">
+                <button className="bg-blue-600 hover:bg-blue-700 text-white py-2 sm:py-3 px-4 sm:px-6 rounded-lg w-full transition duration-300 ease-in-out transform hover:scale-105 shadow-md flex items-center justify-center">
                   <FaWallet className="mr-2" />
                   Load Wallet
                 </button>
-                <div className="mt-6 border-t pt-4">
-                  <h3 className="text-lg font-semibold text-gray-700 mb-4">Recent Transactions</h3>
-                  <div className="overflow-hidden shadow-sm rounded-lg border border-gray-200">
+                <div className="mt-4 sm:mt-6 border-t pt-4">
+                  <h3 className="text-base sm:text-lg font-semibold text-gray-700 mb-3 sm:mb-4">Recent Transactions</h3>
+                  <div className="overflow-x-auto shadow-sm rounded-lg border border-gray-200">
                     <table className="min-w-full divide-y divide-gray-200">
                       <thead className="bg-gray-50">
                         <tr>
-                          <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          <th scope="col" className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                             Transaction
                           </th>
-                          <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          <th scope="col" className="px-4 sm:px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                             Amount
                           </th>
                         </tr>
@@ -185,11 +180,11 @@ const Dashboard: React.FC = () => {
                           { label: 'Load Wallet', amount: 10, date: '2024-08-08' },
                         ].map((transaction, index) => (
                           <tr key={index} className="hover:bg-gray-50 transition duration-150 ease-in-out">
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <div className="text-sm font-medium text-gray-900">{transaction.label}</div>
-                              <div className="text-sm text-gray-500">{transaction.date}</div>
+                            <td className="px-4 sm:px-6 py-3 sm:py-4 whitespace-nowrap">
+                              <div className="text-xs sm:text-sm font-medium text-gray-900">{transaction.label}</div>
+                              <div className="text-xs sm:text-sm text-gray-500">{transaction.date}</div>
                             </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium text-gray-500">
+                            <td className="px-4 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-right text-xs sm:text-sm font-medium text-gray-500">
                               GHS {transaction.amount.toFixed(2)}
                             </td>
                           </tr>

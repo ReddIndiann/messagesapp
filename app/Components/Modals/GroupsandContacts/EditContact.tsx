@@ -34,7 +34,7 @@ const EditContact: React.FC<EditContactProps> = ({ isOpen, onClose, contact }) =
       setGroup(contact.groupId || null);
     }
   }, [contact]);
-
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL;
   useEffect(() => {
     const signInResponse = localStorage.getItem('signInResponse');
     if (signInResponse) {
@@ -50,7 +50,7 @@ const EditContact: React.FC<EditContactProps> = ({ isOpen, onClose, contact }) =
 
   const fetchGroups = async (userId: number) => {
     try {
-      const response = await axios.get(`http://localhost:5000/groups/user/${userId}`);
+      const response = await axios.get(`${apiUrl}/groups/user/${userId}`);
       setGroups(response.data);
     } catch (error) {
       console.error('Error fetching groups:', error);
@@ -76,7 +76,7 @@ const EditContact: React.FC<EditContactProps> = ({ isOpen, onClose, contact }) =
     }
 
     try {
-      const response = await fetch(`http://localhost:5000/contacts/${contact.id}`, {
+      const response = await fetch(`${apiUrl}/contacts/${contact.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

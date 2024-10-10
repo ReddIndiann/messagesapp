@@ -32,7 +32,7 @@ const ScheduleToGroupstepper: React.FC<ScheduleToGroupstepperProps> = ({ isOpen,
   const [showErrorModal, setShowErrorModal] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string>('');
   const navigate = useRouter();
-
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL;
   useEffect(() => {
     const fetchUserGroups = async () => {
       const signInResponse = localStorage.getItem('signInResponse');
@@ -129,7 +129,7 @@ const ScheduleToGroupstepper: React.FC<ScheduleToGroupstepperProps> = ({ isOpen,
     };
 
     try {
-      await axios.post('http://localhost:5000/schedule-messages/create', payload);
+      await axios.post(`${apiUrl}/schedule-messages/create`, payload);
       console.log('Message scheduled successfully:', payload);
       setShowSuccessModal(true);
 

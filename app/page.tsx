@@ -25,7 +25,7 @@ const slides = [
     description: 'Start sending bulk SMS and voice messages today.'
   }
 ];
-
+const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 const SignIn: React.FC = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [email, setEmail] = useState('');
@@ -48,12 +48,13 @@ const SignIn: React.FC = () => {
 
     try {
       const data = await signIn({ email, password });
-
+      router.push('/Sms/Home');
       // Handle successful login
+      console.log('redirecting');
       console.log('Login successful:', data);
 
       // Redirect to another page (e.g., dashboard)
-      router.push('/Sms/Home');
+   
 
     } catch (err: any) {
       setError(err.message || 'An error occurred');
@@ -61,7 +62,7 @@ const SignIn: React.FC = () => {
     } finally {
       setIsSubmitting(false);
     }
-  };
+  };console.log(`api ${apiUrl}`)
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white flex items-center justify-center p-4">

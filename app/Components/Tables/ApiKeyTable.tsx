@@ -10,7 +10,7 @@ type ApiKeyItem = {
   createdAt: string;
   updatedAt: string;
 };
-
+const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 type TableComponentProps = {
   userId: number | null;
 };
@@ -24,7 +24,7 @@ const TableComponent: React.FC<TableComponentProps> = ({ userId }) => {
 
     setLoading(true);
     try {
-      const response = await fetch(`http://localhost:5000/apikeys/user/${userId}`);
+      const response = await fetch(`${apiUrl}/apikeys/user/${userId}`);
       const result = await response.json();
       const formattedData = result.map((item: ApiKeyItem) => ({
         id: item.id,
@@ -49,7 +49,7 @@ const TableComponent: React.FC<TableComponentProps> = ({ userId }) => {
 
   const updateStatus = async (id: number, newStatus: string) => {
     try {
-      await fetch(`http://localhost:5000/apikeys/${id}`, {
+      await fetch(`${apiUrl}/apikeys/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: newStatus }),

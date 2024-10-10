@@ -13,7 +13,7 @@ interface Campaign {
   title: string;
   content: string;
   messageCategory: string;
-  date: string;
+  createdAt: string;
 }
 
 interface MessageTemplatesTableProps {
@@ -33,6 +33,18 @@ const MessageTemplatesTable: React.FC<MessageTemplatesTableProps> = ({ campaigns
 
   const truncateText = (text: string, maxLength: number = 30) => {
     return text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
+  };
+
+  const formatDate = (dateString: string) => {
+    const options: Intl.DateTimeFormatOptions = {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: 'numeric',
+      minute: 'numeric',
+    };
+    const date = new Date(dateString);
+    return date.toLocaleDateString(undefined, options);
   };
 
   const handleSendClick = (campaign: Campaign) => {
@@ -117,7 +129,7 @@ const MessageTemplatesTable: React.FC<MessageTemplatesTableProps> = ({ campaigns
                 {truncateText(campaign.content, 50)}
               </td>
               <td className="py-4 px-4 text-gray-500 border-b">{campaign.messageCategory}</td>
-              <td className="py-4 px-4 text-gray-500 border-b">{campaign.date}</td>
+              <td className="py-4 px-4 text-gray-500 border-b">{formatDate(campaign.createdAt)}</td>
               <td className="py-4 px-4 flex space-x-2 border-b">
                 <button
                   title="send"

@@ -11,7 +11,7 @@ import { faHistory, faFileAlt, faPlus ,IconDefinition} from '@fortawesome/free-s
 
 const Dashboard: FC = () => {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState<boolean>(false);
-  const [currentSection, setCurrentSection] = useState<'bulkSMS' | 'voiceCalls' | 'admin'>('bulkSMS');
+  const [currentSection, setCurrentSection] = useState<'bulkSMS' | 'Developer' | 'admin'>('bulkSMS');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [userId, setUserId] = useState<number | null>(null);
   const [currentTabSection, setCurrentTabSection] = useState('');

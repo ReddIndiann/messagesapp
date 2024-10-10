@@ -47,7 +47,7 @@ const TableComponent: React.FC<TableComponentProps> = ({ section, userId }) => {
   const [loading, setLoading] = useState(true);
   const [isEditOpen, setIsEditOpen] = useState<boolean>(false);
   const [selectedUser, setSelectedUser] = useState<UserReportItems | null>(null);
-
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL;
   useEffect(() => {
     if (userId === null) return;
 
@@ -55,9 +55,9 @@ const TableComponent: React.FC<TableComponentProps> = ({ section, userId }) => {
 
     const fetchData = async () => {
       try {
-        const campresponse = await fetch(`http://localhost:5000/send-messages/user/${userId}`);
+        const campresponse = await fetch(`${apiUrl}/send-messages/user/${userId}`);
         const campresult = await campresponse.json();
-        const userresponse = await fetch(`http://localhost:5000/auth`);
+        const userresponse = await fetch(`${apiUrl}/auth`);
         const userresult = await userresponse.json();
 
         if (section === 'campaignHistory') {

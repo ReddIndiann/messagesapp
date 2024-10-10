@@ -14,7 +14,7 @@ type ApiKeyItem = {
 type TableComponentProps = {
   userId: number | null;
 };
-
+const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 const TableComponent: React.FC<TableComponentProps> = ({ userId }) => {
   const [data, setData] = useState<ApiKeyItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -24,7 +24,7 @@ const TableComponent: React.FC<TableComponentProps> = ({ userId }) => {
 
     setLoading(true);
     try {
-      const response = await fetch(`http://localhost:5000/senders`);
+      const response = await fetch(`${apiUrl}/senders`);
       const result = await response.json();
       const formattedData = result.map((item: ApiKeyItem) => ({
         id: item.id,
@@ -49,7 +49,7 @@ const TableComponent: React.FC<TableComponentProps> = ({ userId }) => {
 
   const updateStatus = async (id: number, newStatus: string) => {
     try {
-      await fetch(`http://localhost:5000/senders/${id}`, {
+      await fetch(`${apiUrl}/senders/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: newStatus }),

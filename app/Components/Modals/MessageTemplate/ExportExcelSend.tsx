@@ -22,7 +22,7 @@ interface ExcelData {
   email?: string;
   date_of_birth?: string;
 }
-
+const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 const ExcelUploadStepper: React.FC<ExcelUploadStepperProps> = ({ isOpen, onClose,initialTitle, initialContent }) => {
   const [file, setFile] = useState<File | null>(null);
   const [data, setData] = useState<ExcelData[]>([]);
@@ -115,7 +115,7 @@ const ExcelUploadStepper: React.FC<ExcelUploadStepperProps> = ({ isOpen, onClose
     };
 
     try {
-      const response = await axios.post('http://localhost:5000/send-messages/create', payload);
+      const response = await axios.post(`${apiUrl}/send-messages/create`, payload);
       console.log('Message sent successfully:', response.data);
       setShowSuccessModal(true);
 

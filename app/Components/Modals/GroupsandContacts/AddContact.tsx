@@ -35,10 +35,10 @@ const navigate = useRouter();
       }
     }
   }, []);
-
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL;
   const fetchGroups = async (userId: number) => {
     try {
-      const response = await axios.get(`http://localhost:5000/groups/user/${userId}`);
+      const response = await axios.get(`${apiUrl}/groups/user/${userId}`);
       setGroups(response.data);
     } catch (error) {
       console.error('Error fetching groups:', error);

@@ -1,5 +1,5 @@
 import axios from 'axios';
-
+const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 export const createTemplate = async (
   title: string,
   content: string,
@@ -19,7 +19,7 @@ export const createTemplate = async (
   };
 
   try {
-    const response = await axios.post('http://localhost:5000/message-templates/create', templateData, {
+    const response = await axios.post(`${apiUrl}/message-templates/create`, templateData, {
       headers: {
         'Content-Type': 'application/json',
       },
@@ -42,7 +42,7 @@ export const fetchMessageTemplates = async (userId: number | null) => {
   }
 
   try {
-    const response = await axios.get(`http://localhost:5000/message-templates/user/${userId}`);
+    const response = await axios.get(`${apiUrl}/message-templates/user/${userId}`);
     return response.data; // Assuming the API response is an array of message templates
   } catch (error) {
     console.error('Error fetching message templates:', error);
@@ -57,7 +57,7 @@ export const fetchScheduleMessage = async (userId: number | null) => {
   }
 
   try {
-    const response = await axios.get(`http://localhost:5000/schedule-messages/user/${userId}`);
+    const response = await axios.get(`${apiUrl}/schedule-messages/user/${userId}`);
     return response.data; // Assuming the API response is an array of scheduled messages
   } catch (error) {
     console.error('Error fetching scheduled messages:', error);
@@ -67,7 +67,7 @@ export const fetchScheduleMessage = async (userId: number | null) => {
 
 export const deleteTemplate = async (contactId: number) => {
   try {
-    const response = await axios.delete(`http://localhost:5000/message-templates/${contactId}`);
+    const response = await axios.delete(`${apiUrl}/message-templates/${contactId}`);
     console.log('Template deleted successfully:', response.data);
     return response.data; // Return the response data if needed
   } catch (error) {

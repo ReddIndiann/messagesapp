@@ -18,7 +18,13 @@ const Profile: React.FC = () => {
   });
   const [loading, setLoading] = useState<boolean>(true);
   const [userId, setUserId] = useState<number | null>(null);
-  const [currentSection, setCurrentSection] = useState<'bulkSMS' | 'voiceCalls' | 'admin'>('bulkSMS');
+  const [currentSection, setCurrentSection] = useState<'bulkSMS' | 'Developer' | 'admin'>('bulkSMS');
+
+  // Password-related state
+  const [oldPassword, setOldPassword] = useState<string>('');
+  const [newPassword, setNewPassword] = useState<string>('');
+  const [confirmNewPassword, setConfirmNewPassword] = useState<string>('');
+  const [isEditingPassword, setIsEditingPassword] = useState<boolean>(false);
 
   useEffect(() => {
     const signInResponse = localStorage.getItem('signInResponse');
@@ -65,6 +71,26 @@ const Profile: React.FC = () => {
     setIsEditing(!isEditing); // Toggle editing mode
   };
 
+  // Handle password change
+  const handlePasswordChange = async () => {
+    if (newPassword !== confirmNewPassword) {
+      alert('New passwords do not match!');
+      return;
+    }
+    try {
+      // Call your backend API to update the password here
+      // Example: await changePassword({ oldPassword, newPassword });
+
+      alert('Password updated successfully!');
+      setOldPassword('');
+      setNewPassword('');
+      setConfirmNewPassword('');
+      setIsEditingPassword(false);
+    } catch (error) {
+      alert('Error changing password. Please try again.');
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col">
       <Header currentSection={currentSection} />
@@ -77,41 +103,22 @@ const Profile: React.FC = () => {
             animate={{ opacity: 1 }}
             transition={{ duration: 0.5 }}
           >
-            <h2 className="text-2xl font-bold mb-6 text-center   text-slate-500">Profile Information</h2>
+            <h2 className="text-2xl font-bold mb-6 text-center text-slate-500">Profile Information</h2>
             {loading ? (
               <p className="text-center text-gray-500">Loading user data...</p>
             ) : (
               <>
-                <div className="flex items-center justify-center mb-6">
-                  <div className="relative">
-                    <img
-                      src="https://source.unsplash.com/random/100x100/?user"
-                      alt="User Avatar"
-                      className="w-24 h-24 rounded-full border-4 border-blue-500"
-                    />
-                    <button
-                      type="button"
-                      className="absolute bottom-0 right-0 bg-blue-500 text-white rounded-full w-10 h-10 flex items-center justify-center border-4 border-white transform hover:scale-110 transition-transform"
-                      title="Change Avatar"
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                      </svg>
-                    </button>
-                  </div>
-                </div>
                 <form>
                   <div className="mb-4">
                     <label className="block text-gray-700">Name</label>
                     <input
-  type="text"
-  name="username" // Change from "name" to "username"
-  value={userData.username}
-  onChange={handleChange}
-  disabled={!isEditing}
-  className={`mt-1 block w-full border text-slate-500 rounded-md p-2 ${isEditing ? 'border-gray-300' : 'bg-gray-100 cursor-not-allowed'}`}
-/>
-
+                      type="text"
+                      name="username"
+                      value={userData.username}
+                      onChange={handleChange}
+                      disabled={!isEditing}
+                      className={`mt-1 block w-full border text-slate-500 rounded-md p-2 ${isEditing ? 'border-gray-300' : 'bg-gray-100 cursor-not-allowed'}`}
+                    />
                   </div>
                   <div className="mb-4">
                     <label className="block text-gray-700">Email</label>
@@ -127,14 +134,13 @@ const Profile: React.FC = () => {
                   <div className="mb-6">
                     <label className="block text-gray-700">Phone</label>
                     <input
-  type="tel"
-  name="number" // Change from "phone" to "number"
-  value={userData.number}
-  onChange={handleChange}
-  disabled={!isEditing}
-  className={`mt-1 block text-slate-500 w-full border rounded-md p-2 ${isEditing ? 'border-gray-300' : 'bg-gray-100 cursor-not-allowed'}`}
-/>
-
+                      type="tel"
+                      name="number"
+                      value={userData.number}
+                      onChange={handleChange}
+                      disabled={!isEditing}
+                      className={`mt-1 block text-slate-500 w-full border rounded-md p-2 ${isEditing ? 'border-gray-300' : 'bg-gray-100 cursor-not-allowed'}`}
+                    />
                   </div>
                   <div className="flex justify-between mt-4">
                     <button
@@ -155,6 +161,52 @@ const Profile: React.FC = () => {
                     )}
                   </div>
                 </form>
+
+                {/* Password Change Section */}
+                <h2 className="text-2xl font-bold mt-8 mb-6 text-center text-slate-500">Change Password</h2>
+                <div className="mb-4">
+                  <label className="block text-gray-700">Old Password</label>
+                  <input
+                    type="password"
+                    value={oldPassword}
+                    onChange={(e) => setOldPassword(e.target.value)}
+                    className="mt-1 block w-full border border-gray-300 rounded-md p-2"
+                  />
+                </div>
+                <div className="mb-4">
+                  <label className="block text-gray-700">New Password</label>
+                  <input
+                    type="password"
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    className="mt-1 block w-full border border-gray-300 rounded-md p-2"
+                  />
+                </div>
+                <div className="mb-6">
+                  <label className="block text-gray-700">Confirm New Password</label>
+                  <input
+                    type="password"
+                    value={confirmNewPassword}
+                    onChange={(e) => setConfirmNewPassword(e.target.value)}
+                    className="mt-1 block w-full border border-gray-300 rounded-md p-2"
+                  />
+                </div>
+                <div className="flex justify-between mt-4">
+                  <button
+                    type="button"
+                    onClick={handlePasswordChange}
+                    className="bg-blue-500 text-white rounded-md px-4 py-2 hover:bg-blue-600"
+                  >
+                    Save Password
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setIsEditingPassword(false)}
+                    className="bg-gray-400 text-white rounded-md px-4 py-2 hover:bg-gray-500"
+                  >
+                    Cancel
+                  </button>
+                </div>
               </>
             )}
           </motion.div>

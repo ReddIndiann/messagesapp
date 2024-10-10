@@ -20,7 +20,7 @@ const BundleOptions = () => {
     {
       title: 'Unlimited',
       price: 'Ghc 30',
-      period: 'unlimted',
+      period: 'unlimited',
       subtext: 'Non Expiry',
       features: [
         'unlimited history',
@@ -32,7 +32,7 @@ const BundleOptions = () => {
     {
       title: 'Enterprise',
       price: 'Ghc 399',
-      period: 'unlimted',
+      period: 'unlimited',
       subtext: 'Suited for team members',
       features: [
         'unlimited history',
@@ -45,9 +45,9 @@ const BundleOptions = () => {
   ];
 
   return (
-    <div className="bg-gray-100 py-12">
-      <div className="max-w-6xl mx-auto">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <div className="bg-gray-100 py-8 sm:py-12">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {plans.map((plan, index) => (
             <motion.div
               key={index}
@@ -64,22 +64,22 @@ const BundleOptions = () => {
                   Popular
                 </div>
               )}
-              <h3 className="text-2xl font-bold mb-4 text-gray-800">{plan.title}</h3>
+              <h3 className="text-xl sm:text-2xl font-bold mb-4 text-gray-800">{plan.title}</h3>
               <div className="mb-6">
-                <span className="text-4xl font-bold text-blue-600">{plan.price}</span>
+                <span className="text-3xl sm:text-4xl font-bold text-blue-600">{plan.price}</span>
                 <span className="text-gray-500">{plan.period}</span>
               </div>
-              <p className="text-gray-600 mb-8">{plan.subtext}</p>
+              <p className="text-sm sm:text-base text-gray-600 mb-8">{plan.subtext}</p>
               <ul className="mb-8 flex-grow">
                 {plan.features.map((feature, idx) => (
                   <li key={idx} className="flex items-center mb-3">
                     <FaCheck className="text-blue-500 mr-3" />
-                    <span className="text-gray-700">{feature}</span>
+                    <span className="text-sm sm:text-base text-gray-700">{feature}</span>
                   </li>
                 ))}
               </ul>
               <motion.button
-                className={`py-3 px-6 rounded-full font-semibold w-full transition-colors duration-300 ${
+                className={`py-2 sm:py-3 px-4 sm:px-6 rounded-full font-semibold w-full transition-colors duration-300 ${
                   plan.current
                     ? 'bg-blue-100 text-blue-500 hover:bg-blue-200'
                     : 'bg-blue-500 text-white hover:bg-blue-600'

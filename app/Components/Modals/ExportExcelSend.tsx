@@ -35,7 +35,7 @@ const ExcelUploadStepper: React.FC<ExcelUploadStepperProps> = ({ isOpen, onClose
   const [senders, setSenders] = useState<Sender[]>([]);
   const [selectedSenderId, setSelectedSenderId] = useState<string>('');
   const [userId, setUserId] = useState<number | null>(null);
-
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL;
   const router = useRouter();
 
 
@@ -117,7 +117,7 @@ const ExcelUploadStepper: React.FC<ExcelUploadStepperProps> = ({ isOpen, onClose
 
 
     try {
-      const response = await axios.post('http://localhost:5000/send-messages/create', payload);
+      const response = await axios.post('${apiUrl}/send-messages/create', payload);
       console.log('Message sent successfully:', response.data);
       setShowSuccessModal(true);
 

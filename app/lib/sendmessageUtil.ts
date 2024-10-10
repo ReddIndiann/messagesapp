@@ -1,7 +1,7 @@
 // lib/fetchTableData.ts
 import axios from "axios";
 
-
+const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 export type FetchTableDataProps = {
     section: 'campaignHistory' | 'deliveryReport';
     userId: number;
@@ -9,7 +9,7 @@ export type FetchTableDataProps = {
   
   export const fetchTableData = async ({ section, userId }: FetchTableDataProps) => {
     try {
-      const response = await fetch(`http://localhost:5000/send-messages/user/${userId}`);
+      const response = await fetch(`${apiUrl}send-messages/user/${userId}`);
       const result = await response.json();
   
       if (section === 'campaignHistory') {
@@ -44,7 +44,7 @@ export type FetchTableDataProps = {
 
   export const fetchList = async (userId: number) => {
     try {
-      const response = await axios.get(`http://localhost:5000/send-messages/user/${userId}`);
+      const response = await axios.get(`${apiUrl}/send-messages/user/${userId}`);
       return response.data; // Return the fetched contacts
     } catch (error) {
       console.error('Error fetching credit useddd:', error);
@@ -54,7 +54,7 @@ export type FetchTableDataProps = {
 
   export const fetchGraph = async (userId: number) => {
     try {
-      const response = await axios.get(`http://localhost:5000/send-messages/getlist/${userId}`);
+      const response = await axios.get(`${apiUrl}/send-messages/getlist/${userId}`);
       return response.data; // Ensure this returns the required data structure
     } catch (error) {
       console.error('Error fetching campaign data:', error);

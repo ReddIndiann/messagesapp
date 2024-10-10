@@ -11,7 +11,7 @@ interface FormData {
   messageContent: string;
   recipients: string[];
 }
-
+const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 interface QuickSMSModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -316,7 +316,7 @@ const QuickSMSModal: React.FC<QuickSMSModalProps> = ({ isOpen, onClose }) => {
 
   const handleSend = async (selectedSenderID: string, userId: number) => {
     try {
-      const response = await axios.post('http://localhost:5000/send-messages/create', {
+      const response = await axios.post(`${apiUrl}/send-messages/create`, {
         recipients: formData.recipients,
         senderId: selectedSenderID, // Use selected sender ID
         userId: userId, // Include user ID

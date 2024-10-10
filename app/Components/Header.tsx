@@ -6,7 +6,7 @@ import { userdetails } from '../lib/authUtils';
 
 
 interface HeaderProps {
-  currentSection: 'bulkSMS' | 'voiceCalls' | 'admin';
+  currentSection: 'bulkSMS' | 'Developer' | 'admin';
 }
 
 const Header: React.FC<HeaderProps> = ({ currentSection }) => {
@@ -105,7 +105,7 @@ const Header: React.FC<HeaderProps> = ({ currentSection }) => {
               </div>
             </>
           )}
-          {currentSection === 'voiceCalls' && (
+          {currentSection === 'Developer' && (
             <div className="text-center pr-2 hidden sm:block">
               <div className="text-sm">
                 <span className="block text-xs text-gray-500 font-semibold">Voice Balance</span>

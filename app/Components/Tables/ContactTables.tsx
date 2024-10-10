@@ -94,161 +94,155 @@ const ContactsTables: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col lg:flex-row space-y-8 lg:space-y-0 lg:space-x-8 p-6 bg-gray-100">
-      <div className="w-full lg:w-3/5">
-        {/* Contacts Section */}
-        <div className="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-4 sm:space-y-0">
-          <h2 className="font-medium text-base text-gray-700">Contacts ({contacts.length})</h2>
-          <div className="flex space-x-3">
-            <button
-              className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition duration-300 flex items-center shadow-md"
-              onClick={() => setIsContactModalOpen(true)}
-            >
-              <FontAwesomeIcon icon={faPlus} className="mr-2" />
-              <span>Add Contact</span>
-            </button>
-            <button className="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition duration-300 flex items-center shadow-md">
-              <FontAwesomeIcon icon={faFileExport} className="mr-2" />
-              <span>Export</span>
-            </button>
-          </div>
-        </div>
-        <div className="overflow-x-auto bg-white rounded-lg shadow-lg">
-          <table className="w-full table-auto">
-            <thead className="bg-gray-200 text-gray-700">
-              <tr>
-                <th className="py-4 px-6 text-left font-semibold">Name</th>
-                <th className="py-4 px-6 text-left font-semibold">Mobile</th>
-                <th className="py-4 px-6 text-left font-semibold">Groups</th>
-                <th className="py-4 px-6 text-center font-semibold">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {contacts.map((contact, index) => (
-                <tr
-                  key={index}
-                  className="border-b hover:bg-gray-50 transition duration-200 text-gray-700"
-                >
-                  <td className="py-4 px-6 font-medium">{contact.firstname} {contact.lastname}</td>
-                  <td className="py-4 px-6">{contact.phone}</td>
-                  <td className="py-4 px-6">{getGroupCountForContact(contact.id)} Groups</td>
-                  <td className="py-4 px-6">
-                    <div className="flex justify-center space-x-3 items-center">
-                      <button
-                        title="view"
-                        className="text-gray-400 hover:text-gray-600 transition duration-200"
-                        onClick={() => handleViewContact(contact)}
-                      >
-                        <FontAwesomeIcon icon={faUser} />
-                      </button>
-                      <button
-                        title="edit"
-                        className="text-gray-400 hover:text-gray-600 transition duration-200"
-                        onClick={() => handleEditContact(contact)}
-                      >
-                        <FontAwesomeIcon icon={faEdit} />
-                      </button>
-                      <button
-                        title="delete"
-                        className="text-gray-400 hover:text-red-500 transition duration-200"
-                        onClick={() => handleDeleteContact(contact.id)}
-                      >
-                        <FontAwesomeIcon icon={faTrash} />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+    <div className="flex flex-col lg:flex-row space-y-8 lg:space-y-0 lg:space-x-8">
+    <div className="w-full lg:w-3/5">
+      {/* Contacts Section */}
+      <div className="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-4 sm:space-y-0">
+        <h2 className="font-medium text-base text-gray-700">Contacts ({contacts.length})</h2>
+        <div className="flex space-x-3">
+          <button
+            className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition duration-300 flex items-center shadow-md"
+            onClick={() => setIsContactModalOpen(true)}
+          >
+            <FontAwesomeIcon icon={faPlus} className="mr-2" />
+            <span className="hidden sm:inline">Add Contact</span>
+          </button>
+          <button className="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition duration-300 flex items-center shadow-md">
+            <FontAwesomeIcon icon={faFileExport} className="mr-2" />
+            <span className="hidden sm:inline">Export</span>
+          </button>
         </div>
       </div>
-
-      <div className="w-full lg:w-2/5">
-        {/* Groups Section */}
-        <div className="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-4 sm:space-y-0">
-          <h2 className="font-medium text-base text-gray-700">Groups ({groups.length})</h2>
-          <div className="flex space-x-3">
-            <button
-              className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition duration-300 flex items-center shadow-md"
-              onClick={() => setIsGroupModalOpen(true)}
-            >
-              <FontAwesomeIcon icon={faPlus} className="mr-2" />
-              <span>Add Group</span>
-            </button>
-            <button className="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition duration-300 flex items-center shadow-md"
-            
-          
-            
-            >
-              <FontAwesomeIcon icon={faFileExport} className="mr-2" />
-              <span>Export</span>
-            </button>
-          </div>
-        </div>
-        <div className="overflow-x-auto bg-white rounded-lg shadow-lg">
-          <table className="w-full table-auto">
-            <thead className="bg-gray-200 text-gray-700">
-              <tr>
-                <th className="py-4 px-6 text-left font-semibold">Group Name</th>
-                <th className="py-4 px-6 text-left font-semibold">Member Count</th>
-                <th className="py-4 px-6 text-center font-semibold">Actions</th>
+      <div className="overflow-x-auto bg-white rounded-lg shadow-lg">
+        <table className="w-full table-auto">
+          <thead className="bg-gray-200 text-gray-700">
+            <tr>
+              <th className="py-4 px-6 text-left font-semibold">Name</th>
+              <th className="py-4 px-6 text-left font-semibold hidden sm:table-cell">Mobile</th>
+              <th className="py-4 px-6 text-left font-semibold hidden md:table-cell">Groups</th>
+              <th className="py-4 px-6 text-center font-semibold">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {contacts.map((contact, index) => (
+              <tr
+                key={index}
+                className="border-b hover:bg-gray-50 transition duration-200 text-gray-700"
+              >
+                <td className="py-4 px-6 font-medium">{contact.firstname} {contact.lastname}</td>
+                <td className="py-4 px-6 hidden sm:table-cell">{contact.phone}</td>
+                <td className="py-4 px-6 hidden md:table-cell">{getGroupCountForContact(contact.id)} Groups</td>
+                <td className="py-4 px-6">
+                  <div className="flex justify-center space-x-3 items-center">
+                    <button
+                      title="view"
+                      className="text-gray-400 hover:text-gray-600 transition duration-200"
+                      onClick={() => handleViewContact(contact)}
+                    >
+                      <FontAwesomeIcon icon={faUser} />
+                    </button>
+                    <button
+                      title="edit"
+                      className="text-gray-400 hover:text-gray-600 transition duration-200"
+                      onClick={() => handleEditContact(contact)}
+                    >
+                      <FontAwesomeIcon icon={faEdit} />
+                    </button>
+                    <button
+                      title="delete"
+                      className="text-gray-400 hover:text-red-500 transition duration-200"
+                      onClick={() => handleDeleteContact(contact.id)}
+                    >
+                      <FontAwesomeIcon icon={faTrash} />
+                    </button>
+                  </div>
+                </td>
               </tr>
-            </thead>
-            <tbody>
-              {groups.map((group, index) => (
-                <tr
-                  key={index}
-                  className="border-b hover:bg-gray-50 transition duration-200 text-gray-700"
-                >
-                  <td className="py-4 px-6 font-medium">{group.groupName}</td>
-                  <td className="py-4 px-6">{getContactCountForGroup(group.id)} members</td>
-                  <td className="py-4 px-6">
-                    <div className="flex justify-center space-x-3 items-center">
-                      <button
-                        title="view"
-                        className="text-gray-400 hover:text-gray-600 transition duration-200"
-                        onClick={() => handleViewGroup(group)}
-                      >
-                        <FontAwesomeIcon icon={faUsers} />
-                      </button>
-                      <button
-                        title="edit"
-                        className="text-gray-400 hover:text-gray-600 transition duration-200"
-                        onClick={() => handleEditGroup(group)}
-                      >
-                        <FontAwesomeIcon icon={faEdit} />
-                      </button>
-                      <button
-                        title="delete"
-                        className="text-gray-400 hover:text-red-500 transition duration-200"
-                        onClick={() => handleDeleteGroup(group.id)}
-                      >
-                        <FontAwesomeIcon icon={faTrash} />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-        <ExcelUploadStepper
-        isOpen={isExportExcelModalOpen}
-        onClose={() => setIsExportExcelModalOpen(false)}
-
-        // onNext={handleNextFromQuickSMS}
-      />
+            ))}
+          </tbody>
+        </table>
       </div>
-
-      {/* Modals */}
-      <AddContact isOpen={isContactModalOpen} onClose={() => setIsContactModalOpen(false)} />
-      <AddGroup isOpen={isGroupModalOpen} onClose={() => setIsGroupModalOpen(false)} />
-      <EditContact isOpen={isContactEditModalOpen} onClose={() => setIsContactEditModalOpen(false)} contact={selectedContact} />
-      <EditGroup isOpen={isGroupEditModalOpen} onClose={() => setIsGroupEditModalOpen(false)} group={selectedGroup} />
-      <ViewContact isOpen={isContactViewModalOpen} onClose={() => setIsContactViewModalOpen(false)} contact={selectedContact} />
-      <ViewGroup isOpen={isGroupViewModalOpen} onClose={() => setIsGroupViewModalOpen(false)} group={selectedGroup} />
     </div>
+
+    <div className="w-full lg:w-2/5">
+      {/* Groups Section */}
+      <div className="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-4 sm:space-y-0">
+        <h2 className="font-medium text-base text-gray-700">Groups ({groups.length})</h2>
+        <div className="flex space-x-3">
+          <button
+            className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition duration-300 flex items-center shadow-md"
+            onClick={() => setIsGroupModalOpen(true)}
+          >
+            <FontAwesomeIcon icon={faPlus} className="mr-2" />
+            <span className="hidden sm:inline">Add Group</span>
+          </button>
+          <button className="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition duration-300 flex items-center shadow-md">
+            <FontAwesomeIcon icon={faFileExport} className="mr-2" />
+            <span className="hidden sm:inline">Export</span>
+          </button>
+        </div>
+      </div>
+      <div className="overflow-x-auto bg-white rounded-lg shadow-lg">
+        <table className="w-full table-auto">
+          <thead className="bg-gray-200 text-gray-700">
+            <tr>
+              <th className="py-4 px-6 text-left font-semibold">Group Name</th>
+              <th className="py-4 px-6 text-left font-semibold hidden sm:table-cell">Member Count</th>
+              <th className="py-4 px-6 text-center font-semibold">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {groups.map((group, index) => (
+              <tr
+                key={index}
+                className="border-b hover:bg-gray-50 transition duration-200 text-gray-700"
+              >
+                <td className="py-4 px-6 font-medium">{group.groupName}</td>
+                <td className="py-4 px-6 hidden sm:table-cell">{getContactCountForGroup(group.id)} members</td>
+                <td className="py-4 px-6">
+                  <div className="flex justify-center space-x-3 items-center">
+                    <button
+                      title="view"
+                      className="text-gray-400 hover:text-gray-600 transition duration-200"
+                      onClick={() => handleViewGroup(group)}
+                    >
+                      <FontAwesomeIcon icon={faUsers} />
+                    </button>
+                    <button
+                      title="edit"
+                      className="text-gray-400 hover:text-gray-600 transition duration-200"
+                      onClick={() => handleEditGroup(group)}
+                    >
+                      <FontAwesomeIcon icon={faEdit} />
+                    </button>
+                    <button
+                      title="delete"
+                      className="text-gray-400 hover:text-red-500 transition duration-200"
+                      onClick={() => handleDeleteGroup(group.id)}
+                    >
+                      <FontAwesomeIcon icon={faTrash} />
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    {/* Modals */}
+    <AddContact isOpen={isContactModalOpen} onClose={() => setIsContactModalOpen(false)} />
+    <AddGroup isOpen={isGroupModalOpen} onClose={() => setIsGroupModalOpen(false)} />
+    <EditContact isOpen={isContactEditModalOpen} onClose={() => setIsContactEditModalOpen(false)} contact={selectedContact} />
+    <EditGroup isOpen={isGroupEditModalOpen} onClose={() => setIsGroupEditModalOpen(false)} group={selectedGroup} />
+    <ViewContact isOpen={isContactViewModalOpen} onClose={() => setIsContactViewModalOpen(false)} contact={selectedContact} />
+    <ViewGroup isOpen={isGroupViewModalOpen} onClose={() => setIsGroupViewModalOpen(false)} group={selectedGroup} />
+    <ExcelUploadStepper
+      isOpen={isExportExcelModalOpen}
+      onClose={() => setIsExportExcelModalOpen(false)}
+    />
+  </div>
   );
 };
 

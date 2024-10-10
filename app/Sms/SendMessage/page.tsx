@@ -24,7 +24,7 @@ import ExcelUploadScheduleStepper from '@/app/Components/Modals/ExportExcelSched
 
 const Dashboard: React.FC = () => {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState<boolean>(false);
-  const [currentSection, setCurrentSection] = useState<'bulkSMS' | 'voiceCalls' | 'admin'>('bulkSMS');
+  const [currentSection, setCurrentSection] = useState<'bulkSMS' | 'Developer' | 'admin'>('bulkSMS');
   const [activeMainTab, setActiveMainTab] = useState<'messages' | 'scheduled' | 'international'>('messages');
   const [isCreateTemplateModalOpen, setIsCreateTemplateModalOpen] = useState<boolean>(false);
   const [isSendMessageOptionsModalOpen, setIsSendMessageOptionsModalOpen] = useState<boolean>(false);
@@ -85,7 +85,7 @@ const Dashboard: React.FC = () => {
   const mainTabs = [
     { id: 'messages', label: 'Messages' },
     { id: 'scheduled', label: 'Scheduled' },
-    { id: 'international', label: 'International' },
+
   ];
 
   const handleMainTabClick = (tabId: 'messages' | 'scheduled' | 'international') => {
@@ -176,40 +176,45 @@ const Dashboard: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
-      <Header currentSection={currentSection} />
-      <div className="flex flex-1 pt-16">
-        <Sidebar onCollapse={setIsSidebarCollapsed} setCurrentSection={setCurrentSection} />
-        <main className={`flex-1 ${isSidebarCollapsed ? 'ml-16' : 'ml-64'} p-4 md:p-6 lg:p-8 overflow-y-auto`}>
-          <div className="bg-white rounded-lg shadow-lg">
-            <div className="border-b border-gray-200">
-              <nav className="flex -mb-px">
-                {mainTabs.map((tab) => (
-                  <button
-                    key={tab.id}
-                    className={`px-6 py-3 font-medium text-sm ${activeMainTab === tab.id ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-500 hover:text-gray-700'}`}
-                    onClick={() => handleMainTabClick(tab.id as 'messages' | 'scheduled' | 'international')}
-                  >
-                    {tab.label}
-                  </button>
-                ))}
-              </nav>
-            </div>
-            
-            <div className="flex justify-end items-center border-b border-gray-200 px-6 py-3">
-              <div>
-                {renderActionButtons()}
-              </div>
-            </div>
-
-            <div className="p-6 grid grid-cols-1 gap-6">
-  {activeMainTab === 'messages' && <MessageTemplatesTable campaigns={smsCampaigns} />}
-  {activeMainTab === 'scheduled' && <ScheduledMessageTable campaigns={smsSchedule} />}
-  {activeMainTab === 'international' && <InternationalMessagesTable messages={internationalMessages} campaigns={internationalCampaigns} />}
-</div>
-
+    <Header currentSection={currentSection} />
+    <div className="flex flex-1 pt-16">
+      <Sidebar onCollapse={setIsSidebarCollapsed} setCurrentSection={setCurrentSection} />
+      <main className={`flex-1 ${isSidebarCollapsed ? 'ml-16' : 'ml-64'} p-4 md:p-6 lg:p-8 overflow-y-auto`}>
+        <div className="bg-white rounded-lg shadow-lg">
+          <div className="border-b border-gray-200">
+            <nav className="flex flex-wrap -mb-px">
+              {mainTabs.map((tab) => (
+                <button
+                  key={tab.id}
+                  className={`px-4 py-2 md:px-6 md:py-3 font-medium text-sm ${
+                    activeMainTab === tab.id
+                      ? 'text-blue-600 border-b-2 border-blue-600'
+                      : 'text-gray-500 hover:text-gray-700'
+                  }`}
+                  onClick={() => handleMainTabClick(tab.id as 'messages' | 'scheduled' | 'international')}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </nav>
           </div>
-        </main>
-      </div>
+          
+          <div className="flex flex-wrap justify-between items-center border-b border-gray-200 px-4 py-3 md:px-6">
+            <div className="w-full md:w-auto mb-2 md:mb-0">
+              {renderActionButtons()}
+            </div>
+          </div>
+
+          <div className="p-4 md:p-6">
+            {activeMainTab === 'messages' && <MessageTemplatesTable campaigns={smsCampaigns} />}
+            {activeMainTab === 'scheduled' && <ScheduledMessageTable campaigns={smsSchedule} />}
+            {activeMainTab === 'international' && (
+              <InternationalMessagesTable messages={internationalMessages} campaigns={internationalCampaigns} />
+            )}
+          </div>
+        </div>
+      </main>
+    </div>
 
       {/* Render the modals */}
       <CreateTemplateModal isOpen={isCreateTemplateModalOpen} onClose={() => setIsCreateTemplateModalOpen(false)} onTemplateCreated={handleTemplateCreated} />

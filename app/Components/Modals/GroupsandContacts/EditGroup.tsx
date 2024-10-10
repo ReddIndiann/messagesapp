@@ -12,6 +12,7 @@ const EditGroup: React.FC<EditGroupModalProps> = ({ isOpen, onClose, group }) =>
   const [groupName, setGroupName] = useState<string>(group?.groupName ||'');
   const [userId, setUserId] = useState<number | null>(null);
   const [showSuccessModal, setShowSuccessModal] = useState<boolean>(false);
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL;
   useEffect(() => {
     if (group) {
       setGroupName(group.groupName || '');
@@ -38,7 +39,7 @@ const EditGroup: React.FC<EditGroupModalProps> = ({ isOpen, onClose, group }) =>
     }
 
     try {
-      const response = await fetch(`http://localhost:5000/groups/${group.id}`, {
+      const response = await fetch(`${apiUrl}/groups/${group.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

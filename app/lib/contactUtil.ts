@@ -1,5 +1,5 @@
 import axios from 'axios';
-
+const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 // Function to create a new contact
 const createContact = async (contactData: {
   firstname: string;
@@ -15,7 +15,7 @@ const createContact = async (contactData: {
   }
 
   try {
-    const response = await axios.post('http://localhost:5000/contacts', contactData);
+    const response = await axios.post(`${apiUrl}/contacts`, contactData);
     console.log('Contact registered successfully');
     return response; // Return the full response, including the new contact's ID
   } catch (error) {
@@ -26,7 +26,7 @@ const createContact = async (contactData: {
 
 const addContactToGroup = async (contactId: number, groupId: number) => {
   try {
-    await axios.post('http://localhost:5000/contactgroups', {
+    await axios.post(`${apiUrl}/contactgroups`, {
       contactId,
       groupId,
     });
@@ -40,7 +40,7 @@ const addContactToGroup = async (contactId: number, groupId: number) => {
 // Function to fetch contacts for a specific user
 const fetchContacts = async (userId: number) => {
   try {
-    const response = await axios.get(`http://localhost:5000/contacts/user/${userId}`);
+    const response = await axios.get(`${apiUrl}/contacts/user/${userId}`);
     return response.data; // Return the fetched contacts
   } catch (error) {
     console.error('Error fetching contacts:', error);
@@ -51,7 +51,7 @@ const fetchContacts = async (userId: number) => {
 
 const fetchAllContacts = async () => {
   try {
-    const response = await axios.get(`http://localhost:5000/contacts/`);
+    const response = await axios.get(`${apiUrl}/contacts/`);
     return response.data; // Return the fetched contacts
   } catch (error) {
     console.error('Error fetching contacts:', error);
@@ -62,7 +62,7 @@ const fetchAllContacts = async () => {
 const deleteContact = async (contactId: number) => {
   try {
     // Perform the delete operation using axios
-    const response = await axios.delete(`http://localhost:5000/contacts/${contactId}`);
+    const response = await axios.delete(`${apiUrl}/contacts/${contactId}`);
     console.log('Contact deleted successfully:', response.data);
     return response.data; // Return the response data if needed
   } catch (error) {

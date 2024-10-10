@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { saveToCookies, getFromCookies } from "./storage";
-
+const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 export const signUp = async (formData: {
   username: string;
   number: string;
@@ -10,7 +10,7 @@ export const signUp = async (formData: {
   const { username, number, email, password } = formData;
 
   try {
-    const response = await axios.post('http://localhost:5000/auth/signup', {
+    const response = await axios.post(`${apiUrl}/auth/signup`, {
       username,
       email,
       password,
@@ -44,7 +44,7 @@ export const signIn = async (formData: {
   const { email, password } = formData;
 
   try {
-    const response = await axios.post('http://localhost:5000/auth/signin', {
+    const response = await axios.post(`${apiUrl}/auth/signin`, {
       email,
       password,
     });
@@ -74,7 +74,7 @@ export const signIn = async (formData: {
 
 export const userdetails = async (userId: number) => {
   try {
-    const response = await axios.get(`http://localhost:5000/auth/${userId}`);
+    const response = await axios.get(`${apiUrl}/auth/${userId}`);
     
     return response.data; // Return the fetched API keys
   } catch (err: any) {
@@ -86,7 +86,7 @@ export const userdetails = async (userId: number) => {
   userData: { username: string; email: string; number: string }
 ) => {
   try {
-    const response = await axios.put(`http://localhost:5000/auth/update/${userId}`, userData);
+    const response = await axios.put(`${apiUrl}/auth/update/${userId}`, userData);
 
     // Clear localStorage
     localStorage.removeItem('signInResponse');

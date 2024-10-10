@@ -2,14 +2,13 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { fetchGroups, Group } from '@/app/lib/grouputil';
 import axios from 'axios';
 import { fetchSenderIds } from '@/app/lib/senderIdUtils';
-
+const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 interface SendToGroupStepperProps {
   isOpen: boolean;
   onClose: () => void;
   initialTitle: string;
   initialContent: string;
 }
-
 const SendToGroupStepper: React.FC<SendToGroupStepperProps> = ({ isOpen, onClose, initialTitle, initialContent }) => {
   const [step, setStep] = useState<number>(1);
   const [selectedGroups, setSelectedGroups] = useState<string[]>([]);
@@ -44,6 +43,15 @@ const SendToGroupStepper: React.FC<SendToGroupStepperProps> = ({ isOpen, onClose
 
     fetchUserGroups();
   }, []);
+  useEffect(() => {
+    const signInResponse = localStorage.getItem('signInResponse');
+    if (signInResponse) {
+      const parsedResponse = JSON.parse(signInResponse);
+      const extractedUserId = parsedResponse.user?.id || null;
+      setUserId(extractedUserId);
+    }
+  }, []);
+
   useEffect(() => {
     if (userId) {
       const getSenderIds = async () => {
@@ -86,7 +94,7 @@ const SendToGroupStepper: React.FC<SendToGroupStepperProps> = ({ isOpen, onClose
     };
 
     try {
-      await axios.post('http://localhost:5000/send-messages/create', payload);
+      await axios.post(`${apiUrl}/create`, payload);
       console.log('Message sent successfully:', payload);
       setShowSuccessModal(true);
 
@@ -178,17 +186,13 @@ const SendToGroupStepper: React.FC<SendToGroupStepperProps> = ({ isOpen, onClose
     const [localCampaignTitle, setLocalCampaignTitle] = useState(campaignTitle);
     const [localMessageContent, setLocalMessageContent] = useState(messageContent);
   
-    // Sync the local state with props
-    useEffect(() => {
-      setLocalSenderID(selectedSenderID);
-    }, [selectedSenderID]);
-  
     const handleAddSenderID = () => {
       if (newSenderID) {
         setSelectedSenderID(newSenderID);
         setNewSenderID('');
       }
     };
+  
   
     return (
       <div>
@@ -198,30 +202,30 @@ const SendToGroupStepper: React.FC<SendToGroupStepperProps> = ({ isOpen, onClose
             <label htmlFor="senderID" className="block text-sm font-medium text-gray-700 mb-2">Sender ID</label>
             <div className="flex items-center gap-2">
             <select
-              id="selectedSenderID"
-              value={selectedSenderID}
-              onChange={(e) => setSelectedSenderID(e.target.value)}
-              className="w-full bg-white border border-gray-300 rounded-lg shadow-sm py-1 px-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-800 transition-all duration-200"
-              required
-            >
-              <option value="" disabled>Select Sender ID</option>
-              {senders.length > 0 ? (
-                senders.map((sender) => (
-                  <option key={sender.id} value={sender.id}>
-                    {sender.name}
-                  </option>
-                ))
-              ) : (
-                <option value="" disabled>No Sender IDs available</option>
-              )}
-            </select>
-            <button
+                id="selectedSenderID"
+                value={selectedSenderID}
+                onChange={(e) => setSelectedSenderID(e.target.value)}
+                className="w-full bg-white border border-gray-300 rounded-lg shadow-sm py-1 px-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-800 transition-all duration-200"
+                required
+              >
+                <option value="" disabled>Select Sender ID</option>
+                {senders.length > 0 ? (
+                  senders.map((sender) => (
+                    <option key={sender.id} value={sender.id}>
+                      {sender.name}
+                    </option>
+                  ))
+                ) : (
+                  <option value="" disabled>No Sender IDs available</option>
+                )}
+              </select>
+            {/* <button
               type="button"
               className="bg-gray-100 text-gray-800 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors duration-200"
               onClick={handleAddSenderID}
             >
               Add New
-            </button>
+            </button> */}
           </div>
           </div>
   

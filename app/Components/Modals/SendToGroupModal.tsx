@@ -119,7 +119,7 @@ const navigate = useRouter();
     };
   
     try {
-      await axios.post('http://localhost:5000/send-messages/create', payload);
+      await axios.post('${apiUrl}/send-messages/create', payload);
       console.log('Message sent successfully:', payload);
       setShowSuccessModal(true);
 
@@ -211,7 +211,7 @@ const navigate = useRouter();
     const [localSenderID, setLocalSenderID] = useState(selectedSenderID);
     const [localCampaignTitle, setLocalCampaignTitle] = useState(campaignTitle);
     const [localMessageContent, setLocalMessageContent] = useState(messageContent);
-
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL;
     const handleAddSenderID = () => {
       if (newSenderID) {
         setSelectedSenderID(newSenderID);
