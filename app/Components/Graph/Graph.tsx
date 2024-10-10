@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { BarChart } from '@mui/x-charts/BarChart';
 
-
+const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 interface ChartData {
   date: string; // Month-Year format
   valueA: number; // Total messages sent
@@ -25,12 +25,11 @@ export default function BasicBars() {
       setUserId(extractedUserId);
     }
   }, []);
-
   useEffect(() => {
     const fetchData = async () => {
       if (userId) {
         try {
-          const response = await fetch(`http://localhost:5000/send-messages/getlist/${userId}`);
+          const response = await fetch(`${apiUrl}/send-messages/getlist/${userId}`);
           const result = await response.json();
           
           // Assuming the response format contains an array of objects with monthYear, totalMessagesSent, and totalRecipientsCount

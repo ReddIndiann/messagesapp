@@ -350,7 +350,7 @@ const ScheduleQuickSms: React.FC<ScheduleQuickSmsProps> = ({ isOpen, onClose }) 
     };
   
     try {
-      const response = await axios.post('${apiUrl}/schedule-messages/create', payload);
+      const response = await axios.post(`${apiUrl}/schedule-messages/create`, payload);
       console.log('Message scheduled successfully:', response.data);
       setShowSuccessModal(true);
   

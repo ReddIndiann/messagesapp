@@ -39,7 +39,7 @@ export const deleteApiKeys = async (senderId: number) => {
 // Function to register a new API key
 export const registerApiKeys = async (senderID: string, userId: number) => {
   try {
-    const response = await axios.post('${apiUrl}/apikeys/create', {
+    const response = await axios.post(`${apiUrl}/apikeys/create`, {
       name: senderID,
       userId,
     });
