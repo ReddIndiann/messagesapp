@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { updateUserById } from '@/app/lib/userlib';
+import Swal from 'sweetalert2';
+import withReactContent from 'sweetalert2-react-content';
 
 type EditUserProps = {
   isOpen: boolean;
@@ -11,9 +13,10 @@ const EditUser: React.FC<EditUserProps> = ({ isOpen, onClose, user }) => {
   const [username, setUsername] = useState<string>('');
   const [email, setEmail] = useState<string>('');
   const [number, setNumber] = useState<string>('');
-  const [role, setRole] = useState<string>('User'); // Default to 'User'
+  const [role, setRole] = useState<string>('User');
   const [walletbalance, setWalletbalance] = useState<number>(0);
   const [creditbalance, setCreditbalance] = useState<number>(0);
+  const MySwal = withReactContent(Swal); // Initialize SweetAlert with React integration
 
   useEffect(() => {
     if (user) {
@@ -22,7 +25,7 @@ const EditUser: React.FC<EditUserProps> = ({ isOpen, onClose, user }) => {
       setNumber(user.number);
       setRole(user.role);
       setWalletbalance(user.walletbalance);
-      setCreditbalance(user.creditalance);
+      setCreditbalance(user.creditbalance); // Corrected typo
     }
   }, [user]);
 
@@ -42,10 +45,28 @@ const EditUser: React.FC<EditUserProps> = ({ isOpen, onClose, user }) => {
       try {
         const updatedUser = await updateUserById(user.id, updatedUserData);
         console.log('User updated successfully:', updatedUser);
+
+        // Show SweetAlert for success
+        MySwal.fire({
+          title: 'Success!',
+          text: 'User updated successfully.',
+          icon: 'success',
+          timer: 2000,
+          showConfirmButton: false,
+        });
+
         onClose(); // Close the modal after successful save
       } catch (error) {
         console.error('Error updating user:', error);
-        // Optionally, handle error display in the UI
+
+        // Show SweetAlert for error
+        MySwal.fire({
+          title: 'Error!',
+          text: 'There was an error updating the user. Please try again.',
+          icon: 'error',
+          timer: 3000,
+          showConfirmButton: false,
+        });
       }
     }
   };
@@ -58,7 +79,6 @@ const EditUser: React.FC<EditUserProps> = ({ isOpen, onClose, user }) => {
           <div className="mb-4">
             <label className="block text-gray-700">Username</label>
             <input
-            title='q'
               type="text"
               className="w-full border text-gray-700 border-gray-300 px-3 py-2 rounded"
               value={username}
@@ -67,7 +87,7 @@ const EditUser: React.FC<EditUserProps> = ({ isOpen, onClose, user }) => {
           </div>
           <div className="mb-4">
             <label className="block text-gray-700">Email</label>
-            <input  title='q'
+            <input
               type="email"
               className="w-full border text-gray-700 border-gray-300 px-3 py-2 rounded"
               value={email}
@@ -76,7 +96,7 @@ const EditUser: React.FC<EditUserProps> = ({ isOpen, onClose, user }) => {
           </div>
           <div className="mb-4">
             <label className="block text-gray-700">Number</label>
-            <input title='q'
+            <input
               type="text"
               className="w-full border text-gray-700 border-gray-300 px-3 py-2 rounded"
               value={number}
@@ -85,7 +105,7 @@ const EditUser: React.FC<EditUserProps> = ({ isOpen, onClose, user }) => {
           </div>
           <div className="mb-4">
             <label className="block text-gray-700">Role</label>
-            <select title='q'
+            <select
               className="w-full border text-gray-700 border-gray-300 px-3 py-2 rounded"
               value={role}
               onChange={(e) => setRole(e.target.value)}
@@ -96,7 +116,7 @@ const EditUser: React.FC<EditUserProps> = ({ isOpen, onClose, user }) => {
           </div>
           <div className="mb-4">
             <label className="block text-gray-700">Wallet Balance</label>
-            <input title='q'
+            <input
               type="number"
               className="w-full border text-gray-700 border-gray-300 px-3 py-2 rounded"
               value={walletbalance}
@@ -105,7 +125,7 @@ const EditUser: React.FC<EditUserProps> = ({ isOpen, onClose, user }) => {
           </div>
           <div className="mb-4">
             <label className="block text-gray-700">Credit Balance</label>
-            <input title='q'
+            <input
               type="number"
               className="w-full border text-gray-700 border-gray-300 px-3 py-2 rounded"
               value={creditbalance}

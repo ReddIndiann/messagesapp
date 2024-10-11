@@ -35,6 +35,9 @@
     "react-phone-number-input": "^3.4.5",
     "react-responsive-carousel": "^3.2.23",
     "react-toastify": "^10.0.5",
+    "sass": "^1.79.5",
+    "sweetalert2": "^11.14.2",
+    "sweetalert2-react-content": "^5.0.7",
     "xlsx": "^0.18.5"
   },
   "devDependencies": {

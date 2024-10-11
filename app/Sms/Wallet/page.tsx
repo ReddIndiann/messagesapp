@@ -9,7 +9,7 @@ import BundleHistoryTable from '@/app/Components/Tables/BundleHistoryTable';
 import BundleOptions from '@/app/Components/Tables/BundleOptions';
 import { FaWallet, FaShoppingCart, FaHistory } from 'react-icons/fa';
 import { fetchUserById } from '@/app/lib/userlib';
-
+import DepositeWallet from '@/app/Components/Modals/WalletModal/depositeWallet';
 type TabButtonProps = {
   icon: React.ReactNode;
   label: string;
@@ -23,7 +23,7 @@ const Dashboard: React.FC = () => {
   const [currentTab, setCurrentTab] = useState('PurchaseBundle');
   const [walletBalance, setWalletBalance] = useState(0.0);
   const [userId, setUserId] = useState<number | null>(null);
-
+  const [isDepositeModalOpen, setIsDepositeModalOpen] = useState<boolean>(false);
   useEffect(() => {
     setCurrentTab('PurchaseBundle');
     const signInResponse = localStorage.getItem('signInResponse');
@@ -155,7 +155,9 @@ const Dashboard: React.FC = () => {
                 <div className="absolute bottom-0 left-0 w-20 sm:w-24 h-20 sm:h-24 bg-white opacity-10 rounded-full -ml-10 sm:-ml-12 -mb-10 sm:-mb-12"></div>
               </div>
               <div className="p-4 sm:p-6">
-                <button className="bg-blue-600 hover:bg-blue-700 text-white py-2 sm:py-3 px-4 sm:px-6 rounded-lg w-full transition duration-300 ease-in-out transform hover:scale-105 shadow-md flex items-center justify-center">
+                <button className="bg-blue-600 hover:bg-blue-700 text-white py-2 sm:py-3 px-4 sm:px-6 rounded-lg w-full transition duration-300 ease-in-out transform hover:scale-105 shadow-md flex items-center justify-center"
+                 onClick={() => setIsDepositeModalOpen(true)}
+                >
                   <FaWallet className="mr-2" />
                   Load Wallet
                 </button>
@@ -193,6 +195,7 @@ const Dashboard: React.FC = () => {
                     </table>
                   </div>
                 </div>
+                <DepositeWallet isOpen={isDepositeModalOpen} onClose={() => setIsDepositeModalOpen(false)} />
               </div>
             </motion.div>
           )}

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import {
-  FiGrid, FiMessageSquare, FiUsers, FiGift, FiCreditCard, FiFileText, FiCode, FiHelpCircle, FiSettings, FiClock,
+  FiGrid, FiMessageSquare, FiUsers, FiBox, FiCreditCard, FiFileText, FiCode, FiHelpCircle, FiSettings, FiClock,
   FiMail, FiPhone, FiChevronLeft, FiChevronRight, FiMenu
 } from 'react-icons/fi';
 
@@ -132,7 +132,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onCollapse, setCurrentSection }) => {
     { href: "/Admin/Dashboard", icon: <FiGrid />, text: "Dashboard" },
     { href: "/Admin/ManageUsers", icon: <FiUsers />, text: "Manage Users" },
     { href: "/Admin/SenderIds", icon: <FiSettings />, text: "SenderIds" },
-    { href: "/Admin/Reports", icon: <FiFileText />, text: "Reports" },
+    { href: "/Admin/PackagesCreation", icon: <FiBox />, text: "Packages" },
     { href: "/Help", icon: <FiHelpCircle />, text: "Help" },
   ];
 
@@ -143,7 +143,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onCollapse, setCurrentSection }) => {
   return (
     <div className={`bg-white shadow-md transition-all duration-300 fixed top-16 left-0 bottom-0 overflow-y-auto ${isCollapsed ? 'w-20 p-2' : 'w-64 p-4'}`}>
       <div className="flex justify-between items-center px-4 py-2">
-        {!isCollapsed && <span className="text-lg font-bold">Logo</span>}
+        {!isCollapsed && <span className="text-lg font-bold"></span>}
         <button onClick={toggleCollapse} className="focus:outline-none">
           {isCollapsed ? <FiChevronRight size={24} className="text-gray-600" /> : <FiChevronLeft size={24} className="text-gray-600" />}
         </button>

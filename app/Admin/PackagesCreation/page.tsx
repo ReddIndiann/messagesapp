@@ -4,12 +4,11 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import Header from '@/app/Components/Header';
 import Sidebar from '@/app/Components/SideNav';
-import TableComponent, { TableComponentRef } from '@/app/Components/Tables/ApiKeyTable';
+import TableComponent, { TableComponentRef } from '@/app/Components/Tables/PackagesTable';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus } from '@fortawesome/free-solid-svg-icons';
 import { useRouter } from 'next/navigation';
-import ApiKeyCreation from '@/app/Components/Modals/ApiKeyModal';
-
+import PackageCreation from '@/app/Components/Modals/PackageModal';
 const Dashboard: React.FC = () => {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState<boolean>(false);
   const [currentSection, setCurrentSection] = useState<'bulkSMS' | 'Developer' | 'admin'>('bulkSMS');
@@ -75,7 +74,7 @@ const Dashboard: React.FC = () => {
           </motion.div>
         </main>
       </div>
-      <ApiKeyCreation
+      <PackageCreation
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         userId={userId}

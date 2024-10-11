@@ -1,52 +1,53 @@
 import React, { useState, ChangeEvent } from 'react';
 import { registerApiKeys } from '@/app/lib/apikeyutils';
+import Swal from 'sweetalert2';
+import withReactContent from 'sweetalert2-react-content';
 
 interface ApiKeyCreationModalProps {
   isOpen: boolean;
   onClose: () => void;
   userId: number | null;
-// Callback to trigger refetch after successful registration
+  onSuccess: () => void;
 }
 
-const ApiKeyCreation: React.FC<ApiKeyCreationModalProps> = ({ isOpen, onClose, userId,  }) => {
+const ApiKeyCreation: React.FC<ApiKeyCreationModalProps> = ({ isOpen, onClose, userId, onSuccess }) => {
   const [keyName, setKeyName] = useState<string>('');
+  const MySwal = withReactContent(Swal);
 
-  const [showSuccessModal, setShowSuccessModal] = useState<boolean>(false);
-  const [showErrorModal, setShowErrorModal] = useState<boolean>(false);
-  const [errorMessage, setErrorMessage] = useState<string>('');
   if (!isOpen) return null;
 
   const handleRegister = async () => {
     if (!userId) return;
-  
+
     try {
       await registerApiKeys(keyName, userId);
-  
-      // Show success modal
-      setShowSuccessModal(true);
-  
-      // Call the onSuccess callback to refetch the list
-   
-  
-      // Close the modal after 2 seconds
-      setTimeout(() => {
-        setShowSuccessModal(false); // Hide success modal
-        onClose(); // Close the modal
-      }, 2000);
-    } catch (error:any) {
-      console.error('Error Creating API keys:', error);
 
-      // Set error message and show error modal
-      setErrorMessage(error.response?.data?.message || 'An error occurred while creating the API key.');
-      setShowErrorModal(true);
+      // Display success alert
+      MySwal.fire({
+        title: 'Success!',
+        text: 'API key created successfully.',
+        icon: 'success',
+        timer: 2000, // Automatically close after 2 seconds
+        showConfirmButton: false,
+        willClose: () => {
+          onClose();
+        },
+      });
 
-      // Hide the error modal after 3 seconds
-      setTimeout(() => {
-        setShowErrorModal(false);
-      }, 3000);
+      onSuccess();
+    } catch (error: any) {
+      const errorMessage = error.response?.data?.message || 'An error occurred while creating the API key.';
+
+      // Display error alert
+      MySwal.fire({
+        title: 'Error!',
+        text: errorMessage,
+        icon: 'error',
+        timer: 3000, // Automatically close after 3 seconds
+        showConfirmButton: false,
+      });
     }
   };
-  
 
   return (
     <div>
@@ -54,52 +55,29 @@ const ApiKeyCreation: React.FC<ApiKeyCreationModalProps> = ({ isOpen, onClose, u
         <div className="bg-white p-6 rounded-lg shadow-lg w-96">
           <h2 className="text-xl font-medium mb-4 text-black">Create a new Api Key</h2>
           <div className="mb-4">
-            <label className="block text-gray-700 mb-2" htmlFor="sender-id">
+            <label className="block text-gray-700 mb-2" htmlFor="key-name">
               Name
             </label>
             <input
-              id="sender-id"
+              id="key-name"
               type="text"
-              className="w-full p-2 border border-gray-300 rounded text-black" // Set text color to black
+              className="w-full p-2 border border-gray-300 rounded text-black"
               value={keyName}
               onChange={(e: ChangeEvent<HTMLInputElement>) => setKeyName(e.target.value)}
-              placeholder="Enter  name"
+              placeholder="Enter name"
             />
           </div>
-        
+
           <div className="flex justify-end">
-            <button
-              className="bg-gray-100 text-gray-800 py-2 px-4 rounded mr-2"
-              onClick={onClose}
-            >
+            <button className="bg-gray-100 text-gray-800 py-2 px-4 rounded mr-2" onClick={onClose}>
               Cancel
             </button>
-            <button
-              className="bg-blue-400 text-white py-2 px-4 rounded hover:bg-blue-500"
-              onClick={handleRegister}
-            >
+            <button className="bg-blue-400 text-white py-2 px-4 rounded hover:bg-blue-500" onClick={handleRegister}>
               Create Api key
             </button>
           </div>
         </div>
       </div>
-
-      {showSuccessModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-lg shadow-lg w-96">
-            <h2 className="text-xl font-medium text-green-600">Success!</h2>
-            <p className="text-gray-700">API key created successfully.</p>
-          </div>
-        </div>
-      )}
-       {showErrorModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-lg shadow-lg w-96">
-            <h2 className="text-xl font-medium text-red-600">Error!</h2>
-            <p className="text-gray-700">{errorMessage}</p>
-          </div>
-        </div>
-      )}
     </div>
   );
 };
