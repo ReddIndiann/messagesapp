@@ -9,7 +9,7 @@ import BundleHistoryTable from '@/app/Components/Tables/BundleHistoryTable';
 import BundleOptions from '@/app/Components/Tables/BundleOptions';
 import { FaWallet, FaShoppingCart, FaHistory } from 'react-icons/fa';
 import { fetchUserById } from '@/app/lib/userlib';
-import DepositeWallet from '@/app/Components/Modals/WalletModal/depositeWallet';
+import DepositeWallet from '@/app/Components/Modals/WalletBundleModal/depositeWallet';
 type TabButtonProps = {
   icon: React.ReactNode;
   label: string;

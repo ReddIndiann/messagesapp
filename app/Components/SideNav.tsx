@@ -5,7 +5,7 @@ import {
   FiGrid, FiMessageSquare, FiUsers, FiBox, FiCreditCard, FiFileText, FiCode, FiHelpCircle, FiSettings, FiClock,
   FiMail, FiPhone, FiChevronLeft, FiChevronRight, FiMenu
 } from 'react-icons/fi';
-
+import BuyCreditModal from './Modals/WalletBundleModal/BuyCreditModal';
 interface SidebarProps {
   onCollapse: (isCollapsed: boolean) => void;
   setCurrentSection: (section: 'bulkSMS' | 'Developer' | 'admin') => void;
