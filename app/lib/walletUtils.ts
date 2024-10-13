@@ -1,11 +1,12 @@
 // groupService.ts
 import axios from 'axios';
 
-export interface Group {
+export interface Wallet {
   id: number;
   transactionid: string;
   amount: number;
   note:string;
+  wallet:any
 }
 const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
@@ -25,25 +26,11 @@ export const depositewallet = async (walletData: { transactionid: string; userId
     }
   };
 
-export const EditGroup = async (groupData: { groupName: string; userId: number | null }) => {
-  if (groupData.userId === null) {
-    throw new Error('User ID is not available.');
-  }
 
+
+export const fetchWalletHistory = async (userId: number): Promise<Wallet[]> => {
   try {
-    await axios.post('${apiUrl}/groups${contact.id}', groupData);
-    console.log('Group registered successfully');
-  } catch (error) {
-    console.error('Error registering group:', error);
-    throw error;
-  }
-};
-
-
-
-export const fetchWalletHistory = async (userId: number): Promise<Group[]> => {
-  try {
-    const response = await axios.get<Group[]>(`${apiUrl}/wallet/user/${userId}`);
+    const response = await axios.get<Wallet[]>(`${apiUrl}/wallet/useramount/${userId}`);
     return response.data;
   } catch (error) {
     console.error('Error fetching wallet:', error);
@@ -51,9 +38,9 @@ export const fetchWalletHistory = async (userId: number): Promise<Group[]> => {
   }
 };
 
-export const fetchAllWalletHistory = async (): Promise<Group[]> => {
+export const fetchAllWalletHistory = async (): Promise<Wallet[]> => {
   try {
-    const response = await axios.get<Group[]>(`${apiUrl}/wallet`);
+    const response = await axios.get<Wallet[]>(`${apiUrl}/wallet`);
     return response.data;
   } catch (error) {
     console.error('Error fetching wallet:', error);

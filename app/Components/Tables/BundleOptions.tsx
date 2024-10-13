@@ -2,20 +2,24 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { FaCheck, FaLightbulb } from 'react-icons/fa';
 import axios from 'axios';
-
-const apiUrl = process.env.NEXT_PUBLIC_API_URL; // Make sure this is defined in your environment
+import dayjs from 'dayjs';
+import Swal from 'sweetalert2'; // Import SweetAlert2
+import BuyCreditModal from '../Modals/WalletBundleModal/BuyCreditModal';
+const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
 const BundleOptions = () => {
   const [plans, setPlans] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [isModalOpen, setIsModalOpen] = useState(false); // State for modal visibility
-  const [selectedPlan, setSelectedPlan] = useState<any>(null); // Store selected plan
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isBuyBundleModalOpen, setIsBuyBundleModalOpen] = useState(false);
+  const [selectedPlan, setSelectedPlan] = useState<any>(null);
+  const userId = 1; // This should come from your user authentication context or API
 
   // Fetch packages from the API
   const fetchPackages = async () => {
     try {
       const response = await axios.get(`${apiUrl}/packages`);
-      setPlans(response.data); // Assuming the API returns an array of packages
+      setPlans(response.data);
       setLoading(false);
     } catch (error) {
       console.error('Error fetching packages:', error);
@@ -30,21 +34,56 @@ const BundleOptions = () => {
   // Function to handle plan selection and open modal
   const handleChoosePlan = (plan: any) => {
     setSelectedPlan(plan);
-    setIsModalOpen(true); // Open modal
+    setIsModalOpen(true);
   };
 
   const onClose = () => {
-    setIsModalOpen(false); // Close modal
+    setIsModalOpen(false);
   };
 
-  const onBuyFromAppWalletClick = () => {
-    console.log(`Buying ${selectedPlan?.name} from App Wallet`);
-    // Implement your app wallet purchase logic here
+  const calculateExpiry = (duration: number) => {
+    const now = dayjs();
+    return now.add(duration, 'day').format('YYYY-MM-DD');
   };
 
-  const onBuyFromMobileWalletClick = () => {
-    console.log(`Buying ${selectedPlan?.name} from Mobile Wallet`);
-    // Implement your mobile wallet purchase logic here
+  const buyCreditFromAppWallet = async () => {
+    if (!selectedPlan) return;
+
+    const expiryDate = calculateExpiry(selectedPlan.duration);
+
+    const bundleData = {
+      userId,
+      packageId: selectedPlan.id,
+      package_name: selectedPlan.name,
+      type: selectedPlan.type,
+      expiry: expiryDate,
+      status: 'active',
+      creditscore: selectedPlan.smscount,
+    };
+
+    try {
+      const response = await axios.post(`${apiUrl}/bundle/createinapp`, bundleData);
+      console.log(`Successfully bought ${selectedPlan.name}`, response.data);
+
+      // Trigger SweetAlert for success
+      Swal.fire({
+        title: 'Purchase Successful!',
+        text: `You have successfully purchased the ${selectedPlan.name}.`,
+        icon: 'success',
+        confirmButtonText: 'OK',
+      });
+      onClose();
+    } catch (error) {
+      console.error('Error purchasing bundle:', error);
+
+      // Trigger SweetAlert for failure
+      Swal.fire({
+        title: 'Purchase Failed',
+        text: 'There was an error processing your purchase. Please try again.',
+        icon: 'error',
+        confirmButtonText: 'OK',
+      });
+    }
   };
 
   return (
@@ -102,7 +141,7 @@ const BundleOptions = () => {
                       ? 'bg-blue-100 text-blue-500 hover:bg-blue-200'
                       : 'bg-blue-500 text-white hover:bg-blue-600'
                   }`}
-                  onClick={() => handleChoosePlan(plan)} // Trigger modal on click
+                  onClick={() => handleChoosePlan(plan)}
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                 >
@@ -114,17 +153,16 @@ const BundleOptions = () => {
         )}
       </div>
 
-      {/* Modal for choosing the payment option */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white p-6 rounded shadow-lg w-96">
             <h3 className="text-lg font-semibold mb-4">Choose Payment Option</h3>
-            <p className="mb-4 text-black text-xs sm:text-sm">What action do you want to perform?</p>
+            <p className="mb-4 text-black text-xs sm:text-sm">Select how you want to pay:</p>
             <button
               className="w-full bg-gray-100 text-gray-400 py-2 rounded mb-2 hover:bg-blue-100 hover:text-blue-400 text-sm sm:text-base"
               onClick={() => {
                 onClose();
-                onBuyFromAppWalletClick();
+                buyCreditFromAppWallet();
               }}
             >
               Buy From App Wallet
@@ -132,11 +170,11 @@ const BundleOptions = () => {
             <button
               className="w-full bg-gray-100 text-gray-400 py-2 rounded mb-2 hover:bg-blue-100 hover:text-blue-400 text-sm sm:text-base"
               onClick={() => {
-                onClose();
-                onBuyFromMobileWalletClick();
+                setIsModalOpen(false);
+                setIsBuyBundleModalOpen(true);
               }}
             >
-              Buy From Mobile Wallet
+              Buy From Mobile Wallet (Coming Soon)
             </button>
             <button
               className="w-full sm:w-24 bg-gray-100 text-gray-800 py-2 mt-4 sm:mt-5 rounded text-sm sm:text-base"
@@ -146,6 +184,15 @@ const BundleOptions = () => {
             </button>
           </div>
         </div>
+      )}
+
+      {/* Render BuyBundle Modal for Mobile Wallet */}
+      {isBuyBundleModalOpen && (
+        <BuyCreditModal
+          isOpen={isBuyBundleModalOpen}
+          onClose={() => setIsBuyBundleModalOpen(false)}
+          selectedPlan={selectedPlan} // Pass selectedPlan
+        />
       )}
     </div>
   );

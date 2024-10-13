@@ -1,59 +1,90 @@
-import React from 'react';
-
+import React, { useEffect, useState } from 'react';
+import { fetchBundleHistory } from '@/app/lib/bundlesUtils';
 const BundleHistoryTable = () => {
+  const [bundles, setBundles] = useState([]);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchBundles = async () => {
+      try {
+        const data = await fetchBundleHistory(1); // Pass user ID (1 in this case)
+        setBundles(data.bundles);
+      } catch (err) {
+        setError('Failed to fetch bundle history');
+        console.error(err);
+      }
+    };
+
+    fetchBundles();
+  }, []);
+
   return (
     <div className="overflow-x-auto shadow-md rounded-lg">
+      {error && <p className="text-red-500">{error}</p>} {/* Display error if fetching fails */}
       <table className="min-w-full divide-y divide-gray-200">
         <thead className="bg-gray-50">
           <tr>
-            <th scope="col" className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Balance Before
+            <th
+              scope="col"
+              className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+            >
+              Package Name
             </th>
-            <th scope="col" className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              SMS Bonus
+            <th
+              scope="col"
+              className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+            >
+              Creditscore
             </th>
-            <th scope="col" className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Quantity
+            <th
+              scope="col"
+              className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+            >
+              Expiry Date
             </th>
-            <th scope="col" className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Amount
+            <th
+              scope="col"
+              className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+            >
+              Status
             </th>
-            <th scope="col" className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Payment Method
-            </th>
-            <th scope="col" className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            <th
+              scope="col"
+              className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+            >
               Bundle Type
             </th>
-            <th scope="col" className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            <th
+              scope="col"
+              className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+            >
               Bundle By
             </th>
           </tr>
         </thead>
         <tbody className="bg-white divide-y divide-gray-200">
-          <tr className="hover:bg-gray-50">
-            <td className="px-4 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-xs sm:text-sm text-gray-500">
-              0
-            </td>
-            <td className="px-4 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-xs sm:text-sm text-gray-500">
-              10
-            </td>
-            <td className="px-4 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-xs sm:text-sm text-gray-500">
-              400
-            </td>
-            <td className="px-4 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-xs sm:text-sm text-gray-500">
-              GHC 10.00
-            </td>
-            <td className="px-4 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-xs sm:text-sm text-gray-500">
-              Mobile Money
-            </td>
-            <td className="px-4 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-xs sm:text-sm text-gray-500">
-              SMS
-            </td>
-            <td className="px-4 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-xs sm:text-sm text-gray-500">
-              Daniel
-            </td>
-          </tr>
-          {/* Add more rows as needed */}
+          {bundles.map((bundle, index) => (
+            <tr key={index} className="hover:bg-gray-50">
+              <td className="px-4 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-xs sm:text-sm text-gray-500">
+                {bundle.package_name}
+              </td>
+              <td className="px-4 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-xs sm:text-sm text-gray-500">
+                {bundle.creditscore}
+              </td>
+              <td className="px-4 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-xs sm:text-sm text-gray-500">
+                {new Date(bundle.expiry).toLocaleDateString()} {/* Formats the date */}
+              </td>
+              <td className="px-4 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-xs sm:text-sm text-gray-500">
+                {bundle.status}
+              </td>
+              <td className="px-4 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-xs sm:text-sm text-gray-500">
+                {bundle.type}
+              </td>
+              <td className="px-4 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-xs sm:text-sm text-gray-500">
+                {bundle.User.username}
+              </td>
+            </tr>
+          ))}
         </tbody>
       </table>
     </div>

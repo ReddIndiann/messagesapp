@@ -1,6 +1,44 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import { fetchWalletHistory } from '@/app/lib/walletUtils';
 
-const WalletHistoryTable = () => {
+interface WalletHistory {
+  id: number;
+  transactionid: string;
+  amount: number;
+  note: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+const WalletHistoryTable: React.FC = () => {
+  const [walletHistory, setWalletHistory] = useState<WalletHistory[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const getWalletHistory = async () => {
+      try {
+        const userId = 1; // Replace with dynamic user ID if needed
+        const data = await fetchWalletHistory(userId);
+        setWalletHistory(data.wallet); // Accessing the wallet array from response
+      } catch (error) {
+        setError('Error fetching wallet history');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    getWalletHistory();
+  }, []);
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+  if (error) {
+    return <div>{error}</div>;
+  }
+
   return (
     <div>
       <table className="min-w-full divide-y divide-gray-200">
@@ -16,66 +54,27 @@ const WalletHistoryTable = () => {
               Amount
             </th>
             <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Balance Before Deposit
-            </th>
-            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              MoMo Number
-            </th>
-            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Status
-            </th>
-            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Payment Method
+              Note
             </th>
           </tr>
         </thead>
         <tbody className="bg-white divide-y divide-gray-200">
-          <tr>
-            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-              6baf0ca9-4d10-4f0b-b2df-a451f879fb6f_prod
-            </td>
-            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-              2024-08-02
-            </td>
-            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-              GHS 10.00
-            </td>
-            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-              GHS 0.00
-            </td>
-            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-              0245392996
-            </td>
-            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-              SUCCESS
-            </td>
-            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-              Korba(MTN)
-            </td>
-          </tr>
-          <tr>
-            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-              3dc8dc26-6b58-47cf-92da-2e95d9cd563a_prod
-            </td>
-            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-              2024-08-02
-            </td>
-            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-              GHS 10.00
-            </td>
-            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-              GHS 0.00
-            </td>
-            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-              0245392996
-            </td>
-            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-              FAILED
-            </td>
-            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-              Korba(MTN)
-            </td>
-          </tr>
+          {walletHistory.map((transaction) => (
+            <tr key={transaction.id}>
+              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                {transaction.transactionid}
+              </td>
+              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                {new Date(transaction.createdAt).toLocaleDateString()}
+              </td>
+              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                GHS {transaction.amount.toFixed(2)}
+              </td>
+              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                {transaction.note}
+              </td>
+            </tr>
+          ))}
         </tbody>
       </table>
     </div>

@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation'; 
+import { useRouter } from 'next/navigation';
 import { deleteAuthCookie } from '../lib/storage';
 import { fetchUserById } from '../lib/userlib';
-import { userdetails } from '../lib/authUtils';
-
+import { fetchBundleHistory } from '@/app/lib/bundlesUtils';
 
 interface HeaderProps {
   currentSection: 'bulkSMS' | 'Developer' | 'admin';
@@ -12,10 +11,14 @@ interface HeaderProps {
 const Header: React.FC<HeaderProps> = ({ currentSection }) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState<boolean>(false);
   const [username, setUsername] = useState<string | null>(null);
-  const [creditbalance, setCreditbalance] = useState<number | null>(null);
+  const [combinedCredit, setCombinedCredit] = useState<number | null>(null);
+  const [bonusCredit, setBonusCredit] = useState<number | null>(null);
+  const [bonusExpiry, setBonusExpiry] = useState<string | null>(null);
   const [userId, setUserId] = useState<number | null>(null);
-  const router = useRouter(); 
+  const router = useRouter();
   const [loading, setLoading] = useState<boolean>(true);
+
+  // Fetch userId from localStorage on component mount
   useEffect(() => {
     const signInResponse = localStorage.getItem('signInResponse');
     if (signInResponse) {
@@ -24,23 +27,34 @@ const Header: React.FC<HeaderProps> = ({ currentSection }) => {
       setUserId(extractedUserId);
     }
   }, []);
+
+  // Fetch credit balances using fetchBundle
   useEffect(() => {
-    const fetchUserData = async () => {
+    const fetchCreditData = async () => {
       if (userId) {
         try {
           setLoading(true);
-          const data = await userdetails(userId);
-          setCreditbalance(data.creditbalance);
+          const bundleData = await fetchBundleHistory(userId);
+
+          // Extract the combined credit and bonus credit values from the API response
+          setCombinedCredit(bundleData.creditScores.combinedExpiryNonExpiry);
+          setBonusCredit(bundleData.creditScores.bonus);
+
+          // If the API returns the bonus expiry date, set it (replace with actual API field)
+          setBonusExpiry(bundleData.creditScores.bonusExpiry || '2024-09-01'); // Default or API response
+
         } catch (error) {
-          console.error('Error fetching user data:', error);
+          console.error('Error fetching bundle data:', error);
         } finally {
           setLoading(false);
         }
       }
     };
 
-    fetchUserData();
+    fetchCreditData();
   }, [userId]);
+
+  // Fetch username
   useEffect(() => {
     const loadUserData = async () => {
       if (userId !== null) {
@@ -49,9 +63,7 @@ const Header: React.FC<HeaderProps> = ({ currentSection }) => {
 
           if (userData) {
             setUsername(userData.username || null);
-          
             console.log('Extracted Username:', userData.username);
-            console.log('Extracted Credit Balance:', userData.creditbalance);
           }
         } catch (error) {
           console.error('Error fetching user data:', error);
@@ -93,14 +105,16 @@ const Header: React.FC<HeaderProps> = ({ currentSection }) => {
               <div className="text-center pr-2 hidden sm:block">
                 <div className="text-sm">
                   <span className="block text-xs text-gray-500 font-semibold">SMS Balance</span>
-                  <span className="text-gray-500">{creditbalance !== null ? creditbalance.toFixed(0) : '0'}</span>
+                  <span className="text-gray-500">{combinedCredit !== null ? combinedCredit.toFixed(0) : '0'}</span>
                 </div>
               </div>
               <div className="text-center pr-2 hidden sm:block">
                 <div className="text-sm">
                   <span className="block text-xs text-gray-500 font-semibold mb-1">Bonus</span>
-                  <span className="font-semibold bg-blue-500 text-white rounded-full px-2 py-1 mb-1">407</span>
-                  <span className="block text-xs text-red-500">Expires on 2024-09-01</span>
+                  <span className="font-semibold bg-blue-500 text-white rounded-full px-2 py-1 mb-1">
+                    {bonusCredit !== null ? bonusCredit.toFixed(0) : '0'}
+                  </span>
+                  <span className="block text-xs text-red-500">Expires on {bonusExpiry}</span>
                 </div>
               </div>
             </>

@@ -8,8 +8,9 @@ import WalletHistoryTable from '@/app/Components/Tables/WalletHistoryTable';
 import BundleHistoryTable from '@/app/Components/Tables/BundleHistoryTable';
 import BundleOptions from '@/app/Components/Tables/BundleOptions';
 import { FaWallet, FaShoppingCart, FaHistory } from 'react-icons/fa';
-import { fetchUserById } from '@/app/lib/userlib';
+import { fetchWalletHistory } from '@/app/lib/walletUtils';
 import DepositeWallet from '@/app/Components/Modals/WalletBundleModal/depositeWallet';
+
 type TabButtonProps = {
   icon: React.ReactNode;
   label: string;
@@ -21,9 +22,11 @@ const Dashboard: React.FC = () => {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState<boolean>(false);
   const [currentSection, setCurrentSection] = useState<'bulkSMS' | 'Developer' | 'admin'>('bulkSMS');
   const [currentTab, setCurrentTab] = useState('PurchaseBundle');
-  const [walletBalance, setWalletBalance] = useState(0.0);
+  const [walletBalance, setWalletBalance] = useState(0.0); // Wallet balance state
   const [userId, setUserId] = useState<number | null>(null);
   const [isDepositeModalOpen, setIsDepositeModalOpen] = useState<boolean>(false);
+
+  // Set user ID from local storage on component mount
   useEffect(() => {
     setCurrentTab('PurchaseBundle');
     const signInResponse = localStorage.getItem('signInResponse');
@@ -34,13 +37,14 @@ const Dashboard: React.FC = () => {
     }
   }, []);
 
+  // Fetch wallet history and use totalAmount to set wallet balance
   useEffect(() => {
     const loadWalletBalance = async () => {
       if (userId !== null) {
         try {
-          const userData = await fetchUserById(userId);
-          if (userData && userData.walletbalance !== undefined) {
-            setWalletBalance(userData.walletbalance);
+          const walletData = await fetchWalletHistory(userId);
+          if (walletData && walletData.totalAmount !== undefined) {
+            setWalletBalance(walletData.totalAmount); // Set the total amount as wallet balance
           }
         } catch (error) {
           console.error('Error fetching wallet balance:', error);
@@ -155,8 +159,9 @@ const Dashboard: React.FC = () => {
                 <div className="absolute bottom-0 left-0 w-20 sm:w-24 h-20 sm:h-24 bg-white opacity-10 rounded-full -ml-10 sm:-ml-12 -mb-10 sm:-mb-12"></div>
               </div>
               <div className="p-4 sm:p-6">
-                <button className="bg-blue-600 hover:bg-blue-700 text-white py-2 sm:py-3 px-4 sm:px-6 rounded-lg w-full transition duration-300 ease-in-out transform hover:scale-105 shadow-md flex items-center justify-center"
-                 onClick={() => setIsDepositeModalOpen(true)}
+                <button
+                  className="bg-blue-600 hover:bg-blue-700 text-white py-2 sm:py-3 px-4 sm:px-6 rounded-lg w-full transition duration-300 ease-in-out transform hover:scale-105 shadow-md flex items-center justify-center"
+                  onClick={() => setIsDepositeModalOpen(true)}
                 >
                   <FaWallet className="mr-2" />
                   Load Wallet
@@ -167,10 +172,16 @@ const Dashboard: React.FC = () => {
                     <table className="min-w-full divide-y divide-gray-200">
                       <thead className="bg-gray-50">
                         <tr>
-                          <th scope="col" className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          <th
+                            scope="col"
+                            className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                          >
                             Transaction
                           </th>
-                          <th scope="col" className="px-4 sm:px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          <th
+                            scope="col"
+                            className="px-4 sm:px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider"
+                          >
                             Amount
                           </th>
                         </tr>
