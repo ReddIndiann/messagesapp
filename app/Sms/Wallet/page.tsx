@@ -8,59 +8,44 @@ import WalletHistoryTable from '@/app/Components/Tables/WalletHistoryTable';
 import BundleHistoryTable from '@/app/Components/Tables/BundleHistoryTable';
 import BundleOptions from '@/app/Components/Tables/BundleOptions';
 import { FaWallet, FaShoppingCart, FaHistory } from 'react-icons/fa';
-import { fetchWalletHistory } from '@/app/lib/walletUtils';
+import { userdetails } from '@/app/lib/authUtils';
 import DepositeWallet from '@/app/Components/Modals/WalletBundleModal/depositeWallet';
-
-type TabButtonProps = {
-  icon: React.ReactNode;
-  label: string;
-  isActive: boolean;
-  onClick: () => void;
-};
 
 const Dashboard: React.FC = () => {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState<boolean>(false);
   const [currentSection, setCurrentSection] = useState<'bulkSMS' | 'Developer' | 'admin'>('bulkSMS');
   const [currentTab, setCurrentTab] = useState('PurchaseBundle');
-  const [walletBalance, setWalletBalance] = useState(0.0); // Wallet balance state
+  const [walletBalance, setWalletBalance] = useState(0.0);
   const [userId, setUserId] = useState<number | null>(null);
   const [isDepositeModalOpen, setIsDepositeModalOpen] = useState<boolean>(false);
 
-  // Set user ID from local storage on component mount
+  // Set user ID from local storage and fetch user details on component mount
   useEffect(() => {
-    setCurrentTab('PurchaseBundle');
     const signInResponse = localStorage.getItem('signInResponse');
     if (signInResponse) {
       const parsedResponse = JSON.parse(signInResponse);
       const extractedUserId = parsedResponse.user?.id || null;
       setUserId(extractedUserId ? Number(extractedUserId) : null);
+
+      const fetchUserDetails = async () => {
+        if (extractedUserId) {
+          try {
+            const userDetails = await userdetails(extractedUserId);
+            setWalletBalance(userDetails.walletbalance || 0.0); // Set wallet balance from user details
+          } catch (error) {
+            console.error('Error fetching user details:', error);
+          }
+        }
+      };
+
+      fetchUserDetails();
     }
   }, []);
 
-  // Fetch wallet history and use totalAmount to set wallet balance
-  useEffect(() => {
-    const loadWalletBalance = async () => {
-      if (userId !== null) {
-        try {
-          const walletData = await fetchWalletHistory(userId);
-          if (walletData && walletData.totalAmount !== undefined) {
-            setWalletBalance(walletData.totalAmount); // Set the total amount as wallet balance
-          }
-        } catch (error) {
-          console.error('Error fetching wallet balance:', error);
-        }
-      }
-    };
-
-    loadWalletBalance();
-  }, [userId]);
-
-  const TabButton: React.FC<TabButtonProps> = ({ icon, label, isActive, onClick }) => (
+  const TabButton = ({ icon, label, isActive, onClick }) => (
     <button
       className={`flex items-center px-2 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm font-medium transition-colors duration-200 border-b-2 ${
-        isActive
-          ? 'text-blue-600 border-blue-600'
-          : 'text-gray-500 border-transparent hover:text-gray-700 hover:border-gray-300'
+        isActive ? 'text-blue-600 border-blue-600' : 'text-gray-500 border-transparent hover:text-gray-700 hover:border-gray-300'
       }`}
       onClick={onClick}
     >
@@ -97,11 +82,7 @@ const Dashboard: React.FC = () => {
       <Header currentSection={currentSection} />
       <div className="flex flex-1 pt-16">
         <Sidebar onCollapse={setIsSidebarCollapsed} setCurrentSection={setCurrentSection} />
-        <main
-          className={`flex-1 ${
-            isSidebarCollapsed ? 'ml-20' : 'ml-0 sm:ml-64'
-          } p-4 sm:p-8 overflow-y-auto flex flex-col lg:flex-row`}
-        >
+        <main className={`flex-1 ${isSidebarCollapsed ? 'ml-20' : 'ml-0 sm:ml-64'} p-4 sm:p-8 overflow-y-auto flex flex-col lg:flex-row`}>
           <motion.div
             className="flex-1 bg-white shadow-lg rounded-lg overflow-hidden mb-4 lg:mb-0 lg:mr-4"
             initial={{ opacity: 0, y: 20 }}
@@ -168,43 +149,7 @@ const Dashboard: React.FC = () => {
                 </button>
                 <div className="mt-4 sm:mt-6 border-t pt-4">
                   <h3 className="text-base sm:text-lg font-semibold text-gray-700 mb-3 sm:mb-4">Recent Transactions</h3>
-                  <div className="overflow-x-auto shadow-sm rounded-lg border border-gray-200">
-                    <table className="min-w-full divide-y divide-gray-200">
-                      <thead className="bg-gray-50">
-                        <tr>
-                          <th
-                            scope="col"
-                            className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                          >
-                            Transaction
-                          </th>
-                          <th
-                            scope="col"
-                            className="px-4 sm:px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider"
-                          >
-                            Amount
-                          </th>
-                        </tr>
-                      </thead>
-                      <tbody className="bg-white divide-y divide-gray-200">
-                        {[
-                          { label: 'Bundle purchased', amount: -10, date: '2024-08-10' },
-                          { label: 'Load Wallet', amount: 10, date: '2024-08-09' },
-                          { label: 'Load Wallet', amount: 10, date: '2024-08-08' },
-                        ].map((transaction, index) => (
-                          <tr key={index} className="hover:bg-gray-50 transition duration-150 ease-in-out">
-                            <td className="px-4 sm:px-6 py-3 sm:py-4 whitespace-nowrap">
-                              <div className="text-xs sm:text-sm font-medium text-gray-900">{transaction.label}</div>
-                              <div className="text-xs sm:text-sm text-gray-500">{transaction.date}</div>
-                            </td>
-                            <td className="px-4 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-right text-xs sm:text-sm font-medium text-gray-500">
-                              GHS {transaction.amount.toFixed(2)}
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
+                  <WalletHistoryTable /> {/* Include WalletHistoryTable here */}
                 </div>
                 <DepositeWallet isOpen={isDepositeModalOpen} onClose={() => setIsDepositeModalOpen(false)} />
               </div>

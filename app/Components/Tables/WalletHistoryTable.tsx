@@ -6,6 +6,7 @@ interface WalletHistory {
   transactionid: string;
   amount: number;
   note: string;
+  wallet:any
   createdAt: string;
   updatedAt: string;
 }
@@ -14,22 +15,34 @@ const WalletHistoryTable: React.FC = () => {
   const [walletHistory, setWalletHistory] = useState<WalletHistory[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [userId, setUserId] = useState<number | null>(null);
+
+  useEffect(() => {
+    // Fetch user ID from local storage
+    const signInResponse = localStorage.getItem('signInResponse');
+    if (signInResponse) {
+      const parsedResponse = JSON.parse(signInResponse);
+      const extractedUserId = parsedResponse.user?.id || null;
+      setUserId(extractedUserId ? Number(extractedUserId) : null);
+    }
+  }, []);
 
   useEffect(() => {
     const getWalletHistory = async () => {
-      try {
-        const userId = 1; // Replace with dynamic user ID if needed
-        const data = await fetchWalletHistory(userId);
-        setWalletHistory(data.wallet); // Accessing the wallet array from response
-      } catch (error) {
-        setError('Error fetching wallet history');
-      } finally {
-        setLoading(false);
+      if (userId !== null) {
+        try {
+          const data = await fetchWalletHistory(userId);
+          setWalletHistory(data.wallet); // Accessing the wallet array from response
+        } catch (error) {
+          setError('Error fetching wallet history');
+        } finally {
+          setLoading(false);
+        }
       }
     };
 
     getWalletHistory();
-  }, []);
+  }, [userId]); // Dependency array includes userId
 
   if (loading) {
     return <div>Loading...</div>;

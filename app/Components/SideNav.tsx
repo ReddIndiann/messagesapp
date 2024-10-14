@@ -111,12 +111,12 @@ const Sidebar: React.FC<SidebarProps> = ({ onCollapse, setCurrentSection }) => {
   const isActive = (path: string) => pathname === path;
 
   const smsNavItems = [
-    { href: "/Sms/Home", icon: <FiGrid />, text: "Overview" },
-    { href: "/Sms/SendMessage", icon: <FiMessageSquare />, text: "Send Message" },
-    { href: "/Sms/Contacts", icon: <FiUsers />, text: "Contacts" },
-    { href: "/Sms/Wallet", icon: <FiCreditCard />, text: "Wallet", badge: <span className="text-xs bg-green-500 text-white px-2 py-0.5 rounded-full">GHS 0.00</span> },
-    { href: "/Sms/CampaignHistory", icon: <FiFileText />, text: "Campaign History" },
-    { href: "/Help", icon: <FiHelpCircle />, text: "Get Help", badge: <span className="w-2 h-2 bg-orange-500 rounded-full"></span> },
+    { href: "/Sms/Home", icon: <FiGrid />, text: "Dashboard" },
+    { href: "/Sms/SendMessage", icon: <FiMessageSquare />, text: "Send Sms" },
+    { href: "/Sms/Contacts", icon: <FiUsers />, text: "Contacts and Groups" },
+    { href: "/Sms/Wallet", icon: <FiCreditCard />, text: "Wallet Account ", },
+    { href: "/Sms/CampaignHistory", icon: <FiFileText />, text: "History" },
+    { href: "/Help", icon: <FiHelpCircle />, text: "Help Page", },
   ];
 
   const voiceNavItems = [
@@ -133,6 +133,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onCollapse, setCurrentSection }) => {
     { href: "/Admin/ManageUsers", icon: <FiUsers />, text: "Manage Users" },
     { href: "/Admin/SenderIds", icon: <FiSettings />, text: "SenderIds" },
     { href: "/Admin/PackagesCreation", icon: <FiBox />, text: "Packages" },
+    { href: "/Admin/ManageBundleUsage", icon: <FiSettings />, text: "Credit Usage Settings" },
     { href: "/Help", icon: <FiHelpCircle />, text: "Help" },
   ];
 
@@ -158,7 +159,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onCollapse, setCurrentSection }) => {
             text={item.text}
             active={isActive(item.href)}
             isCollapsed={isCollapsed}
-            badge={item.badge}
+           
           />
         ))}
       </nav>

@@ -5,6 +5,7 @@ import axios from 'axios';
 import dayjs from 'dayjs';
 import Swal from 'sweetalert2'; // Import SweetAlert2
 import BuyCreditModal from '../Modals/WalletBundleModal/BuyCreditModal';
+
 const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
 const BundleOptions = () => {
@@ -13,7 +14,17 @@ const BundleOptions = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isBuyBundleModalOpen, setIsBuyBundleModalOpen] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<any>(null);
-  const userId = 1; // This should come from your user authentication context or API
+  const [userId, setUserId] = useState<number | null>(null); // State for user ID
+
+  // Fetch user ID from local storage
+  useEffect(() => {
+    const signInResponse = localStorage.getItem('signInResponse');
+    if (signInResponse) {
+      const parsedResponse = JSON.parse(signInResponse);
+      const extractedUserId = parsedResponse.user?.id || null;
+      setUserId(extractedUserId ? Number(extractedUserId) : null);
+    }
+  }, []);
 
   // Fetch packages from the API
   const fetchPackages = async () => {
@@ -47,12 +58,12 @@ const BundleOptions = () => {
   };
 
   const buyCreditFromAppWallet = async () => {
-    if (!selectedPlan) return;
+    if (!selectedPlan || userId === null) return; // Ensure userId is available
 
     const expiryDate = calculateExpiry(selectedPlan.duration);
 
     const bundleData = {
-      userId,
+      userId, // Use user ID from state
       packageId: selectedPlan.id,
       package_name: selectedPlan.name,
       type: selectedPlan.type,
@@ -112,7 +123,7 @@ const BundleOptions = () => {
                 <h3 className="text-xl sm:text-2xl font-bold mb-4 text-gray-800">{plan.name}</h3>
                 <div className="mb-6">
                   <span className="text-3xl sm:text-4xl font-bold text-blue-600">Ghc {plan.price}</span>
-                  <span className="text-gray-500"> / {plan.expiry || plan.period}</span>
+                  <span className="text-gray-500"> / {plan.duration || plan.period}</span>
                 </div>
                 <p className="text-sm sm:text-base text-gray-600 mb-8">{plan.type || 'Plan details'}</p>
                 <ul className="mb-8 flex-grow">

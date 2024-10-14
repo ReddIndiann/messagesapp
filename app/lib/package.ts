@@ -21,6 +21,25 @@ export const createPackage = async (packageData: {
   }
 };
 
+export const createCreditUsage= async (creditusageData: {
+  usefirst: string;
+  usesecond: string;
+  usethird: string;
+
+}) => {
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+
+  try {
+    // Sending the POST request to the correct endpoint
+    await axios.post(`${apiUrl}/creditusage/create`, creditusageData);
+    console.log('Credit Usage created successfully');
+  } catch (error) {
+    console.error('Error creating Credit Usage :', error);
+    throw error;
+  }
+};
+
+
 
 // export const fetchWalletHistory = async (userId: number): Promise<Group[]> => {
 //   try {

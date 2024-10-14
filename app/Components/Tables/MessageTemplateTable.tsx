@@ -7,6 +7,7 @@ import SendToGroupStepper from '../Modals/MessageTemplate/SendToGroupModal';
 import EditTemplateModal from '../Modals/MessageTemplate/EditTemplateModal';
 import { deleteTemplate } from '@/app/lib/createTemplateUtils';
 import ExcelUploadStepper from '../Modals/MessageTemplate/ExportExcelSend';
+import Swal from 'sweetalert2'; // Import SweetAlert
 
 interface Campaign {
   id: number;
@@ -58,12 +59,24 @@ const MessageTemplatesTable: React.FC<MessageTemplatesTableProps> = ({ campaigns
   };
 
   const handleDeleteTemplate = async (campaignId: number) => {
-    if (window.confirm('Are you sure you want to delete this template?')) {
+    const result = await Swal.fire({
+      title: 'Are you sure?',
+      text: 'You won’t be able to revert this!',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6',
+      confirmButtonText: 'Yes, delete it!',
+    });
+
+    if (result.isConfirmed) {
       try {
         await deleteTemplate(campaignId);
+        Swal.fire('Deleted!', 'Your template has been deleted.', 'success');
         // Optionally, update the campaigns state here
       } catch (err: any) {
         console.error('Error deleting template: ' + err.message);
+        Swal.fire('Error!', 'There was an error deleting the template.', 'error');
       }
     }
   };

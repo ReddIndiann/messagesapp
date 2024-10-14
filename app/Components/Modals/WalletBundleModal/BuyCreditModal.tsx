@@ -1,13 +1,15 @@
 import React, { useState, ChangeEvent, useEffect } from 'react';
-import { depositewallet } from '@/app/lib/walletUtils';
 import { useRouter } from 'next/navigation';
 import Swal from 'sweetalert2'; // Import SweetAlert
-
+import axios from 'axios';
+import dayjs from 'dayjs';
 interface BuyCreditModalProps {
   isOpen: boolean;
   onClose: () => void;
   selectedPlan: any; // Selected plan prop to get the price and other details
 }
+
+const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
 const BuyCreditModal: React.FC<BuyCreditModalProps> = ({ isOpen, onClose, selectedPlan }) => {
   const [transactionId, setTransactionId] = useState<string>(''); // User's transaction ID for mobile payment
@@ -34,26 +36,34 @@ const BuyCreditModal: React.FC<BuyCreditModalProps> = ({ isOpen, onClose, select
   if (!isOpen) return null;
 
   const handleBuyCredit = async () => {
-    if (userId === null || amount === '') {
-      console.error('User ID or amount is missing.');
+    if (userId === null || amount === '' || transactionId === '') {
+      console.error('User ID, amount, or transaction ID is missing.');
       Swal.fire({
         icon: 'error',
         title: 'Error',
-        text: 'User ID or amount is missing!',
+        text: 'User ID, amount, or transaction ID is missing!',
       });
       return;
     }
 
-    try {
-      const parsedAmount = parseFloat(amount);
+    const expiryDate = calculateExpiry(selectedPlan.duration);
 
-      // Call your deposit wallet API here
-      await depositewallet({
-        transactionId,
-        userId,
-        amount: parsedAmount,
-        note,
-      });
+    const bundleData = {
+      userId,
+      packageId: selectedPlan.id,
+      package_name: selectedPlan.name,
+      type: selectedPlan.type,
+      expiry: expiryDate,
+      status: 'active',
+      creditscore: selectedPlan.smscount,
+      transactionId, // Include the transaction ID
+      note, // Optional note
+      amount: parseFloat(amount), // Include the amount if needed
+    };
+
+    try {
+      const response = await axios.post(`${apiUrl}/bundle/createoutapp`, bundleData);
+      console.log(`Successfully bought ${selectedPlan.name}`, response.data);
 
       Swal.fire({
         icon: 'success',
@@ -72,6 +82,11 @@ const BuyCreditModal: React.FC<BuyCreditModalProps> = ({ isOpen, onClose, select
         text: 'There was an issue processing your purchase. Please try again later.',
       });
     }
+  };
+
+  const calculateExpiry = (duration: number) => {
+    const now = dayjs();
+    return now.add(duration, 'day').format('YYYY-MM-DD');
   };
 
   return (

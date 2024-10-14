@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { deleteAuthCookie } from '../lib/storage';
 import { fetchUserById } from '../lib/userlib';
-import { fetchBundleHistory } from '@/app/lib/bundlesUtils';
+import Swal from 'sweetalert2';
 
 interface HeaderProps {
   currentSection: 'bulkSMS' | 'Developer' | 'admin';
@@ -28,21 +28,19 @@ const Header: React.FC<HeaderProps> = ({ currentSection }) => {
     }
   }, []);
 
-  // Fetch credit balances using fetchBundle
+  // Fetch credit balances using the new endpoint
   useEffect(() => {
     const fetchCreditData = async () => {
       if (userId) {
         try {
           setLoading(true);
-          const bundleData = await fetchBundleHistory(userId);
+          const response = await fetch(`http://localhost:5000/auth/${userId}`);
+          const data = await response.json();
 
-          // Extract the combined credit and bonus credit values from the API response
-          setCombinedCredit(bundleData.creditScores.combinedExpiryNonExpiry);
-          setBonusCredit(bundleData.creditScores.bonus);
-
-          // If the API returns the bonus expiry date, set it (replace with actual API field)
-          setBonusExpiry(bundleData.creditScores.bonusExpiry || '2024-09-01'); // Default or API response
-
+          // Validate and set SMS balance and bonus balance
+          setCombinedCredit(typeof data.totalMainBalance === 'number' ? data.totalMainBalance : 0);
+          setBonusCredit(typeof data.bonusbalance === 'number' ? data.bonusbalance : 0);
+          setBonusExpiry('2024-11-01'); // Set actual expiry if available
         } catch (error) {
           console.error('Error fetching bundle data:', error);
         } finally {
@@ -64,6 +62,15 @@ const Header: React.FC<HeaderProps> = ({ currentSection }) => {
           if (userData) {
             setUsername(userData.username || null);
             console.log('Extracted Username:', userData.username);
+          } else {
+            // Show SweetAlert if no user data exists and log out
+            await Swal.fire({
+              title: 'Session Expired',
+              text: 'No user found. You will be logged out.',
+              icon: 'warning',
+              confirmButtonText: 'OK',
+            });
+            await handleLogout();
           }
         } catch (error) {
           console.error('Error fetching user data:', error);
@@ -72,7 +79,7 @@ const Header: React.FC<HeaderProps> = ({ currentSection }) => {
     };
 
     loadUserData();
-  }, [userId]); // Re-run this effect when userId changes
+  }, [userId]);
 
   const handleMouseEnter = () => {
     setIsDropdownOpen(true);
@@ -142,18 +149,11 @@ const Header: React.FC<HeaderProps> = ({ currentSection }) => {
             {isDropdownOpen && (
               <div className="absolute right-0 mt-44 bg-white border border-gray-300 rounded-lg shadow-lg w-48">
                 <ul className="list-none p-0 m-0">
-                  <li className="hover:bg-gray-100 cursor-pointer px-4 py-2 transition duration-200 ease-in-out"  onClick={()=>{router.push('/Profile')}} >Profile</li>
-                  <li className="hover:bg-gray-100 cursor-pointer px-4 py-2 transition duration-200 ease-in-out"
-                   onClick={()=>{router.push('/Developer/ApiKeyCreation')}}
-                  >Developer</li>
+                  <li className="hover:bg-gray-100 cursor-pointer px-4 py-2 transition duration-200 ease-in-out" onClick={() => { router.push('/Profile'); }}>Profile</li>
+                  <li className="hover:bg-gray-100 cursor-pointer px-4 py-2 transition duration-200 ease-in-out" onClick={() => { router.push('/Developer/ApiKeyCreation'); }}>Developer</li>
                   <li className="hover:bg-gray-100 cursor-pointer px-4 py-2 transition duration-200 ease-in-out">Referral</li>
                   <li className="hover:bg-gray-100 cursor-pointer px-4 py-2 transition duration-200 ease-in-out">Marketplace</li>
-                  <li
-                    className="hover:bg-gray-100 cursor-pointer px-4 py-2 transition duration-200 ease-in-out"
-                    onClick={handleLogout}
-                  >
-                    Logout
-                  </li>
+                  <li className="hover:bg-gray-100 cursor-pointer px-4 py-2 transition duration-200 ease-in-out" onClick={handleLogout}>Logout</li>
                 </ul>
               </div>
             )}
