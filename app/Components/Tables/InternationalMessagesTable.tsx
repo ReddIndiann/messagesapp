@@ -1,9 +1,27 @@
 import React, { useState } from 'react';
-import PropTypes from 'prop-types';
 
-const InternationalMessagesTable = ({ messages, campaigns }) => {
-  const [messageSearch, setMessageSearch] = useState('');
-  const [campaignSearch, setCampaignSearch] = useState('');
+interface Message {
+  country: string;
+  code: string;
+  internationalRate: string;
+  localRate: string;
+}
+
+interface Campaign {
+  title: string;
+  content: string;
+  countries: string[];
+  status: string;
+}
+
+interface InternationalMessagesTableProps {
+  messages: Message[];
+  campaigns: Campaign[];
+}
+
+const InternationalMessagesTable: React.FC<InternationalMessagesTableProps> = ({ messages, campaigns }) => {
+  const [messageSearch, setMessageSearch] = useState<string>('');
+  const [campaignSearch, setCampaignSearch] = useState<string>('');
 
   const filteredMessages = messages.filter((message) =>
     message.country.toLowerCase().includes(messageSearch.toLowerCase())
@@ -44,7 +62,7 @@ const InternationalMessagesTable = ({ messages, campaigns }) => {
           </tbody>
         </table>
       </div>
-      
+
       <div className="overflow-x-auto w-full md:w-2/3 md:ml-4">
         <input
           type="text"
@@ -69,7 +87,7 @@ const InternationalMessagesTable = ({ messages, campaigns }) => {
                 <td className="py-4 px-2 text-gray-500 border-b">{campaign.title}</td>
                 <td className="py-4 px-2 text-gray-500 border-b">{campaign.content}</td>
                 <td className="py-4 px-2 text-gray-500 border-b">
-                  <select className="border p-1 rounded">
+                  <select className="border p-1 rounded" title='q'>
                     <option value="">Select Country</option>
                     {messages.map((message, idx) => (
                       <option key={idx} value={message.country}>{message.country}</option>
@@ -85,25 +103,6 @@ const InternationalMessagesTable = ({ messages, campaigns }) => {
       </div>
     </div>
   );
-};
-
-InternationalMessagesTable.propTypes = {
-  messages: PropTypes.arrayOf(
-    PropTypes.shape({
-      country: PropTypes.string.isRequired,
-      code: PropTypes.string.isRequired,
-      internationalRate: PropTypes.string.isRequired,
-      localRate: PropTypes.string.isRequired,
-    })
-  ).isRequired,
-  campaigns: PropTypes.arrayOf(
-    PropTypes.shape({
-      title: PropTypes.string.isRequired,
-      content: PropTypes.string.isRequired,
-      countries: PropTypes.arrayOf(PropTypes.string).isRequired,
-      status: PropTypes.string.isRequired,
-    })
-  ).isRequired,
 };
 
 export default InternationalMessagesTable;

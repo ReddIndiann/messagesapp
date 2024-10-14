@@ -1,5 +1,6 @@
-import Cookies from 'js-cookie'; // Import the cookie library
-
+import axios from 'axios';
+import { saveToCookies, getFromCookies } from "./storage";
+const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 export const signUp = async (formData: {
   username: string;
   number: string;
@@ -9,29 +10,30 @@ export const signUp = async (formData: {
   const { username, number, email, password } = formData;
 
   try {
-      const response = await fetch('http://localhost:5000/auth/signup', {
-          method: 'POST',
-          headers: {
-              'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ username, email, password, number }),
-      });
+    const response = await axios.post(`${apiUrl}/auth/signup`, {
+      username,
+      email,
+      password,
+      number,
+    });
 
-      const data = await response.json();
+    // No need to parse response data as axios does this for us
+    const data = response.data;
 
-      if (!response.ok) {
-          throw new Error(data.msg || 'Registration failed');
-      }
+    // Save the response data to cookies
+    await saveToCookies(); // Expires in 1 day
 
-      // Save the response data to cookies
-      Cookies.set('signInResponse', JSON.stringify(data), { expires: 1 }); // Expires in 1 day
+    // Save the response data to localStorage
+    localStorage.setItem('signInResponse', JSON.stringify(data));
 
-      // Console log all details saved in cookies
-      console.log('Sign-Up Response:', Cookies.get('signInResponse'));
+    // Console log all details saved in cookies and localStorage
+    console.log('Sign-Up Response (Cookies):', getFromCookies('signInResponse'));
+    console.log('Sign-Up Response (localStorage):', localStorage.getItem('signInResponse'));
 
-      return data;
+    return data;
   } catch (err: any) {
-      throw new Error(err.message || 'An error occurred');
+    console.error('Sign-Up Error:', err);
+    throw new Error(err.response?.data.msg || 'Registration failed');
   }
 };
 
@@ -42,28 +44,61 @@ export const signIn = async (formData: {
   const { email, password } = formData;
 
   try {
-      const response = await fetch('http://localhost:5000/auth/signin', {
-          method: 'POST',
-          headers: {
-              'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({ email, password })
-      });
+    const response = await axios.post(`${apiUrl}/auth/signin`, {
+      email,
+      password,
+    });
 
-      const data = await response.json();
+    // No need to parse response data as axios does this for us
+    const data = response.data;
 
-      if (!response.ok) {
-          throw new Error(data.msg || 'Login failed');
-      }
+    // Save the response data to cookies
+    await saveToCookies(); // Expires in 1 day
 
-      // Save the response data to cookies
-      Cookies.set('signInResponse', JSON.stringify(data), { expires: 1});// Expires in 1 day
+    // Save the response data to localStorage
+    localStorage.setItem('signInResponse', JSON.stringify(data));
 
-      // Console log all details saved in cookies
-      console.log('Sign-In Response:', Cookies.get('signInResponse'));
+    // Console log all details saved in cookies and localStorage
+    console.log('Sign-In Response (Cookies):', getFromCookies('signInResponse'));
+    console.log('Sign-In Response (localStorage):', localStorage.getItem('signInResponse'));
 
-      return data;
+    return data;
   } catch (err: any) {
-      throw new Error(err.message || 'An error occurred');
+    console.error('Sign-In Error:', err);
+    console.log(err.response?.data.msg )
+    throw new Error(err.response?.data.msg || 'Login failed');
+  }
+};
+
+
+
+export const userdetails = async (userId: number) => {
+  try {
+    const response = await axios.get(`${apiUrl}/auth/${userId}`);
+    
+    return response.data; // Return the fetched API keys
+  } catch (err: any) {
+    console.error('Error fetching user details:', err.response?.data?.msg || 'An error occurred');
+    throw err;
+  }
+};export const updateUserDetails = async (
+  userId: number, 
+  userData: { username: string; email: string; number: string }
+) => {
+  try {
+    const response = await axios.put(`${apiUrl}/auth/update/${userId}`, userData);
+
+    // Clear localStorage
+    localStorage.removeItem('signInResponse');
+
+    // Save the updated user data to localStorage
+    localStorage.setItem('signInResponse', JSON.stringify(response.data));
+
+    console.log('Updated User Data:', response.data);
+
+    return response.data; // Return the updated user data
+  } catch (err: any) {
+    console.error('Error updating user details:', err.response?.data?.msg || 'An error occurred');
+    throw err; // Rethrow the error for further handling
   }
 };

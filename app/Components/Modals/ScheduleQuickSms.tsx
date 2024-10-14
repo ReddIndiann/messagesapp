@@ -1,7 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState,useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTimes, faCalendar } from '@fortawesome/free-solid-svg-icons';
+import axios from 'axios';
+import { useRouter } from 'next/navigation';
+import { fetchSenderIds } from '@/app/lib/senderIdUtils';
+
+const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
 interface FormData {
   selectedSenderID: string;
@@ -10,8 +15,13 @@ interface FormData {
   messageContent: string;
   scheduledDate: string;
   scheduledTime: string;
+  recipients: string;
 }
 
+interface Sender {
+  id: string;
+  name: string;
+}
 interface StepIndicatorProps {
   currentStep: number;
   totalSteps: number;
@@ -49,9 +59,11 @@ const StepIndicator: React.FC<StepIndicatorProps> = ({ currentStep, totalSteps }
 
 interface Step1Props {
   onNext: () => void;
+  formData: FormData;
+  setFormData: React.Dispatch<React.SetStateAction<FormData>>;
 }
 
-const Step1: React.FC<Step1Props> = ({ onNext }) => (
+const Step1: React.FC<Step1Props> = ({ onNext, formData, setFormData }) => (
   <motion.div
     initial={{ opacity: 0, y: 20 }}
     animate={{ opacity: 1, y: 0 }}
@@ -64,6 +76,8 @@ const Step1: React.FC<Step1Props> = ({ onNext }) => (
         <label htmlFor="recipient" className="block text-sm font-medium text-gray-700 mb-2">Recipient</label>
         <textarea
           id="recipient"
+          value={formData.recipients}
+          onChange={(e) => setFormData({ ...formData, recipients: e.target.value })}
           className="w-full bg-white border border-gray-300 rounded-lg shadow-sm p-4 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-800 transition-all duration-200"
           placeholder="Enter recipient's number or select from contacts"
           rows={4}
@@ -80,14 +94,17 @@ const Step1: React.FC<Step1Props> = ({ onNext }) => (
   </motion.div>
 );
 
+
 interface Step2Props {
   onNext: () => void;
   onPrevious: () => void;
   formData: FormData;
   setFormData: React.Dispatch<React.SetStateAction<FormData>>;
+  senders: Sender[];  // Add this line to accept senders
 }
 
-const Step2: React.FC<Step2Props> = ({ onNext, onPrevious, formData, setFormData }) => {
+
+const Step2: React.FC<Step2Props> = ({ onNext, onPrevious, formData, setFormData, senders }) => {
   const handleAddSenderID = () => {
     if (formData.newSenderID) {
       setFormData({
@@ -110,17 +127,29 @@ const Step2: React.FC<Step2Props> = ({ onNext, onPrevious, formData, setFormData
         <div className="mb-6">
           <label htmlFor="senderID" className="block text-sm font-medium text-gray-700 mb-2">Sender ID</label>
           <div className="flex items-center gap-2">
-            <select
-              id="senderID"
+          <select
+              id="selectedSenderID"
               value={formData.selectedSenderID}
               onChange={(e) => setFormData({ ...formData, selectedSenderID: e.target.value })}
-              className="flex-1 bg-white border border-gray-300 rounded-lg shadow-sm py-2 px-3 text-gray-800 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+              className="w-full bg-white border border-gray-300 rounded-lg shadow-sm py-1 px-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-800 transition-all duration-200"
               required
             >
-              <option value="" disabled>Select Sender ID</option>
-              <option value="12345">12345</option>
-              <option value="67890">67890</option>
+              <option value="" disabled>
+                Select Sender ID
+              </option>
+              {senders && senders.length > 0 ? (
+                senders.map((sender) => (
+                  <option key={sender.id} value={sender.id}>
+                    {sender.name} ({sender.id})
+                  </option>
+                ))
+              ) : (
+                <option value="" disabled>
+                  No Sender IDs available
+                </option>
+              )}
             </select>
+
             <button
               type="button"
               className="bg-gray-100 text-gray-800 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors duration-200"
@@ -225,7 +254,7 @@ const Step3: React.FC<Step3Props> = ({ onPrevious, formData, setFormData, onSche
             className="w-full bg-white border border-gray-300 rounded-lg shadow-sm py-2 px-3 text-gray-800 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
             required
           />
-          <FontAwesomeIcon icon={faCalendar} className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+         
         </div>
       </div>
       <div className="mb-6">
@@ -272,15 +301,81 @@ const ScheduleQuickSms: React.FC<ScheduleQuickSmsProps> = ({ isOpen, onClose }) 
     messageContent: '',
     scheduledDate: '',
     scheduledTime: '',
+    recipients:''
   });
-
+  const [showSuccessModal, setShowSuccessModal] = useState<boolean>(false);
+  const [showErrorModal, setShowErrorModal] = useState<boolean>(false);
+  const [errorMessage, setErrorMessage] = useState<string>('');
+  const [userId, setUserId] = useState<number | null>(null);
+  const [senders, setSenders] = useState<Sender[]>([]);
   const handleNext = () => setCurrentStep((prev) => prev + 1);
   const handlePrevious = () => setCurrentStep((prev) => prev - 1);
 
-  const handleSchedule = () => {
-    console.log('Scheduled message:', formData);
-    onClose();
+  useEffect(() => {
+    const signInResponse = localStorage.getItem('signInResponse');
+    if (signInResponse) {
+      const parsedResponse = JSON.parse(signInResponse);
+      const extractedUserId = parsedResponse.user?.id || null;
+      setUserId(extractedUserId);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (userId) {
+      const getSenderIds = async () => {
+        try {
+          const data = await fetchSenderIds(userId);
+          setSenders(data.map((sender: any) => ({ id: sender.id, name: sender.name })));
+        } catch (error) {
+          console.error('Error fetching sender IDs:', error);
+        }
+      };
+
+      getSenderIds();
+    }
+  }, [userId]);
+
+
+  const handleSchedule = async () => {
+    const payload = {
+      recipients: formData.recipients.split(',').map(recipient => recipient.trim()),
+      senderId: formData.selectedSenderID,  // Use selectedSenderID from formData
+      userId: userId,  // Use the extracted userId from the state
+      campaignTitle: formData.campaignTitle,
+      content: formData.messageContent,
+      messageType: "text",
+      recursion: "none",
+      dateScheduled: formData.scheduledDate,
+      timeScheduled: formData.scheduledTime,
+    };
+  
+    try {
+      const response = await axios.post(`${apiUrl}/schedule-messages/create`, payload);
+      console.log('Message scheduled successfully:', response.data);
+      setShowSuccessModal(true);
+  
+      setTimeout(() => {
+        setShowSuccessModal(false);
+        onClose();
+      }, 2000);
+    } catch (error) {
+      console.error('Error scheduling message:', error);
+      let errorMessage = 'An unexpected error occurred.';
+  
+      if (axios.isAxiosError(error) && error.response) {
+        errorMessage = error.response.data.message || 'An error occurred while sending the message.';
+      }
+  
+      setShowErrorModal(true);
+      setErrorMessage(errorMessage);
+  
+      setTimeout(() => {
+        setShowErrorModal(false);
+      }, 2000);
+    }
   };
+  
+  
 
   if (!isOpen) return null;
 
@@ -297,16 +392,19 @@ const ScheduleQuickSms: React.FC<ScheduleQuickSmsProps> = ({ isOpen, onClose }) 
         </button>
         <StepIndicator currentStep={currentStep} totalSteps={3} />
         <AnimatePresence mode="wait">
-          {currentStep === 1 && <Step1 key="step1" onNext={handleNext} />}
+          {currentStep === 1 && <Step1 key="step1" onNext={handleNext} formData={formData} setFormData={setFormData} />
+        }
           {currentStep === 2 && (
-            <Step2
-              key="step2"
-              onNext={handleNext}
-              onPrevious={handlePrevious}
-              formData={formData}
-              setFormData={setFormData}
-            />
-          )}
+  <Step2
+    key="step2"
+    onNext={handleNext}
+    onPrevious={handlePrevious}
+    formData={formData}
+    setFormData={setFormData}
+    senders={senders}  // Pass senders here
+  />
+)}
+
           {currentStep === 3 && (
             <Step3
               key="step3"
@@ -318,6 +416,22 @@ const ScheduleQuickSms: React.FC<ScheduleQuickSmsProps> = ({ isOpen, onClose }) 
           )}
         </AnimatePresence>
       </div>
+      {showSuccessModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg w-96">
+            <h2 className="text-xl font-medium text-green-600">Success!</h2>
+            <p className="text-gray-700">Message Scheduled successfully.</p>
+          </div>
+        </div>
+      )}
+        {showErrorModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg w-96">
+            <h2 className="text-xl font-medium text-red-600">Error Scheduling Message!</h2>
+            <p className="text-gray-700">{errorMessage}</p>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

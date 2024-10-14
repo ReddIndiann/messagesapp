@@ -1,44 +1,47 @@
-'use client';
+'use client'
 
 import React, { useState, useEffect } from 'react';
 import Header from '@/app/Components/Header';
 import Sidebar from '@/app/Components/SideNav';
-import Cookies from 'js-cookie';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPaperPlane, faPlus } from '@fortawesome/free-solid-svg-icons';
 import MessageTemplatesTable from '@/app/Components/Tables/MessageTemplateTable';
 import ScheduledMessageTable from '@/app/Components/Tables/ScheduledMessageTable';
 import InternationalMessagesTable from '@/app/Components/Tables/InternationalMessagesTable';
-import CreateTemplateModal from '@/app/Components/Modals/CreateTemplateModal';
+import CreateTemplateModal from '@/app/Components/Modals/MessageTemplate/CreateTemplateModal';
 import SendMessageOptionsModal from '@/app/Components/Modals/SendMessageOptionsModal';
 import QuickSMSModal from '@/app/Components/Modals/SendQuicksms';
 import ScheduleQuickSms from '@/app/Components/Modals/ScheduleQuickSms';
 import SendToGroupModal from '@/app/Components/Modals/SendToGroupModal';
 import ScheduleToGroupStepper from '@/app/Components/Modals/ScheduleToGroupModal';
 import ScheduleMessageOptions from '@/app/Components/Modals/ScheduleMessageOptions';
+import ExportExcelContactStepper from '@/app/Components/Modals/ExportExcelSend';
+import { fetchMessageTemplates,fetchScheduleMessage } from '@/app/lib/createTemplateUtils'; // Adjust the path as necessary
+import ExcelUploadScheduleStepper from '@/app/Components/Modals/ExportExcelSchedule';
 
-import { fetchMessageTemplates } from '@/app/lib/createTemplateUtils';// Adjust the path as necessary
 
 
 
 const Dashboard: React.FC = () => {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState<boolean>(false);
-  const [currentSection, setCurrentSection] = useState<string>('bulkSMS');
+  const [currentSection, setCurrentSection] = useState<'bulkSMS' | 'Developer' | 'admin'>('bulkSMS');
   const [activeMainTab, setActiveMainTab] = useState<'messages' | 'scheduled' | 'international'>('messages');
   const [isCreateTemplateModalOpen, setIsCreateTemplateModalOpen] = useState<boolean>(false);
   const [isSendMessageOptionsModalOpen, setIsSendMessageOptionsModalOpen] = useState<boolean>(false);
   const [isQuickSMSModalOpen, setIsQuickSMSModalOpen] = useState<boolean>(false);
   const [isScheduleQuickSMSModalOpen, setIsScheduleQuickSMSModalOpen] = useState<boolean>(false);
+  const [isExportExcelOpen, setIsExportExcelModalOpen] = useState<boolean>(false);
+  const [isExportExcelScheduleOpen, setIsExportExceSchedulelModalOpen] = useState<boolean>(false);
   const [isScheduleToGroupModalOpen, setIsScheduleToGroupModalOpen] = useState<boolean>(false);
   const [isSendToGroupModalOpen, setIsSendToGroupModalOpen] = useState<boolean>(false);
   const [isScheduleMessageOptionsOpen, setIsScheduleMessageOptionsOpen] = useState<boolean>(false);
-  const [smsCampaigns, setSmsCampaigns] = useState([]);  // State to store fetched campaigns
-  const [userId, setUserId] = useState(null);
+  const [smsCampaigns, setSmsCampaigns] = useState([]); // State to store fetched campaigns
+  const [smsSchedule, setSmsSchedule] = useState([]); // State to store fetched campaigns
+  const [userId, setUserId] = useState<number | null>(null);
 
   // Fetch the userId from async storage
   useEffect(() => {
-    // Retrieve and parse the user ID from async storage
-    const signInResponse = Cookies.get('signInResponse');
+    const signInResponse = localStorage.getItem('signInResponse');
     if (signInResponse) {
       const parsedResponse = JSON.parse(signInResponse);
       const extractedUserId = parsedResponse.user?.id || null;
@@ -53,14 +56,22 @@ const Dashboard: React.FC = () => {
         const data = await fetchMessageTemplates(userId);
         setSmsCampaigns(data);
       };
-  
+
       getMessageTemplates();
     }
   }, [userId]);
-
-  const scheduledMessages = [
-    { id: 1, title: 'Meeting Reminder', content: "Don't forget our meeting at 3 PM.", type: 'Scheduled', scheduled: 'Fri 2 Aug, 2024 1:12:22 pm', lastseen: 'Fri 2 Aug, 2024 1:12:22 pm', recipient: 'John Doe', status: 'COMPLETE', repeatperiod: 'None' },
-  ];
+  useEffect(() => {
+    if (userId) {
+      const getScheduleMessages = async () => {
+        const data = await fetchScheduleMessage(userId);
+        setSmsSchedule(data); // Store fetched scheduled messages in smsSchedule state
+      };
+  
+      getScheduleMessages();
+    }
+  }, [userId]);
+  
+ 
 
   const internationalMessages = [
     { country: 'USA', code: '+1', internationalRate: '0.10', localRate: '0.05' },
@@ -74,7 +85,7 @@ const Dashboard: React.FC = () => {
   const mainTabs = [
     { id: 'messages', label: 'Messages' },
     { id: 'scheduled', label: 'Scheduled' },
-    { id: 'international', label: 'International' },
+
   ];
 
   const handleMainTabClick = (tabId: 'messages' | 'scheduled' | 'international') => {
@@ -84,6 +95,7 @@ const Dashboard: React.FC = () => {
   const handleQuickSMSClick = () => {
     setIsSendMessageOptionsModalOpen(false);
     setIsQuickSMSModalOpen(true);
+    console.log('pressed')
   };
 
   const handleScheduleQuickSmsClick = () => {
@@ -94,25 +106,34 @@ const Dashboard: React.FC = () => {
   const handleSendToGroupClick = () => {
     setIsSendMessageOptionsModalOpen(false);
     setIsSendToGroupModalOpen(true);
+    console.log('pressed')
   };
+
+  const handleExportExcelClick = () => {
+    setIsSendMessageOptionsModalOpen(false);
+   setIsExportExcelModalOpen(true);
+    console.log('pressed')
+  };
+
+
 
   const handleScheduleToGroupClick = () => {
     setIsScheduleMessageOptionsOpen(false);
     setIsScheduleToGroupModalOpen(true);
   };
-
-  const handleNextFromQuickSMS = () => {
-    setIsQuickSMSModalOpen(false);
+  const handleExportExcelScheduleClick = () => {
+    setIsScheduleMessageOptionsOpen(false);
+    setIsExportExceSchedulelModalOpen(true);
   };
 
-  const handleSendToGroup = () => {
-    setIsSendToGroupModalOpen(false);
-  };
 
-  const handleScheduleToGroup = () => {
-    setIsScheduleToGroupModalOpen(false);
+ 
+  const handleTemplateCreated = async () => {
+    if (userId) {
+      const data = await fetchMessageTemplates(userId);
+      setSmsCampaigns(data);
+    }
   };
-
   const renderActionButtons = () => {
     if (activeMainTab === 'messages') {
       return (
@@ -155,73 +176,91 @@ const Dashboard: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
-      <Header currentSection={currentSection} />
-      <div className="flex flex-1 pt-16">
-        <Sidebar onCollapse={setIsSidebarCollapsed} setCurrentSection={setCurrentSection} />
-        <main className={`flex-1 ${isSidebarCollapsed ? 'ml-16' : 'ml-64'} p-4 md:p-6 lg:p-8 overflow-y-auto`}>
-          <div className="bg-white rounded-lg shadow-lg">
-            <div className="border-b border-gray-200">
-              <nav className="flex -mb-px">
-                {mainTabs.map((tab) => (
-                  <button
-                    key={tab.id}
-                    className={`px-6 py-3 font-medium text-sm ${activeMainTab === tab.id ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-500 hover:text-gray-700'}`}
-                    onClick={() => handleMainTabClick(tab.id as 'messages' | 'scheduled' | 'international')}
-                  >
-                    {tab.label}
-                  </button>
-                ))}
-              </nav>
-            </div>
-            
-            <div className="flex justify-end items-center border-b border-gray-200 px-6 py-3">
-              <div>
-                {renderActionButtons()}
-              </div>
-            </div>
-
-            <div className="p-6 grid grid-cols-1 gap-6">
-              {activeMainTab === 'messages' && <MessageTemplatesTable campaigns={smsCampaigns} />}
-              {activeMainTab === 'scheduled' && <ScheduledMessageTable campaigns={scheduledMessages} />}
-              {activeMainTab === 'international' && <InternationalMessagesTable messages={internationalMessages} campaigns={internationalCampaigns} />}
+    <Header currentSection={currentSection} />
+    <div className="flex flex-1 pt-16">
+      <Sidebar onCollapse={setIsSidebarCollapsed} setCurrentSection={setCurrentSection} />
+      <main className={`flex-1 ${isSidebarCollapsed ? 'ml-16' : 'ml-64'} p-4 md:p-6 lg:p-8 overflow-y-auto`}>
+        <div className="bg-white rounded-lg shadow-lg">
+          <div className="border-b border-gray-200">
+            <nav className="flex flex-wrap -mb-px">
+              {mainTabs.map((tab) => (
+                <button
+                  key={tab.id}
+                  className={`px-4 py-2 md:px-6 md:py-3 font-medium text-sm ${
+                    activeMainTab === tab.id
+                      ? 'text-blue-600 border-b-2 border-blue-600'
+                      : 'text-gray-500 hover:text-gray-700'
+                  }`}
+                  onClick={() => handleMainTabClick(tab.id as 'messages' | 'scheduled' | 'international')}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </nav>
+          </div>
+          
+          <div className="flex flex-wrap justify-between items-center border-b border-gray-200 px-4 py-3 md:px-6">
+            <div className="w-full md:w-auto mb-2 md:mb-0">
+              {renderActionButtons()}
             </div>
           </div>
-        </main>
-      </div>
+
+          <div className="p-4 md:p-6">
+            {activeMainTab === 'messages' && <MessageTemplatesTable campaigns={smsCampaigns} />}
+            {activeMainTab === 'scheduled' && <ScheduledMessageTable campaigns={smsSchedule} />}
+            {activeMainTab === 'international' && (
+              <InternationalMessagesTable messages={internationalMessages} campaigns={internationalCampaigns} />
+            )}
+          </div>
+        </div>
+      </main>
+    </div>
 
       {/* Render the modals */}
-      <CreateTemplateModal isOpen={isCreateTemplateModalOpen} onClose={() => setIsCreateTemplateModalOpen(false)} />
+      <CreateTemplateModal isOpen={isCreateTemplateModalOpen} onClose={() => setIsCreateTemplateModalOpen(false)} onTemplateCreated={handleTemplateCreated} />
       <SendMessageOptionsModal
         isOpen={isSendMessageOptionsModalOpen}
         onClose={() => setIsSendMessageOptionsModalOpen(false)}
         onQuickSMSClick={handleQuickSMSClick}
         onSendToGroupClick={handleSendToGroupClick}
+        onExportExcel={handleExportExcelClick}
       />
       <QuickSMSModal
         isOpen={isQuickSMSModalOpen}
         onClose={() => setIsQuickSMSModalOpen(false)}
-        onNext={handleNextFromQuickSMS}
+        // onNext={handleNextFromQuickSMS}
       />
       <ScheduleQuickSms
         isOpen={isScheduleQuickSMSModalOpen}
-        onClose={() => setIsScheduleMessageOptionsOpen(false)}
-        onNext={handleScheduleQuickSmsClick}
+        onClose={() => setIsScheduleQuickSMSModalOpen(false)}
       />
       <SendToGroupModal
         isOpen={isSendToGroupModalOpen}
         onClose={() => setIsSendToGroupModalOpen(false)}
-        onSend={handleSendToGroup}
+        // onSend={handleSendToGroup}
       />
+        <ExportExcelContactStepper
+        isOpen={isExportExcelOpen}
+        onClose={()=>setIsExportExcelModalOpen(false)}
+        // onSend={handleSendToGroup}
+      />
+  <ExcelUploadScheduleStepper
+        isOpen={isExportExcelScheduleOpen}
+        onClose={()=>setIsExportExceSchedulelModalOpen(false)}
+      />
+
       <ScheduleToGroupStepper
         isOpen={isScheduleToGroupModalOpen}
         onClose={() => setIsScheduleToGroupModalOpen(false)}
-        onSend={handleScheduleToGroup}
+        // onSend={handleScheduleToGroup}
       />
+      
       <ScheduleMessageOptions
         isOpen={isScheduleMessageOptionsOpen}
         onClose={() => setIsScheduleMessageOptionsOpen(false)}
         onScheduleQuickSMSClick={handleScheduleQuickSmsClick}
         onScheduleToGroupClick={handleScheduleToGroupClick}
+        onExportExcel={handleExportExcelScheduleClick}
       />
     </div>
   );

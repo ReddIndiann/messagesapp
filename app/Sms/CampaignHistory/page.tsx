@@ -1,38 +1,41 @@
 'use client'
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect,FC } from 'react';
 import { motion } from 'framer-motion';
 import Header from '@/app/Components/Header';
 import Sidebar from '@/app/Components/SideNav';
 import AddSenderIdModal from '@/app/Components/Modals/SenderIdModal';
 import TableComponent from '@/app/Components/Tables/SMSCampaignHistory';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faHistory, faFileAlt, faPlus } from '@fortawesome/free-solid-svg-icons';
+import { faHistory, faFileAlt, faPlus ,IconDefinition} from '@fortawesome/free-solid-svg-icons';
 
-const Dashboard = () => {
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
-  const [currentSection, setCurrentSection] = useState('');
+const Dashboard: FC = () => {
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState<boolean>(false);
+  const [currentSection, setCurrentSection] = useState<'bulkSMS' | 'Developer' | 'admin'>('bulkSMS');
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [userId, setUserId] = useState<number | null>(null);
+  const [currentTabSection, setCurrentTabSection] = useState('');
 
   useEffect(() => {
-    setCurrentSection('campaignHistory');
+    setCurrentTabSection('campaignHistory');
+    const signInResponse = localStorage.getItem('signInResponse');
+    if (signInResponse) {
+      const parsedResponse = JSON.parse(signInResponse);
+      const extractedUserId = parsedResponse.user?.id || null;
+      setUserId(extractedUserId);
+    }
   }, []);
 
-  const handleAddSenderId = (newSenderId) => {
-    console.log('New Sender ID:', newSenderId);
-    // Handle the new Sender ID submission here
-  };
 
-  const campaignHistoryData = [
-    { name: 'hii', totalRecipients: 1, senderId: 'Daniel', dateTime: 'Wed, Aug 7, 2024 8:48 AM', totalCreditUsed: 1, walletBalanceUsed: 0 },
-    { name: 'kin', totalRecipients: 1, senderId: 'Daniel', dateTime: 'Tue, Aug 6, 2024 2:09 PM', totalCreditUsed: 1, walletBalanceUsed: 0 },
-    { name: 'API Message - (v1)', totalRecipients: 2, senderId: 'Daniel', dateTime: 'Fri, Aug 2, 2024 1:51 PM', totalCreditUsed: 2, walletBalanceUsed: 0 },
-    { name: 'Gridguard', totalRecipients: 1, senderId: 'Daniel', dateTime: 'Fri, Aug 2, 2024 1:33 PM', totalCreditUsed: 1, walletBalanceUsed: 0 },
-  ];
 
-  const deliveryReportData = []; 
+  interface TabButtonProps {
+    icon: IconDefinition;
+    label: string;
+    isActive: boolean;
+    onClick: () => void;
+  }
 
-  const TabButton = ({ icon, label, isActive, onClick }) => (
+  const TabButton: FC<TabButtonProps> = ({ icon, label, isActive, onClick }) => (
     <button
       className={`flex items-center px-6 py-3 text-sm font-medium transition-colors duration-200 ${
         isActive
@@ -48,13 +51,9 @@ const Dashboard = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
-      <Header currentSection={currentSection} className="bg-white shadow-md" />
+        <Header currentSection={currentSection} />
       <div className="flex flex-1 pt-16">
-        <Sidebar
-          onCollapse={setIsSidebarCollapsed}
-          setCurrentSection={setCurrentSection}
-          className="bg-white shadow-md"
-        />
+      <Sidebar onCollapse={setIsSidebarCollapsed} setCurrentSection={setCurrentSection} />
         <main className={`flex-1 ${isSidebarCollapsed ? 'ml-20' : 'ml-64'} p-8 overflow-y-auto`}>
           <motion.div 
             className="bg-white shadow-lg rounded-xl overflow-hidden"
@@ -80,14 +79,14 @@ const Dashboard = () => {
                 <TabButton
                   icon={faHistory}
                   label="Campaign History"
-                  isActive={currentSection === 'campaignHistory'}
-                  onClick={() => setCurrentSection('campaignHistory')}
+                  isActive={currentTabSection === 'campaignHistory'}
+                  onClick={() => setCurrentTabSection('campaignHistory')}
                 />
                 <TabButton
                   icon={faFileAlt}
                   label="Delivery Report"
-                  isActive={currentSection === 'deliveryReport'}
-                  onClick={() => setCurrentSection('deliveryReport')}
+                  isActive={currentTabSection === 'deliveryReport'}
+                  onClick={() => setCurrentTabSection('deliveryReport')}
                 />
               </div>
             </div>
@@ -99,11 +98,11 @@ const Dashboard = () => {
                 animate={{ opacity: 1 }}
                 transition={{ duration: 0.3 }}
               >
-                {currentSection === 'campaignHistory' && (
-                  <TableComponent data={campaignHistoryData} section="campaignHistory" />
-                )}
-                {currentSection === 'deliveryReport' && (
-                  <TableComponent data={deliveryReportData} section="deliveryReport" />
+                {userId && (
+                  <TableComponent
+                    section={currentTabSection}
+                    userId={userId}
+                  />
                 )}
               </motion.div>
             </div>
@@ -111,11 +110,7 @@ const Dashboard = () => {
         </main>
       </div>
 
-      <AddSenderIdModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        onSubmit={handleAddSenderId}
-      />
+  
     </div>
   );
 };
