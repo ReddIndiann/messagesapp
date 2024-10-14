@@ -12,11 +12,11 @@ interface PackageCreationModalProps {
 
 const PackageCreation: React.FC<PackageCreationModalProps> = ({ isOpen, onClose, userId, onSuccess }) => {
   const [name, setName] = useState<string>('');
-  const [type, setType] = useState<string>('');
+  const [type, setType] = useState<string>('non-expiry');
   const [price, setPrice] = useState<number>(0);
   const [rate, setRate] = useState<number>(0);
   const [smscount, setSmscount] = useState<number>(0);
-  const [expiry, setExpiry] = useState<string>('');
+  const [expiry, setExpiry] = useState<boolean>(false);
   const [duration, setDuration] = useState<number>(0);
 
   const MySwal = withReactContent(Swal);
@@ -65,6 +65,12 @@ const PackageCreation: React.FC<PackageCreationModalProps> = ({ isOpen, onClose,
     }
   };
 
+  const handleExpiryChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const isExpiry = e.target.checked;
+    setExpiry(isExpiry);
+    setType(isExpiry ? 'bonus' : 'non-expiry');
+  };
+
   return (
     <div>
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -80,16 +86,34 @@ const PackageCreation: React.FC<PackageCreationModalProps> = ({ isOpen, onClose,
               onChange={(e: ChangeEvent<HTMLInputElement>) => setName(e.target.value)}
               placeholder="Enter package name"
             />
-            
-            <label className="block text-gray-700 mb-2" htmlFor="type">Type</label>
+
+            <label className="block text-gray-700 mb-2" htmlFor="expiry">Has Expiry?</label>
             <input
+              id="expiry"
+              type="checkbox"
+              className="mr-2"
+              checked={expiry}
+              onChange={handleExpiryChange}
+            />
+            <span>{expiry ? 'Yes' : 'No'}</span>
+
+            <label className="block text-gray-700 mb-2" htmlFor="type">Type</label>
+            <select
               id="type"
-              type="text"
               className="w-full p-2 border border-gray-300 rounded text-black"
               value={type}
-              onChange={(e: ChangeEvent<HTMLInputElement>) => setType(e.target.value)}
-              placeholder="Enter package type (e.g., SMS)"
-            />
+              onChange={(e: ChangeEvent<HTMLSelectElement>) => setType(e.target.value)}
+              disabled={!expiry}
+            >
+              {expiry ? (
+                <>
+                  <option value="bonus">Bonus</option>
+                  <option value="expiry">Expiry</option>
+                </>
+              ) : (
+                <option value="non-expiry">Non-expiry</option>
+              )}
+            </select>
 
             <label className="block text-gray-700 mb-2" htmlFor="price">Price</label>
             <input
@@ -119,16 +143,6 @@ const PackageCreation: React.FC<PackageCreationModalProps> = ({ isOpen, onClose,
               value={smscount}
               onChange={(e: ChangeEvent<HTMLInputElement>) => setSmscount(parseInt(e.target.value))}
               placeholder="Enter SMS count"
-            />
-
-            <label className="block text-gray-700 mb-2" htmlFor="expiry">Expiry</label>
-            <input
-              id="expiry"
-              type="text"
-              className="w-full p-2 border border-gray-300 rounded text-black"
-              value={expiry}
-              onChange={(e: ChangeEvent<HTMLInputElement>) => setExpiry(e.target.value)}
-              placeholder="Enter expiry (e.g., 30 days)"
             />
 
             <label className="block text-gray-700 mb-2" htmlFor="duration">Duration</label>
