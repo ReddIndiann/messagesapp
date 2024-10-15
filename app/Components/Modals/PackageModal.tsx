@@ -13,11 +13,13 @@ interface PackageCreationModalProps {
 const PackageCreation: React.FC<PackageCreationModalProps> = ({ isOpen, onClose, userId, onSuccess }) => {
   const [name, setName] = useState<string>('');
   const [type, setType] = useState<string>('non-expiry');
-  const [price, setPrice] = useState<number>(0);
+  const [price, setPrice] = useState<number | null>(null);  // Allow price to be null
   const [rate, setRate] = useState<number>(0);
   const [smscount, setSmscount] = useState<number>(0);
-  const [expiry, setExpiry] = useState<boolean>(false);
-  const [duration, setDuration] = useState<number>(0);
+  const [expiry, setExpiry] = useState<boolean>(false);  // Default to false
+  const [duration, setDuration] = useState<number | null>(null);  // Allow duration to be null
+  const [bonusrate, setBonusrate] = useState<number | null>(0);  // New state for bonusrate
+  const [userEntry, setUserEntry] = useState<boolean>(false);  // Default to false
 
   const MySwal = withReactContent(Swal);
 
@@ -34,8 +36,10 @@ const PackageCreation: React.FC<PackageCreationModalProps> = ({ isOpen, onClose,
         price,
         rate,
         smscount,
-        expiry,
+        expiry,  // Will be false if checkbox is not checked
         duration,
+        bonusrate,  // Include bonusrate in the package data
+        userEntry,  // Will be false if checkbox is not checked
       });
 
       // Display success alert
@@ -71,6 +75,11 @@ const PackageCreation: React.FC<PackageCreationModalProps> = ({ isOpen, onClose,
     setType(isExpiry ? 'bonus' : 'non-expiry');
   };
 
+  const handleUserEntryChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const isUserEntry = e.target.checked;
+    setUserEntry(isUserEntry);
+  };
+
   return (
     <div>
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -97,13 +106,23 @@ const PackageCreation: React.FC<PackageCreationModalProps> = ({ isOpen, onClose,
             />
             <span>{expiry ? 'Yes' : 'No'}</span>
 
+            <label className="block text-gray-700 mb-2" htmlFor="userEntry">User Entry?</label>
+            <input
+              id="userEntry"
+              type="checkbox"
+              className="mr-2"
+              checked={userEntry}
+              onChange={handleUserEntryChange}
+            />
+            <span>{userEntry ? 'Yes' : 'No'}</span>
+
             <label className="block text-gray-700 mb-2" htmlFor="type">Type</label>
             <select
               id="type"
               className="w-full p-2 border border-gray-300 rounded text-black"
               value={type}
               onChange={(e: ChangeEvent<HTMLSelectElement>) => setType(e.target.value)}
-              disabled={!expiry}
+              disabled={expiry}
             >
               {expiry ? (
                 <>
@@ -120,9 +139,10 @@ const PackageCreation: React.FC<PackageCreationModalProps> = ({ isOpen, onClose,
               id="price"
               type="number"
               className="w-full p-2 border border-gray-300 rounded text-black"
-              value={price}
-              onChange={(e: ChangeEvent<HTMLInputElement>) => setPrice(parseFloat(e.target.value))}
+              value={price ?? ''}  // Allow price to be null
+              onChange={(e: ChangeEvent<HTMLInputElement>) => setPrice(e.target.value ? parseFloat(e.target.value) : null)}
               placeholder="Enter package price"
+              disabled={userEntry}  // Disable if userEntry is true
             />
 
             <label className="block text-gray-700 mb-2" htmlFor="rate">Rate</label>
@@ -143,6 +163,17 @@ const PackageCreation: React.FC<PackageCreationModalProps> = ({ isOpen, onClose,
               value={smscount}
               onChange={(e: ChangeEvent<HTMLInputElement>) => setSmscount(parseInt(e.target.value))}
               placeholder="Enter SMS count"
+              disabled={userEntry}  // Disable if userEntry is true
+            />
+
+            <label className="block text-gray-700 mb-2" htmlFor="bonusrate">Bonus Rate</label>
+            <input
+              id="bonusrate"
+              type="number"
+              className="w-full p-2 border border-gray-300 rounded text-black"
+              value={bonusrate ?? ''}  // Allow bonusrate to be null
+              onChange={(e: ChangeEvent<HTMLInputElement>) => setBonusrate(e.target.value ? parseFloat(e.target.value) : null)}
+              placeholder="Enter bonus rate"
             />
 
             <label className="block text-gray-700 mb-2" htmlFor="duration">Duration</label>
@@ -150,9 +181,10 @@ const PackageCreation: React.FC<PackageCreationModalProps> = ({ isOpen, onClose,
               id="duration"
               type="number"
               className="w-full p-2 border border-gray-300 rounded text-black"
-              value={duration}
-              onChange={(e: ChangeEvent<HTMLInputElement>) => setDuration(parseInt(e.target.value))}
+              value={duration ?? ''}  // Allow duration to be null
+              onChange={(e: ChangeEvent<HTMLInputElement>) => setDuration(e.target.value ? parseInt(e.target.value) : null)}
               placeholder="Enter duration (in days)"
+              disabled={!expiry}  // Enable if expiry is true
             />
           </div>
 
