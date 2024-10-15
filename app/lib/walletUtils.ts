@@ -3,7 +3,7 @@ import axios from 'axios';
 
 export interface Wallet {
   id: number;
-  transactionid: string;
+
   amount: number;
   note:string;
   wallet:any
@@ -11,7 +11,7 @@ export interface Wallet {
 const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
 
-export const depositewallet = async (walletData: { transactionid: string; userId: number | null; amount: number; note: string }) => {
+export const depositewallet = async (walletData: { userId: number | null; amount: number; note: string }) => {
     if (walletData.userId === null) {
       throw new Error('User ID is not available.');
     }

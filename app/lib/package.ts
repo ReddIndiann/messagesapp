@@ -5,6 +5,7 @@ import axios from 'axios';
 export const createPackage = async (packageData: {
   name: string;
   type: string;
+  userEntry:boolean;
   price: number | null;   // Allow price to be null
   rate: number;
   smscount: number;

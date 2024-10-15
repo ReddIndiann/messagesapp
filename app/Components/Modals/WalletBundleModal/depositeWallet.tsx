@@ -6,10 +6,10 @@ import Swal from 'sweetalert2'; // Import SweetAlert
 interface DepositeWalletModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onDepositSuccess: (amount: number) => void; // Add this line
 }
-
-const DepositeWallet: React.FC<DepositeWalletModalProps> = ({ isOpen, onClose }) => {
-  const [transactionid, setTransactionid] = useState<string>('');
+const DepositeWallet: React.FC<DepositeWalletModalProps> = ({ isOpen, onClose, onDepositSuccess }) => {
+  const [number, setnumber] = useState<string>('');
   const [note, setNote] = useState<string>('');
   const [amount, setAmount] = useState<string>(''); // Changed to string to handle input
   const [userId, setUserId] = useState<number | null>(null);
@@ -43,12 +43,12 @@ const DepositeWallet: React.FC<DepositeWalletModalProps> = ({ isOpen, onClose })
       const parsedAmount = parseFloat(amount);
 
       await depositewallet({
-        transactionid,
+        
         userId,
         amount: parsedAmount, // Use parsed number here
         note,
       });
-
+      onDepositSuccess(parsedAmount);
       // Show success alert using SweetAlert
       Swal.fire({
         icon: 'success',
@@ -57,7 +57,7 @@ const DepositeWallet: React.FC<DepositeWalletModalProps> = ({ isOpen, onClose })
         confirmButtonText: 'OK',
       }).then(() => {
         onClose();
-        navigate.push('/');
+       
       });
     } catch (error) {
       console.error('Error registering group:', error);
@@ -79,15 +79,15 @@ const DepositeWallet: React.FC<DepositeWalletModalProps> = ({ isOpen, onClose })
           <h2 className="text-xl font-medium mb-4 text-black">Deposite Into Account</h2>
           <div className="mb-4">
             <label className="block text-black mb-2" htmlFor="transaction-id">
-              TransactionId
+             Number
             </label>
             <input
               id="transaction-id"
               type="text"
               className="w-full p-2 border border-gray-300 rounded text-black"
-              value={transactionid}
-              onChange={(e: ChangeEvent<HTMLInputElement>) => setTransactionid(e.target.value)}
-              placeholder="Enter transaction ID"
+              value={number}
+              onChange={(e: ChangeEvent<HTMLInputElement>) => setnumber(e.target.value)}
+              placeholder="Enter number"
             />
             <label className="block text-black mb-2" htmlFor="amount">
               Amount

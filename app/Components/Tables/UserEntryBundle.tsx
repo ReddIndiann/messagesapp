@@ -3,21 +3,20 @@ import { motion } from 'framer-motion';
 import { FaCheck, FaLightbulb } from 'react-icons/fa';
 import axios from 'axios';
 import dayjs from 'dayjs';
-import Swal from 'sweetalert2'; // Import SweetAlert2
-import BuyCreditModal from '../Modals/WalletBundleModal/BuyCreditModal';
+import Swal from 'sweetalert2';
+import BuyCreditModaltrue from '../Modals/WalletBundleModal/BuyCreditModaltrue';
 
 const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-interface BundleOptionsProps {
-  onBalanceUpdate: (newBalance: number) => void;
-}
-const BundleOptions: React.FC<BundleOptionsProps> = ({ onBalanceUpdate }) => {
-  //
+
+const BundleOptions = () => {
   const [plans, setPlans] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isBuyBundleModalOpen, setIsBuyBundleModalOpen] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<any>(null);
-  const [userId, setUserId] = useState<number | null>(null); // State for user ID
+  const [userId, setUserId] = useState<number | null>(null);
+  const [amounts, setAmounts] = useState<{ [key: string]: number | string }>({}); // State for amounts by plan ID
+  const [smsCounts, setSmsCounts] = useState<{ [key: string]: number }>({}); // State for calculated smscounts
 
   // Fetch user ID from local storage
   useEffect(() => {
@@ -33,8 +32,7 @@ const BundleOptions: React.FC<BundleOptionsProps> = ({ onBalanceUpdate }) => {
   const fetchPackages = async () => {
     try {
       const response = await axios.get(`${apiUrl}/packages`);
-      // Filter plans where userEntry is false
-      const filteredPlans = response.data.filter((plan: any) => !plan.userEntry);
+      const filteredPlans = response.data.filter((plan: any) => plan.userEntry);
       setPlans(filteredPlans);
       setLoading(false);
     } catch (error) {
@@ -55,6 +53,8 @@ const BundleOptions: React.FC<BundleOptionsProps> = ({ onBalanceUpdate }) => {
 
   const onClose = () => {
     setIsModalOpen(false);
+    setAmounts({}); // Reset amounts when closing
+    setSmsCounts({}); // Reset smscounts when closing
   };
 
   const calculateExpiry = (duration: number) => {
@@ -63,29 +63,25 @@ const BundleOptions: React.FC<BundleOptionsProps> = ({ onBalanceUpdate }) => {
   };
 
   const buyCreditFromAppWallet = async () => {
-    if (!selectedPlan || userId === null) return; // Ensure userId is available
+    if (!selectedPlan || userId === null || !amounts[selectedPlan.id]) return; // Ensure amount is provided
 
     const expiryDate = calculateExpiry(selectedPlan.duration);
 
     const bundleData = {
-      userId, // Use user ID from state
+      userId,
       packageId: selectedPlan.id,
       package_name: selectedPlan.name,
       type: selectedPlan.type,
       expiry: expiryDate,
       status: 'active',
-      creditscore: selectedPlan.smscount,
+      creditscore: 10,
+      smscount: smsCounts[selectedPlan.id] || 0, // Include calculated smscount
     };
 
     try {
       const response = await axios.post(`${apiUrl}/bundle/createinapp`, bundleData);
       console.log(`Successfully bought ${selectedPlan.name}`, response.data);
 
-
-      if (response.data.newBalance !== undefined) {
-        onBalanceUpdate(response.data.newBalance);
-      }
-      // Trigger SweetAlert for success
       Swal.fire({
         title: 'Purchase Successful!',
         text: `You have successfully purchased the ${selectedPlan.name}.`,
@@ -96,7 +92,6 @@ const BundleOptions: React.FC<BundleOptionsProps> = ({ onBalanceUpdate }) => {
     } catch (error) {
       console.error('Error purchasing bundle:', error);
 
-      // Trigger SweetAlert for failure
       Swal.fire({
         title: 'Purchase Failed',
         text: 'There was an error processing your purchase. Please try again.',
@@ -104,6 +99,13 @@ const BundleOptions: React.FC<BundleOptionsProps> = ({ onBalanceUpdate }) => {
         confirmButtonText: 'OK',
       });
     }
+  };
+
+  // Calculate smscount based on entered amount and plan rate
+  const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>, plan: any) => {
+    const value = Number(e.target.value);
+    setAmounts((prev) => ({ ...prev, [plan.id]: value })); // Update the amount for this plan
+    setSmsCounts((prev) => ({ ...prev, [plan.id]: value * (plan.rate || 0) })); // Update smscount for this plan
   };
 
   return (
@@ -118,9 +120,7 @@ const BundleOptions: React.FC<BundleOptionsProps> = ({ onBalanceUpdate }) => {
             {plans.map((plan: any, index: number) => (
               <motion.div
                 key={index}
-                className={`bg-white rounded-lg p-6 flex flex-col shadow-lg ${
-                  plan.popular ? 'border-4 border-blue-500' : ''
-                }`}
+                className={`bg-white rounded-lg p-6 flex flex-col shadow-lg ${plan.popular ? 'border-4 border-blue-500' : ''}`}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.4, delay: index * 0.1 }}
@@ -132,38 +132,38 @@ const BundleOptions: React.FC<BundleOptionsProps> = ({ onBalanceUpdate }) => {
                   </div>
                 )}
                 <h3 className="text-xl sm:text-2xl font-bold mb-4 text-gray-800">{plan.name}</h3>
-                <div className="mb-6">
+                {/* <div className="mb-6">
                   <span className="text-3xl sm:text-4xl font-bold text-blue-600">Ghc {plan.price}</span>
                   <span className="text-gray-500"> / {plan.duration || plan.period}</span>
-                </div>
+                </div> */}
                 <p className="text-sm sm:text-base text-gray-600 mb-8">{plan.type || 'Plan details'}</p>
-                <ul className="mb-8 flex-grow">
-                  <li className="flex items-center mb-3">
-                    <FaCheck className="text-blue-500 mr-3" />
-                    <span className="text-sm sm:text-base text-gray-700">
-                      Up to {plan.smscount || 'N/A'} messages
-                    </span>
-                  </li>
-                  <li className="flex items-center mb-3">
-                    <FaCheck className="text-blue-500 mr-3" />
-                    <span className="text-sm sm:text-base text-gray-700">
-                      {plan.rate}% bonus
-                    </span>
-                  </li>
-                  <li className="flex items-center mb-3">
-                    <FaCheck className="text-blue-500 mr-3" />
-                    <span className="text-sm sm:text-base text-gray-700">
-                      {plan.duration} days duration
-                    </span>
-                  </li>
-                </ul>
+               
+
+                {/* Input Field for Amount */}
+                <div className="mb-4">
+                  <label className="block text-sm mb-2" htmlFor={`amount-${plan.id}`}>
+                    Enter Amount:
+                  </label>
+                  <input
+                    type="number"
+                    id={`amount-${plan.id}`}
+                    value={amounts[plan.id] || ''}
+                    onChange={(e) => handleAmountChange(e, plan)}
+                    className={`border rounded w-full py-2 px-3 ${amounts[plan.id] !== undefined ? 'text-black' : 'text-gray-400'}`}
+                    placeholder="Enter amount"
+                  />
+                  <p className="mt-2 text-gray-600">Calculated SMS Count: {smsCounts[plan.id] || 0}</p>
+                </div>
+
                 <motion.button
                   className={`py-2 sm:py-3 px-4 sm:px-6 rounded-full font-semibold w-full transition-colors duration-300 ${
                     plan.current
                       ? 'bg-blue-100 text-blue-500 hover:bg-blue-200'
                       : 'bg-blue-500 text-white hover:bg-blue-600'
                   }`}
-                  onClick={() => handleChoosePlan(plan)}
+                  onClick={() => {
+                    handleChoosePlan(plan);
+                  }}
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                 >
@@ -210,10 +210,11 @@ const BundleOptions: React.FC<BundleOptionsProps> = ({ onBalanceUpdate }) => {
 
       {/* Render BuyBundle Modal for Mobile Wallet */}
       {isBuyBundleModalOpen && (
-        <BuyCreditModal
+        <BuyCreditModaltrue
           isOpen={isBuyBundleModalOpen}
           onClose={() => setIsBuyBundleModalOpen(false)}
-          selectedPlan={selectedPlan} // Pass selectedPlan
+          selectedPlan={selectedPlan}
+          amount={amounts[selectedPlan.id]}
         />
       )}
     </div>

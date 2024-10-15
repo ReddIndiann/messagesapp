@@ -133,7 +133,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onCollapse, setCurrentSection }) => {
     { href: "/Admin/ManageUsers", icon: <FiUsers />, text: "Manage Users" },
     { href: "/Admin/SenderIds", icon: <FiSettings />, text: "SenderIds" },
     { href: "/Admin/PackagesCreation", icon: <FiBox />, text: "Packages" },
-    { href: "/Admin/ManageBundleUsage", icon: <FiSettings />, text: "Credit Usage Settings" },
+    { href: "/Admin/ManageBundleUsage", icon: <FiSettings />, text: "Credit Usage Order" },
     { href: "/Help", icon: <FiHelpCircle />, text: "Help" },
   ];
 

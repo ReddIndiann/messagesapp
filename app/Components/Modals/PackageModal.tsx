@@ -13,7 +13,7 @@ interface PackageCreationModalProps {
 const PackageCreation: React.FC<PackageCreationModalProps> = ({ isOpen, onClose, userId, onSuccess }) => {
   const [name, setName] = useState<string>('');
   const [type, setType] = useState<string>('non-expiry');
-  const [price, setPrice] = useState<number | null>(null);  // Allow price to be null
+  const [price, setPrice] = useState<number>(0);  // Allow price to be null
   const [rate, setRate] = useState<number>(0);
   const [smscount, setSmscount] = useState<number>(0);
   const [expiry, setExpiry] = useState<boolean>(false);  // Default to false

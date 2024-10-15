@@ -3,19 +3,28 @@ import { useRouter } from 'next/navigation';
 import Swal from 'sweetalert2'; // Import SweetAlert
 import axios from 'axios';
 import dayjs from 'dayjs';
+
 interface BuyCreditModalProps {
   isOpen: boolean;
   onClose: () => void;
   selectedPlan: any; // Selected plan prop to get the price and other details
 }
 
+interface BuyCreditModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  selectedPlan: any;
+  onBalanceUpdate: (newBalance: number) => void;
+}
 const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
-const BuyCreditModal: React.FC<BuyCreditModalProps> = ({ isOpen, onClose, selectedPlan }) => {
-  const [transactionId, setTransactionId] = useState<string>(''); // User's transaction ID for mobile payment
+const BuyCreditModal: React.FC<BuyCreditModalProps> = ({ isOpen, onClose, selectedPlan, onBalanceUpdate }) => {
+  //
+  const [number, setNumber] = useState<string>(''); // User's transaction ID for mobile payment
   const [note, setNote] = useState<string>(''); // Optional note
   const [amount, setAmount] = useState<string>(''); // Bundle price
   const [userId, setUserId] = useState<number | null>(null);
+  const [smsCount, setSmsCount] = useState<number>(0); // New state for SMS count
   const navigate = useRouter();
 
   useEffect(() => {
@@ -29,6 +38,8 @@ const BuyCreditModal: React.FC<BuyCreditModalProps> = ({ isOpen, onClose, select
     // Automatically set the amount based on the selected plan when modal opens
     if (selectedPlan) {
       setAmount(selectedPlan.price.toString());
+      // Calculate the initial SMS count
+      setSmsCount(selectedPlan.price * selectedPlan.rate); // Multiply by the selected plan rate
     }
   }, [selectedPlan]);
 
@@ -36,7 +47,7 @@ const BuyCreditModal: React.FC<BuyCreditModalProps> = ({ isOpen, onClose, select
   if (!isOpen) return null;
 
   const handleBuyCredit = async () => {
-    if (userId === null || amount === '' || transactionId === '') {
+    if (userId === null || amount === '' || number === '') {
       console.error('User ID, amount, or transaction ID is missing.');
       Swal.fire({
         icon: 'error',
@@ -55,8 +66,8 @@ const BuyCreditModal: React.FC<BuyCreditModalProps> = ({ isOpen, onClose, select
       type: selectedPlan.type,
       expiry: expiryDate,
       status: 'active',
-      creditscore: selectedPlan.smscount,
-      transactionId, // Include the transaction ID
+      creditscore: smsCount, // Use the calculated SMS count here
+      number, // Include the transaction ID
       note, // Optional note
       amount: parseFloat(amount), // Include the amount if needed
     };
@@ -64,7 +75,9 @@ const BuyCreditModal: React.FC<BuyCreditModalProps> = ({ isOpen, onClose, select
     try {
       const response = await axios.post(`${apiUrl}/bundle/createoutapp`, bundleData);
       console.log(`Successfully bought ${selectedPlan.name}`, response.data);
-
+      if (response.data.newBalance !== undefined) {
+        onBalanceUpdate(response.data.newBalance);
+      }
       Swal.fire({
         icon: 'success',
         title: 'Success!',
@@ -96,15 +109,15 @@ const BuyCreditModal: React.FC<BuyCreditModalProps> = ({ isOpen, onClose, select
         <h2 className="text-xl font-medium mb-4 text-black">Buy Credit Bundle</h2>
         <div className="mb-4">
           <label className="block text-black mb-2" htmlFor="transaction-id">
-            Transaction ID
+            Number
           </label>
           <input
             id="transaction-id"
             type="text"
             className="w-full p-2 border border-gray-300 rounded text-black"
-            value={transactionId}
-            onChange={(e: ChangeEvent<HTMLInputElement>) => setTransactionId(e.target.value)}
-            placeholder="Enter transaction ID"
+            value={number}
+            onChange={(e: ChangeEvent<HTMLInputElement>) => setNumber(e.target.value)}
+            placeholder="Enter number"
           />
           <label className="block text-black mb-2" htmlFor="amount">
             Amount
@@ -115,6 +128,16 @@ const BuyCreditModal: React.FC<BuyCreditModalProps> = ({ isOpen, onClose, select
             className="w-full p-2 border border-gray-300 rounded text-black"
             value={amount}
             disabled // Disable amount field to show the selected plan price
+          />
+          <label className="block text-black mb-2" htmlFor="sms-count">
+            SMS Count
+          </label>
+          <input
+            id="sms-count"
+            type="number"
+            className="w-full p-2 border border-gray-300 rounded text-black"
+            value={smsCount} // Display the calculated SMS count
+            disabled // Disable SMS count field
           />
           <label className="block text-black mb-2" htmlFor="note">
             Note (Optional)

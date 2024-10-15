@@ -7,6 +7,7 @@ import Sidebar from '@/app/Components/SideNav';
 import WalletHistoryTable from '@/app/Components/Tables/WalletHistoryTable';
 import BundleHistoryTable from '@/app/Components/Tables/BundleHistoryTable';
 import BundleOptions from '@/app/Components/Tables/BundleOptions';
+import BundleOptionsTrue from '@/app/Components/Tables/UserEntryBundle';
 import { FaWallet, FaShoppingCart, FaHistory } from 'react-icons/fa';
 import { userdetails } from '@/app/lib/authUtils';
 import DepositeWallet from '@/app/Components/Modals/WalletBundleModal/depositeWallet';
@@ -39,10 +40,22 @@ const Dashboard: React.FC = () => {
       };
 
       fetchUserDetails();
+
     }
   }, []);
+  const handleBalanceUpdate = (newBalance: number) => {
+    setWalletBalance(newBalance);
+  };
 
-  const TabButton = ({ icon, label, isActive, onClick }) => (
+  interface TabButtonProps {
+    icon: React.ReactNode;
+    label: string;
+    isActive: boolean;
+    onClick: () => void;
+  }
+  
+  const TabButton: React.FC<TabButtonProps> = ({ icon, label, isActive, onClick }) => (
+    // your button code
     <button
       className={`flex items-center px-2 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm font-medium transition-colors duration-200 border-b-2 ${
         isActive ? 'text-blue-600 border-blue-600' : 'text-gray-500 border-transparent hover:text-gray-700 hover:border-gray-300'
@@ -65,7 +78,11 @@ const Dashboard: React.FC = () => {
           >
             <h2 className="text-xl sm:text-2xl font-bold text-gray-800 mb-4">SMS Bundles</h2>
             <p className="text-sm sm:text-base text-gray-600 mb-6">Please select a bundle offer</p>
-            <BundleOptions />
+            <BundleOptionsTrue />
+            <p className="text-sm sm:text-base text-gray-600 mb-6">Please select a bundle offer</p>
+            <BundleOptions 
+            onBalanceUpdate={handleBalanceUpdate}// Pass the handler here
+            />
           </motion.div>
         );
       case 'WalletHistory':
@@ -76,7 +93,9 @@ const Dashboard: React.FC = () => {
         return <div>Purchase Bundle Content</div>;
     }
   };
-
+  const handleDepositSuccess = (amount: number) => {
+    setWalletBalance((prevBalance) => prevBalance + amount); // Update the wallet balance
+  };
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
       <Header currentSection={currentSection} />
@@ -151,7 +170,12 @@ const Dashboard: React.FC = () => {
                   <h3 className="text-base sm:text-lg font-semibold text-gray-700 mb-3 sm:mb-4">Recent Transactions</h3>
                   <WalletHistoryTable /> {/* Include WalletHistoryTable here */}
                 </div>
-                <DepositeWallet isOpen={isDepositeModalOpen} onClose={() => setIsDepositeModalOpen(false)} />
+                <DepositeWallet 
+              isOpen={isDepositeModalOpen} 
+              onClose={() => setIsDepositeModalOpen(false)} 
+              onDepositSuccess={handleDepositSuccess} 
+              
+            />
               </div>
             </motion.div>
           )}

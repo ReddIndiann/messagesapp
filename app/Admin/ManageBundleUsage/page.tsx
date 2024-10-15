@@ -46,13 +46,13 @@ const Dashboard: React.FC = () => {
           >
             <div className="bg-gradient-to-r from-blue-400 to-blue-900 p-6">
               <div className="flex justify-between items-center">
-                <h1 className="text-2xl font-bold text-white">Credit Usage</h1>
+                <h1 className="text-2xl font-bold text-white">Credit Usage Order</h1>
                 <button
                   onClick={() => setIsModalOpen(true)}
                   className="bg-white text-blue-500 px-4 py-2 rounded-lg hover:bg-blue-50 transition duration-300 flex items-center"
                 >
                   <FontAwesomeIcon icon={faPlus} className="mr-2" />
-                  Create Credit Usage
+                  Create Credit  Usage Order
                 </button>
               </div>
             </div>
