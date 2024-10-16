@@ -1,6 +1,5 @@
 import React, { useState, ChangeEvent, useEffect } from 'react';
-import { createGroup } from '@/app/lib/grouputil';
-
+import Swal from 'sweetalert2'; // Import SweetAlert2
 
 interface EditGroupModalProps {
   isOpen: boolean;
@@ -9,17 +8,16 @@ interface EditGroupModalProps {
 }
 
 const EditGroup: React.FC<EditGroupModalProps> = ({ isOpen, onClose, group }) => {
-  const [groupName, setGroupName] = useState<string>(group?.groupName ||'');
+  const [groupName, setGroupName] = useState<string>(group?.groupName || '');
   const [userId, setUserId] = useState<number | null>(null);
-  const [showSuccessModal, setShowSuccessModal] = useState<boolean>(false);
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+
   useEffect(() => {
     if (group) {
       setGroupName(group.groupName || '');
-
-      
     }
   }, [group]);
+
   useEffect(() => {
     // Retrieve and parse the user ID from local storage
     const signInResponse = localStorage.getItem('signInResponse');
@@ -34,7 +32,7 @@ const EditGroup: React.FC<EditGroupModalProps> = ({ isOpen, onClose, group }) =>
 
   const handleSaveChanges = async () => {
     if (!group) {
-      console.error('No contact to edit.');
+      console.error('No group to edit.');
       return;
     }
 
@@ -45,7 +43,7 @@ const EditGroup: React.FC<EditGroupModalProps> = ({ isOpen, onClose, group }) =>
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-        groupName
+          groupName,
         }),
       });
 
@@ -53,19 +51,27 @@ const EditGroup: React.FC<EditGroupModalProps> = ({ isOpen, onClose, group }) =>
         throw new Error('Failed to update group.');
       }
 
-      setShowSuccessModal(true);
-
-      setTimeout(() => {
-        onClose();
-      }, 500);
+      // Show SweetAlert success notification
+      Swal.fire({
+        title: 'Success!',
+        text: 'Group updated successfully.',
+        icon: 'success',
+        confirmButtonText: 'Close',
+      }).then(() => {
+        onClose(); // Close the modal after the alert
+      });
     } catch (error) {
       console.error('Error updating group:', error);
+      // Show SweetAlert error notification
+      Swal.fire({
+        title: 'Error!',
+        text: 'There was an error updating the group.',
+        icon: 'error',
+        confirmButtonText: 'Close',
+      });
     }
   };
 
-  const handleCloseSuccessModal = () => {
-    setShowSuccessModal(false);
-  };
   return (
     <>
       <div className="fixed inset-0 flex items-center justify-center z-50">
@@ -96,30 +102,11 @@ const EditGroup: React.FC<EditGroupModalProps> = ({ isOpen, onClose, group }) =>
               className="bg-blue-400 text-white py-2 px-4 rounded hover:bg-blue-500"
               onClick={handleSaveChanges}
             >
-              Register Group
+              Save Changes
             </button>
           </div>
         </div>
       </div>
-
-      {/* Success Modal */}
-      {showSuccessModal && (
-        <div className="fixed inset-0 flex items-center justify-center z-50">
-          <div className="bg-black bg-opacity-50 w-full h-full absolute top-0 left-0"></div>
-          <div className="bg-white p-6 rounded-lg shadow-lg w-96 z-10">
-            <h2 className="text-xl font-medium text-green-600">Success!</h2>
-            <p className="text-gray-700">Group registered successfully.</p>
-            <div className="flex justify-end mt-4">
-              <button
-                className="bg-blue-400 text-white py-2 px-4 rounded hover:bg-blue-500"
-                onClick={handleCloseSuccessModal}
-              >
-                Close
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </>
   );
 };

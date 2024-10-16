@@ -6,9 +6,9 @@ import 'sweetalert2/src/sweetalert2.scss';
 
 type PackageItem = {
   id: number;
-  usefirst: string;
-  usesecond: string;
-  usethird: string;
+  name: string;
+  comment: string;
+
   createdAt: string;
   updatedAt: string;
 };
@@ -37,7 +37,7 @@ const TableComponent = forwardRef<TableComponentRef, TableComponentProps>(({ use
 
     setLoading(true);
     try {
-      const response = await axios.get(`${apiUrl}/creditusage`);
+      const response = await axios.get(`${apiUrl}/creditusageorder`);
       const formattedData = response.data.creditusage.map((item: PackageItem) => ({
         ...item,
         createdAt: new Date(item.createdAt).toLocaleString(),
@@ -62,7 +62,7 @@ const TableComponent = forwardRef<TableComponentRef, TableComponentProps>(({ use
   // Delete a package
   const deletePackage = async (id: number) => {
     try {
-      await axios.delete(`${apiUrl}/creditusage/${id}`);
+      await axios.delete(`${apiUrl}/creditusageorder/${id}`);
       setData((prevData) => prevData.filter((item) => item.id !== id));
       Swal.fire('Deleted!', 'The package has been deleted.', 'success');
     } catch (error) {
@@ -102,18 +102,18 @@ const TableComponent = forwardRef<TableComponentRef, TableComponentProps>(({ use
     if (!selectedPackage) return;
 
     // Check if any two fields have the same value
-    const { usefirst, usesecond, usethird } = selectedPackage;
+    const { name, comment } = selectedPackage;
     if (
-      usefirst === usesecond ||
-      usefirst === usethird ||
-      usesecond === usethird
+        name === name ||
+ 
+      comment === comment
     ) {
       Swal.fire('Error!', 'The fields cannot have the same value.', 'error');
       return;
     }
 
     try {
-      await axios.put(`${apiUrl}/creditusage/${selectedPackage.id}`, selectedPackage);
+      await axios.put(`${apiUrl}/creditusageorder/${selectedPackage.id}`, selectedPackage);
       Swal.fire('Updated!', 'Package has been updated.', 'success');
       fetchData();
       closeEditModal();
@@ -124,7 +124,7 @@ const TableComponent = forwardRef<TableComponentRef, TableComponentProps>(({ use
   };
 
   // Handle dropdown changes
-  const handleDropdownChange = (field: 'usefirst' | 'usesecond' | 'usethird', value: string) => {
+  const handleDropdownChange = (field: 'name' | 'comment' , value: string) => {
     if (selectedPackage) {
       setSelectedPackage((prevPackage) => ({
         ...prevPackage,
@@ -147,9 +147,9 @@ const TableComponent = forwardRef<TableComponentRef, TableComponentProps>(({ use
     return data.length > 0 ? (
       data.map((item) => (
         <tr key={item.id} className="border-t">
-          <td className="py-4 px-4 text-gray-500 border-b">{item.usefirst}</td>
-          <td className="py-4 px-4 text-gray-500 border-b">{item.usesecond}</td>
-          <td className="py-4 px-4 text-gray-500 border-b">{item.usethird}</td>
+          <td className="py-4 px-4 text-gray-500 border-b">{item.name}</td>
+          <td className="py-4 px-4 text-gray-500 border-b">{item.comment}</td>
+  
           <td className="py-4 px-4 text-gray-500 border-b">{item.updatedAt}</td>
           <td className="py-4 px-4 text-gray-500 border-b">
             <button onClick={() => openEditModal(item)} className="text-blue-500 hover:text-blue-700 mr-2">
@@ -178,14 +178,14 @@ const TableComponent = forwardRef<TableComponentRef, TableComponentProps>(({ use
         <div className="bg-white p-6 rounded-lg shadow-lg w-96">
           <h2 className="text-xl font-medium mb-4 text-black">Edit Package</h2>
           <div className="mb-4">
-            <label className="block text-gray-700 mb-2" htmlFor="usefirst">
-              First
+            <label className="block text-gray-700 mb-2" htmlFor="name">
+      Name
             </label>
             <select
-              id="usefirst"
+              id="name"
               className="w-full p-2 border border-gray-300 rounded text-black"
-              value={selectedPackage.usefirst}
-              onChange={(e) => handleDropdownChange('usefirst', e.target.value)}
+              value={selectedPackage.name}
+              onChange={(e) => handleDropdownChange('name', e.target.value)}
             >
               {dropdownOptions.map((option) => (
                 <option key={option} value={option}>
@@ -194,14 +194,14 @@ const TableComponent = forwardRef<TableComponentRef, TableComponentProps>(({ use
               ))}
             </select>
 
-            <label className="block text-gray-700 mb-2" htmlFor="usesecond">
-              Second
+            <label className="block text-gray-700 mb-2" htmlFor="comment">
+              Comment
             </label>
             <select
-              id="usesecond"
+              id="comment"
               className="w-full p-2 border border-gray-300 rounded text-black"
-              value={selectedPackage.usesecond}
-              onChange={(e) => handleDropdownChange('usesecond', e.target.value)}
+              value={selectedPackage.comment}
+              onChange={(e) => handleDropdownChange('comment', e.target.value)}
             >
               {dropdownOptions.map((option) => (
                 <option key={option} value={option}>
@@ -210,21 +210,7 @@ const TableComponent = forwardRef<TableComponentRef, TableComponentProps>(({ use
               ))}
             </select>
 
-            <label className="block text-gray-700 mb-2" htmlFor="usethird">
-              Third
-            </label>
-            <select
-              id="usethird"
-              className="w-full p-2 border border-gray-300 rounded text-black"
-              value={selectedPackage.usethird}
-              onChange={(e) => handleDropdownChange('usethird', e.target.value)}
-            >
-              {dropdownOptions.map((option) => (
-                <option key={option} value={option}>
-                  {option}
-                </option>
-              ))}
-            </select>
+           
           </div>
 
           <div className="flex justify-end">
@@ -246,9 +232,9 @@ const TableComponent = forwardRef<TableComponentRef, TableComponentProps>(({ use
       <table className="min-w-full bg-white border-collapse border border-gray-200">
         <thead className="bg-gray-100 text-slate-600">
           <tr>
-            <th className="py-2 px-4 text-left border-b">First</th>
-            <th className="py-2 px-4 text-left border-b">Second</th>
-            <th className="py-2 px-4 text-left border-b">Third</th>
+            <th className="py-2 px-4 text-left border-b">Name</th>
+            <th className="py-2 px-4 text-left border-b">Comment</th>
+      
             <th className="py-2 px-4 text-left border-b">Date Updated</th>
             <th className="py-2 px-4 text-left border-b">Actions</th>
           </tr>

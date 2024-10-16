@@ -11,6 +11,7 @@ import BundleOptionsTrue from '@/app/Components/Tables/UserEntryBundle';
 import { FaWallet, FaShoppingCart, FaHistory } from 'react-icons/fa';
 import { userdetails } from '@/app/lib/authUtils';
 import DepositeWallet from '@/app/Components/Modals/WalletBundleModal/depositeWallet';
+import SmallWalletHistoryTable from '@/app/Components/Tables/SmallWalletHistoryTable';
 
 const Dashboard: React.FC = () => {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState<boolean>(false);
@@ -81,7 +82,7 @@ const Dashboard: React.FC = () => {
             <BundleOptionsTrue />
             <p className="text-sm sm:text-base text-gray-600 mb-6">Please select a bundle offer</p>
             <BundleOptions 
-            onBalanceUpdate={handleBalanceUpdate}// Pass the handler here
+            onBalanceUpdate={handleBuySuccess}// Pass the handler here
             />
           </motion.div>
         );
@@ -95,6 +96,9 @@ const Dashboard: React.FC = () => {
   };
   const handleDepositSuccess = (amount: number) => {
     setWalletBalance((prevBalance) => prevBalance + amount); // Update the wallet balance
+  };
+  const handleBuySuccess = (amount: number) => {
+    setWalletBalance((prevBalance) => prevBalance - amount); // Update the wallet balance
   };
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
@@ -168,7 +172,7 @@ const Dashboard: React.FC = () => {
                 </button>
                 <div className="mt-4 sm:mt-6 border-t pt-4">
                   <h3 className="text-base sm:text-lg font-semibold text-gray-700 mb-3 sm:mb-4">Recent Transactions</h3>
-                  <WalletHistoryTable /> {/* Include WalletHistoryTable here */}
+                  <SmallWalletHistoryTable /> {/* Include WalletHistoryTable here */}
                 </div>
                 <DepositeWallet 
               isOpen={isDepositeModalOpen} 

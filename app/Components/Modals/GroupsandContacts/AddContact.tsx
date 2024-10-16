@@ -2,6 +2,8 @@ import React, { useState, ChangeEvent, useEffect } from 'react';
 import axios from 'axios';
 import { createContact, addContactToGroup } from '@/app/lib/contactUtil';
 import { useRouter } from 'next/navigation';
+import Swal from 'sweetalert2'; // Import SweetAlert2
+
 interface AddContactModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -21,8 +23,8 @@ const AddContact: React.FC<AddContactModalProps> = ({ isOpen, onClose }) => {
   const [group, setGroup] = useState<number | null>(null);
   const [groups, setGroups] = useState<Group[]>([]);
   const [userId, setUserId] = useState<number | null>(null);
-  const [showSuccessModal, setShowSuccessModal] = useState<boolean>(false);
-const navigate = useRouter();
+  const navigate = useRouter();
+
   useEffect(() => {
     const signInResponse = localStorage.getItem('signInResponse');
     if (signInResponse) {
@@ -35,7 +37,9 @@ const navigate = useRouter();
       }
     }
   }, []);
+
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+
   const fetchGroups = async (userId: number) => {
     try {
       const response = await axios.get(`${apiUrl}/groups/user/${userId}`);
@@ -63,21 +67,25 @@ const navigate = useRouter();
         await addContactToGroup(newContactId, group);
       }
 
-      setShowSuccessModal(true); // Show the success modal
-
-      // Close the main modal after a short delay to allow success modal to appear
-      setTimeout(() => {
-        onClose();
-        navigate.push('/')
-      }, 500); // Adjust the delay if needed
+      // Show SweetAlert success notification
+      Swal.fire({
+        title: 'Success!',
+        text: 'Contact registered successfully.',
+        icon: 'success',
+        confirmButtonText: 'Close',
+      }).then(() => {
+        onClose(); // Close the main modal
+        navigate.push('/'); // Navigate to the home page or another route
+      });
     } catch (error) {
       console.error('Error registering contact:', error);
+      Swal.fire({
+        title: 'Error!',
+        text: 'There was an error registering the contact.',
+        icon: 'error',
+        confirmButtonText: 'Close',
+      });
     }
-  };
-
-  const handleCloseSuccessModal = () => {
-    setShowSuccessModal(false);
-    // The main modal will close after a delay in handleRegister
   };
 
   if (!isOpen) return null;
@@ -194,25 +202,6 @@ const navigate = useRouter();
           </div>
         </div>
       </div>
-
-      {/* Success Modal */}
-      {showSuccessModal && (
-        <div className="fixed inset-0 flex items-center justify-center z-50">
-          <div className="bg-black bg-opacity-50 w-full h-full absolute top-0 left-0"></div>
-          <div className="bg-white p-6 rounded-lg shadow-lg w-96 z-10">
-            <h2 className="text-xl font-medium text-green-600">Success!</h2>
-            <p className="text-gray-700">Contact registered successfully.</p>
-            <div className="flex justify-end mt-4">
-              <button
-                className="bg-blue-400 text-white py-2 px-4 rounded hover:bg-blue-500"
-                onClick={handleCloseSuccessModal}
-              >
-                Close
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </>
   );
 };

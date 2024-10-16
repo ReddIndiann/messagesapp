@@ -171,7 +171,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onCollapse, setCurrentSection }) => {
         <div className="space-y-2">
           <ChannelButton
             icon={<FiMail />}
-            text="Bulk SMS"
+            text="SMS"
             active={activeChannel === 'bulkSMS'}
             isCollapsed={isCollapsed}
             onClick={() => handleChannelSwitch('bulkSMS')}

@@ -1,6 +1,8 @@
 import React, { useState, ChangeEvent, useEffect } from 'react';
 import { createGroup } from '@/app/lib/grouputil';
 import { useRouter } from 'next/navigation';
+import Swal from 'sweetalert2'; // Import SweetAlert2
+
 interface AddGroupModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -9,8 +11,8 @@ interface AddGroupModalProps {
 const AddGroup: React.FC<AddGroupModalProps> = ({ isOpen, onClose }) => {
   const [groupName, setGroupName] = useState<string>('');
   const [userId, setUserId] = useState<number | null>(null);
-  const [showSuccessModal, setShowSuccessModal] = useState<boolean>(false);
   const navigate = useRouter();
+
   useEffect(() => {
     // Retrieve and parse the user ID from local storage
     const signInResponse = localStorage.getItem('signInResponse');
@@ -32,25 +34,28 @@ const AddGroup: React.FC<AddGroupModalProps> = ({ isOpen, onClose }) => {
     try {
       await createGroup({
         groupName,
-        userId
+        userId,
       });
 
-      setShowSuccessModal(true); // Show the success modal
-
-      // Close the main modal after a short delay
-      setTimeout(() => {
-        onClose();
-        navigate.push('/')
-       
-      }, 500); // Adjust the delay if needed
-     
+      // Show SweetAlert success notification
+      Swal.fire({
+        title: 'Success!',
+        text: 'Group registered successfully.',
+        icon: 'success',
+        confirmButtonText: 'Close',
+      }).then(() => {
+        onClose(); // Close the main modal
+        navigate.push('/'); // Navigate to the desired page
+      });
     } catch (error) {
       console.error('Error registering group:', error);
+      Swal.fire({
+        title: 'Error!',
+        text: 'There was an error registering the group.',
+        icon: 'error',
+        confirmButtonText: 'Close',
+      });
     }
-  };
-
-  const handleCloseSuccessModal = () => {
-    setShowSuccessModal(false);
   };
 
   return (
@@ -88,25 +93,6 @@ const AddGroup: React.FC<AddGroupModalProps> = ({ isOpen, onClose }) => {
           </div>
         </div>
       </div>
-
-      {/* Success Modal */}
-      {showSuccessModal && (
-        <div className="fixed inset-0 flex items-center justify-center z-50">
-          <div className="bg-black bg-opacity-50 w-full h-full absolute top-0 left-0"></div>
-          <div className="bg-white p-6 rounded-lg shadow-lg w-96 z-10">
-            <h2 className="text-xl font-medium text-green-600">Success!</h2>
-            <p className="text-gray-700">Group registered successfully.</p>
-            <div className="flex justify-end mt-4">
-              <button
-                className="bg-blue-400 text-white py-2 px-4 rounded hover:bg-blue-500"
-                onClick={handleCloseSuccessModal}
-              >
-                Close
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </>
   );
 };

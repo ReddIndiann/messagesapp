@@ -5,6 +5,7 @@ import axios from 'axios';
 import dayjs from 'dayjs';
 import Swal from 'sweetalert2';
 import BuyCreditModaltrue from '../Modals/WalletBundleModal/BuyCreditModaltrue';
+import { useRouter } from 'next/navigation';
 
 const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
@@ -15,9 +16,9 @@ const BundleOptions = () => {
   const [isBuyBundleModalOpen, setIsBuyBundleModalOpen] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<any>(null);
   const [userId, setUserId] = useState<number | null>(null);
-  const [amounts, setAmounts] = useState<{ [key: string]: number | string }>({}); // State for amounts by plan ID
-  const [smsCounts, setSmsCounts] = useState<{ [key: string]: number }>({}); // State for calculated smscounts
-
+  const [amounts, setAmounts] = useState<{ [key: number]: number | string }>({}); // State for amounts by plan ID
+  const [smsCounts, setSmsCounts] = useState<{ [key: number]: number }>({}); // State for calculated smscounts
+  const navigate = useRouter();
   // Fetch user ID from local storage
   useEffect(() => {
     const signInResponse = localStorage.getItem('signInResponse');
@@ -88,6 +89,7 @@ const BundleOptions = () => {
         icon: 'success',
         confirmButtonText: 'OK',
       });
+      navigate.push('/'); // Navigate to the home page or another page
       onClose();
     } catch (error) {
       console.error('Error purchasing bundle:', error);

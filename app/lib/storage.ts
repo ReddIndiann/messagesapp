@@ -1,24 +1,23 @@
-'use server'
+'use server';
 import { cookies } from 'next/headers';
 
-// Function to save data to cookies (for server-side usage)
-export const saveToCookies = async (): Promise<void> => {
-  // Directly store the token as a plain string
-  cookies().set("signInResponse", "myToken",
-     { secure: process.env.NODE_ENV === "production",
-       httpOnly: true ,
-    
-      });
+// Save data to cookies (for server-side usage)
+export const saveToCookies = async (token: string): Promise<void> => {
+  cookies().set("signInResponse", token, {
+    secure: process.env.NODE_ENV === "production",
+    httpOnly: true,
+    maxAge: 60 * 60, 
+  });
 };
 
-// Function to get data from cookies
+// Get data from cookies
 export const getFromCookies = (key: string): string | null => {
   const cookieStore = cookies();
   const cookieValue = cookieStore.get(key);
-  return cookieValue ? cookieValue.value : null;  // No JSON.parse needed
+  return cookieValue ? cookieValue.value : null;
 };
 
-// Function to delete the authentication cookie
+// Delete authentication cookie
 export const deleteAuthCookie = async (): Promise<void> => {
   cookies().delete("signInResponse");
 };

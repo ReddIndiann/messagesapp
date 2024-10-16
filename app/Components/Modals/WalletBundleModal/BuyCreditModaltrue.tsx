@@ -8,7 +8,7 @@ interface BuyCreditModalProps {
     isOpen: boolean;
     onClose: () => void;
     selectedPlan: any; // Selected plan prop to get the price and other details
-    amount: string; // New prop to receive the amount
+    amount: number; // New prop to receive the amount
 }
 
 const apiUrl = process.env.NEXT_PUBLIC_API_URL;

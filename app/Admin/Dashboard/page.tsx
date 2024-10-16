@@ -7,13 +7,14 @@ import Header from '@/app/Components/Header';
 import Sidebar from '@/app/Components/SideNav';
 import AddSenderIdModal from '@/app/Components/Modals/SenderIdModal';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faBullhorn, faAddressBook, faUsers, faCoins, faTrash, faChartBar, faCogs } from '@fortawesome/free-solid-svg-icons';
+import { faBullhorn, faAddressBook, faUsers, faCoins, faTrash, faChartBar,faBox, faCogs } from '@fortawesome/free-solid-svg-icons';
 import BasicBars from '@/app/Components/Graph/Graph';
 import { fetchSenderIds, deleteSenderId } from '@/app/lib/senderIdUtils';
 import { fetchAllContacts } from '@/app/lib/contactUtil';
 import { fetchAllGroups } from '@/app/lib/grouputil';
 import { fetchAllUsers } from '@/app/lib/userlib';
-
+import { fetchAllPackages } from '@/app/lib/package';
+import { fetchAllCreditUsage } from '@/app/lib/package';
 // Define types for User
 interface User {
   id: number;
@@ -23,7 +24,7 @@ interface User {
 const Dashboard: React.FC = () => {
   const router = useRouter(); // Initialize useRouter
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
-  const [currentSection, setCurrentSection] = useState<'bulkSMS' | 'voiceCalls' | 'admin'>('bulkSMS');
+  const [currentSection, setCurrentSection] = useState<'bulkSMS' | 'Developer' | 'admin'>('bulkSMS');
   
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [userId, setUserId] = useState<number | null>(null);
@@ -33,6 +34,9 @@ const Dashboard: React.FC = () => {
   const [userCount, setUserCount] = useState<number>(0);
   const [adminCount, setAdminCount] = useState<number>(0);
   const [groupCount, setGroupCount] = useState<number>(0);
+  const [packagesCount, setPackagesCount] = useState<number>(0);
+
+  const [usageCount, setUsageCount] = useState<number>(0);
 
   useEffect(() => {
     const signInResponse = localStorage.getItem('signInResponse');
@@ -48,6 +52,15 @@ const Dashboard: React.FC = () => {
         fetchAllContacts()
           .then(data => setContactCount(data.length))
           .catch(err => setError('Error fetching contacts: ' + err.message));
+
+          fetchAllPackages()
+          .then(data => setPackagesCount(data.length))
+          .catch(err => setError('Error fetching packages: ' + err.message));
+
+
+          fetchAllCreditUsage()
+          .then(data => setUsageCount(data.length))
+          .catch(err => setError('Error fetching usage order: ' + err.message));
 
         fetchAllUsers()
           .then((data: User[]) => {
@@ -78,6 +91,15 @@ const Dashboard: React.FC = () => {
       fetchAllContacts()
         .then(data => setContactCount(data.length))
         .catch(err => setError('Error fetching contacts: ' + err.message));
+
+        fetchAllCreditUsage()
+        .then(data => setUsageCount(data.length))
+        .catch(err => setError('Error fetching usage order: ' + err.message));
+
+
+        fetchAllPackages()
+        .then(data => setPackagesCount(data.length))
+        .catch(err => setError('Error fetching packages: ' + err.message));
 
       fetchAllUsers()
         .then((data: User[]) => {
@@ -124,13 +146,13 @@ const Dashboard: React.FC = () => {
               transition={{ duration: 0.5 }}
             >
               {[
-                { value: userCount + adminCount, label: 'All Users', icon: faUsers, color: 'bg-blue-500', page: 'users' },
-                { value: userCount, label: 'Users', icon: faAddressBook, color: 'bg-green-500', page: 'users' },
-                { value: adminCount, label: 'Admins', icon: faCogs, color: 'bg-yellow-500', page: 'admins' },
-                { value: contactCount, label: 'All Contacts', icon: faAddressBook, color: 'bg-green-500', page: 'contacts' },
-                { value: groupCount, label: 'All Groups', icon: faChartBar, color: 'bg-purple-500', page: 'groups' },
-                { value: 3, label: 'Credit Used', icon: faCoins, color: 'bg-orange-500', page: 'credits' },
-                { value: 3, label: 'Total Credit Used', icon: faCoins, color: 'bg-orange-500', page: 'credits' },
+                { value: userCount + adminCount, label: 'All Users', icon: faUsers, color: 'bg-blue-500', page: '' },
+                { value: userCount, label: 'Users', icon: faAddressBook, color: 'bg-green-500', page: '' },
+                { value: adminCount, label: 'Admins', icon: faCogs, color: 'bg-yellow-500', page: '' },
+                { value: contactCount, label: 'All Contacts', icon: faAddressBook, color: 'bg-green-500', page: '' },
+                { value: groupCount, label: 'All Groups', icon: faChartBar, color: 'bg-purple-500', page: '' },
+                { value: packagesCount, label: 'Packages', icon: faBox, color: 'bg-blue-500', page: '' },
+                { value: usageCount, label: 'Credit Order', icon: faCoins, color: 'bg-yellow-500', page: '' },
                 { value: 3, label: 'Amount Accumulated', icon: faCoins, color: 'bg-orange-500', page: 'credits' },
               ].map((item, index) => (
                 <motion.div

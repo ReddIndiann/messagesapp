@@ -1,6 +1,8 @@
 import axios from 'axios';
-import { saveToCookies, getFromCookies } from "./storage";
+import { saveToCookies, getFromCookies, deleteAuthCookie } from "./storage";
 const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+
+// Sign Up Function
 export const signUp = async (formData: {
   username: string;
   number: string;
@@ -17,16 +19,15 @@ export const signUp = async (formData: {
       number,
     });
 
-    // No need to parse response data as axios does this for us
     const data = response.data;
 
-    // Save the response data to cookies
-    await saveToCookies(); // Expires in 1 day
+    // Save the token to cookies
+    await saveToCookies(data.token);
 
     // Save the response data to localStorage
     localStorage.setItem('signInResponse', JSON.stringify(data));
 
-    // Console log all details saved in cookies and localStorage
+    // Log cookies and localStorage data for debugging
     console.log('Sign-Up Response (Cookies):', getFromCookies('signInResponse'));
     console.log('Sign-Up Response (localStorage):', localStorage.getItem('signInResponse'));
 
@@ -37,6 +38,7 @@ export const signUp = async (formData: {
   }
 };
 
+// Sign In Function
 export const signIn = async (formData: {
   email: string;
   password: string;
@@ -49,40 +51,40 @@ export const signIn = async (formData: {
       password,
     });
 
-    // No need to parse response data as axios does this for us
     const data = response.data;
 
-    // Save the response data to cookies
-    await saveToCookies(); // Expires in 1 day
+    // Save the token to cookies
+    await saveToCookies(data.token);
 
     // Save the response data to localStorage
     localStorage.setItem('signInResponse', JSON.stringify(data));
 
-    // Console log all details saved in cookies and localStorage
+    // Log cookies and localStorage data for debugging
     console.log('Sign-In Response (Cookies):', getFromCookies('signInResponse'));
     console.log('Sign-In Response (localStorage):', localStorage.getItem('signInResponse'));
 
     return data;
   } catch (err: any) {
-    console.error('Sign-In Error:', err);
-    console.log(err.response?.data.msg )
-    throw new Error(err.response?.data.msg || 'Login failed');
+    const errorMsg = err.response?.data.msg || 'Login failed';
+    console.error('Sign-In Error:', errorMsg);
+    throw new Error(errorMsg);
   }
 };
 
-
-
+// Fetch User Details
 export const userdetails = async (userId: number) => {
   try {
     const response = await axios.get(`${apiUrl}/auth/${userId}`);
-    
-    return response.data; // Return the fetched API keys
+    return response.data;
   } catch (err: any) {
     console.error('Error fetching user details:', err.response?.data?.msg || 'An error occurred');
     throw err;
   }
-};export const updateUserDetails = async (
-  userId: number, 
+};
+
+// Update User Details
+export const updateUserDetails = async (
+  userId: number,
   userData: { username: string; email: string; number: string }
 ) => {
   try {
@@ -96,9 +98,20 @@ export const userdetails = async (userId: number) => {
 
     console.log('Updated User Data:', response.data);
 
-    return response.data; // Return the updated user data
+    return response.data;
   } catch (err: any) {
     console.error('Error updating user details:', err.response?.data?.msg || 'An error occurred');
-    throw err; // Rethrow the error for further handling
+    throw err;
+  }
+};
+
+// Log out user and clear cookies/localStorage
+export const logoutUser = async () => {
+  try {
+    await deleteAuthCookie();
+    localStorage.removeItem('signInResponse');
+    console.log('User logged out and cookies cleared.');
+  } catch (err: any) {
+    console.error('Logout Error:', err);
   }
 };

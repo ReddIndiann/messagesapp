@@ -5,7 +5,7 @@ import axios from 'axios';
 import dayjs from 'dayjs';
 import Swal from 'sweetalert2'; // Import SweetAlert2
 import BuyCreditModal from '../Modals/WalletBundleModal/BuyCreditModal';
-
+import { useRouter } from 'next/navigation';
 const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 interface BundleOptionsProps {
   onBalanceUpdate: (newBalance: number) => void;
@@ -18,7 +18,7 @@ const BundleOptions: React.FC<BundleOptionsProps> = ({ onBalanceUpdate }) => {
   const [isBuyBundleModalOpen, setIsBuyBundleModalOpen] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<any>(null);
   const [userId, setUserId] = useState<number | null>(null); // State for user ID
-
+  const navigate = useRouter();
   // Fetch user ID from local storage
   useEffect(() => {
     const signInResponse = localStorage.getItem('signInResponse');
@@ -93,6 +93,7 @@ const BundleOptions: React.FC<BundleOptionsProps> = ({ onBalanceUpdate }) => {
         confirmButtonText: 'OK',
       });
       onClose();
+      navigate.push('/'); // Navigate to the home page or another page
     } catch (error) {
       console.error('Error purchasing bundle:', error);
 
@@ -211,6 +212,7 @@ const BundleOptions: React.FC<BundleOptionsProps> = ({ onBalanceUpdate }) => {
       {/* Render BuyBundle Modal for Mobile Wallet */}
       {isBuyBundleModalOpen && (
         <BuyCreditModal
+        onBalanceUpdate={selectedPlan}
           isOpen={isBuyBundleModalOpen}
           onClose={() => setIsBuyBundleModalOpen(false)}
           selectedPlan={selectedPlan} // Pass selectedPlan

@@ -2,10 +2,19 @@ import React, { useEffect, useState } from 'react';
 import { BarChart } from '@mui/x-charts/BarChart';
 
 const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+
+// Define the interface for the chart data
 interface ChartData {
   date: string; // Month-Year format
   valueA: number; // Total messages sent
   valueB: number; // Total recipients count
+}
+
+// Define the interface for the API response items
+interface ApiResponseItem {
+  monthYear: string; // Month-Year format
+  totalMessagesSent: number; // Total messages sent
+  totalRecipientsCount: number; // Total recipients count
 }
 
 interface SignInResponse {
@@ -13,6 +22,7 @@ interface SignInResponse {
     id: string; // User ID type (adjust if necessary)
   };
 }
+
 export default function BasicBars() {
   const [data, setData] = useState<ChartData[]>([]); // Use the defined type for data
   const [userId, setUserId] = useState<string | null>(null); // userId can be string or null
@@ -25,15 +35,16 @@ export default function BasicBars() {
       setUserId(extractedUserId);
     }
   }, []);
+
   useEffect(() => {
     const fetchData = async () => {
       if (userId) {
         try {
           const response = await fetch(`${apiUrl}/send-messages/getlist/${userId}`);
-          const result = await response.json();
-          
-          // Assuming the response format contains an array of objects with monthYear, totalMessagesSent, and totalRecipientsCount
-          const chartData = result.map(item => ({
+          const result: ApiResponseItem[] = await response.json(); // Explicitly type the result
+
+          // Map the response to the chart data format
+          const chartData: ChartData[] = result.map((item: ApiResponseItem) => ({
             date: item.monthYear,
             valueA: item.totalMessagesSent,
             valueB: item.totalRecipientsCount,

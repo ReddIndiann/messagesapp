@@ -14,7 +14,7 @@ export const createGroup = async (groupData: { groupName: string; userId: number
   }
 
   try {
-    await axios.post(`${apiUrl}/groups`, groupData);
+    await axios.post(`${apiUrl}/groups/`, groupData);
     console.log('Group registered successfully');
   } catch (error) {
     console.error('Error registering group:', error);

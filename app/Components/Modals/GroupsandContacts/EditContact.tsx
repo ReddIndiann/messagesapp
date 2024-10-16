@@ -1,5 +1,6 @@
 import React, { useState, useEffect, ChangeEvent } from 'react';
 import axios from 'axios';
+import Swal from 'sweetalert2'; // Import SweetAlert2
 import { createContact, addContactToGroup } from '@/app/lib/contactUtil';
 
 interface EditContactProps {
@@ -22,7 +23,8 @@ const EditContact: React.FC<EditContactProps> = ({ isOpen, onClose, contact }) =
   const [group, setGroup] = useState<number | null>(contact?.groupId || null);
   const [groups, setGroups] = useState<Group[]>([]);
   const [userId, setUserId] = useState<number | null>(null);
-  const [showSuccessModal, setShowSuccessModal] = useState<boolean>(false);
+
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
   useEffect(() => {
     if (contact) {
@@ -34,7 +36,7 @@ const EditContact: React.FC<EditContactProps> = ({ isOpen, onClose, contact }) =
       setGroup(contact.groupId || null);
     }
   }, [contact]);
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+
   useEffect(() => {
     const signInResponse = localStorage.getItem('signInResponse');
     if (signInResponse) {
@@ -56,16 +58,6 @@ const EditContact: React.FC<EditContactProps> = ({ isOpen, onClose, contact }) =
       console.error('Error fetching groups:', error);
     }
   };
-
-  // useEffect(() => {
-  //   if (contact) {
-  //     setFirstname(contact.firstname);
-  //     setLastname(contact.lastname);
-  //     setEmail(contact.email);
-  //     setPhone(contact.phone);
-  //     setBirthday(contact.birthday);
-  //   }
-  // }, [contact]);
 
   if (!isOpen) return null;
 
@@ -94,18 +86,25 @@ const EditContact: React.FC<EditContactProps> = ({ isOpen, onClose, contact }) =
         throw new Error('Failed to update contact.');
       }
 
-      setShowSuccessModal(true);
-
-      setTimeout(() => {
-        onClose();
-      }, 500);
+      // Show SweetAlert success notification
+      Swal.fire({
+        title: 'Success!',
+        text: 'Contact updated successfully.',
+        icon: 'success',
+        confirmButtonText: 'Close',
+      }).then(() => {
+        onClose(); // Close the modal after the alert
+      });
     } catch (error) {
       console.error('Error updating contact:', error);
+      // Show SweetAlert error notification
+      Swal.fire({
+        title: 'Error!',
+        text: 'There was an error updating the contact.',
+        icon: 'error',
+        confirmButtonText: 'Close',
+      });
     }
-  };
-
-  const handleCloseSuccessModal = () => {
-    setShowSuccessModal(false);
   };
 
   return (
@@ -198,33 +197,8 @@ const EditContact: React.FC<EditContactProps> = ({ isOpen, onClose, contact }) =
           </div>
         </div>
       </div>
-
-      {showSuccessModal && (
-        <div className="fixed inset-0 flex items-center justify-center z-50">
-          <div className="bg-black bg-opacity-50 w-full h-full absolute top-0 left-0"></div>
-          <div className="bg-white p-6 rounded-lg shadow-lg w-96 z-10">
-            <h2 className="text-xl font-medium text-green-600">Success!</h2>
-            <p className="text-gray-700">Contact updated successfully.</p>
-            <div className="flex justify-end mt-4">
-              <button
-                className="bg-blue-400 text-white py-2 px-4 rounded hover:bg-blue-500"
-                onClick={handleCloseSuccessModal}
-              >
-                Close
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </>
   );
 };
 
 export default EditContact;
-
-
-
-
-
-
-
