@@ -34,7 +34,7 @@ const BundleHistoryTable = () => {
 
   return (
     <div className="overflow-x-auto shadow-md rounded-lg">
-      {error && <p className="text-red-500">{error}</p>} {/* Display error if fetching fails */}
+      
       <table className="min-w-full divide-y divide-gray-200">
         <thead className="bg-gray-50">
           <tr>

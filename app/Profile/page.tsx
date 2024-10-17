@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import Header from '@/app/Components/Header';
 import Sidebar from '@/app/Components/SideNav';
 import { userdetails, updateUserDetails } from '../lib/authUtils';
+import Swal from 'sweetalert2';
 
 const Profile: React.FC = () => {
   const [isEditing, setIsEditing] = useState<boolean>(false);
@@ -63,9 +64,9 @@ const Profile: React.FC = () => {
       // If saving, update user details
       try {
         await updateUserDetails(userId as number, userData); // Pass userId and userData to the update function
-        alert('User details updated successfully!'); // Show success message
+        Swal.fire('Success!', 'User details updated successfully!', 'success'); // Show success message using SweetAlert
       } catch (error) {
-        alert('Error updating user details. Please try again.'); // Show error message
+        Swal.fire('Error!', 'Error updating user details. Please try again.', 'error'); // Show error message using SweetAlert
       }
     }
     setIsEditing(!isEditing); // Toggle editing mode
@@ -74,20 +75,20 @@ const Profile: React.FC = () => {
   // Handle password change
   const handlePasswordChange = async () => {
     if (newPassword !== confirmNewPassword) {
-      alert('New passwords do not match!');
+      Swal.fire('Error!', 'New passwords do not match!', 'error');
       return;
     }
     try {
       // Call your backend API to update the password here
       // Example: await changePassword({ oldPassword, newPassword });
 
-      alert('Password updated successfully!');
+      Swal.fire('Success!', 'Password updated successfully!', 'success');
       setOldPassword('');
       setNewPassword('');
       setConfirmNewPassword('');
       setIsEditingPassword(false);
     } catch (error) {
-      alert('Error changing password. Please try again.');
+      Swal.fire('Error!', 'Error changing password. Please try again.', 'error');
     }
   };
 
@@ -117,7 +118,7 @@ const Profile: React.FC = () => {
                       value={userData.username}
                       onChange={handleChange}
                       disabled={!isEditing}
-                      className={`mt-1 block w-full border text-slate-500 rounded-md p-2 ${isEditing ? 'border-gray-300' : 'bg-gray-100 cursor-not-allowed'}`}
+                      className={`mt-1 block w-full border text-black rounded-md p-2 ${isEditing ? 'border-gray-300' : 'bg-gray-100 cursor-not-allowed'}`}
                     />
                   </div>
                   <div className="mb-4">
@@ -128,7 +129,7 @@ const Profile: React.FC = () => {
                       value={userData.email}
                       onChange={handleChange}
                       disabled={!isEditing}
-                      className={`mt-1 block w-full text-slate-500 border rounded-md p-2 ${isEditing ? 'border-gray-300' : 'bg-gray-100 cursor-not-allowed'}`}
+                      className={`mt-1 block w-full text-black border rounded-md p-2 ${isEditing ? 'border-gray-300' : 'bg-gray-100 cursor-not-allowed'}`}
                     />
                   </div>
                   <div className="mb-6">
@@ -139,7 +140,7 @@ const Profile: React.FC = () => {
                       value={userData.number}
                       onChange={handleChange}
                       disabled={!isEditing}
-                      className={`mt-1 block text-slate-500 w-full border rounded-md p-2 ${isEditing ? 'border-gray-300' : 'bg-gray-100 cursor-not-allowed'}`}
+                      className={`mt-1 block text-black w-full border rounded-md p-2 ${isEditing ? 'border-gray-300' : 'bg-gray-100 cursor-not-allowed'}`}
                     />
                   </div>
                   <div className="flex justify-between mt-4">
@@ -170,7 +171,7 @@ const Profile: React.FC = () => {
                     type="password"
                     value={oldPassword}
                     onChange={(e) => setOldPassword(e.target.value)}
-                    className="mt-1 block w-full border border-gray-300 rounded-md p-2"
+                    className="mt-1 block w-full text-black border border-gray-300 rounded-md p-2"
                   />
                 </div>
                 <div className="mb-4">
@@ -179,7 +180,7 @@ const Profile: React.FC = () => {
                     type="password"
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
-                    className="mt-1 block w-full border border-gray-300 rounded-md p-2"
+                    className="mt-1 block w-full text-black border border-gray-300 rounded-md p-2"
                   />
                 </div>
                 <div className="mb-6">
@@ -188,7 +189,7 @@ const Profile: React.FC = () => {
                     type="password"
                     value={confirmNewPassword}
                     onChange={(e) => setConfirmNewPassword(e.target.value)}
-                    className="mt-1 block w-full border border-gray-300 rounded-md p-2"
+                    className="mt-1 block w-full text-black border border-gray-300 rounded-md p-2"
                   />
                 </div>
                 <div className="flex justify-between mt-4">

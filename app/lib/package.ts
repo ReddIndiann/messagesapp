@@ -64,15 +64,12 @@ export const fetchAllCreditUsage = async () => {
 };
 
 
-export const fetchall = async()=>{
-
-  try{
-const response = await axios.get('')
-return response.data;
-
-  } 
-  catch(error){
-    console.error("");
+export const fetchallWallet = async () => {
+  try {
+    const response = await axios.get(`${apiUrl}/wallet/amount`); // Use backticks for template strings
+    return response.data.totalAmount;
+  } catch (error) {
+    console.error("Error fetching wallet amount");
     throw error;
   }
-}
+};

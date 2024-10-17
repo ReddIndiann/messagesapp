@@ -8,7 +8,7 @@ type ApiKeyItem = {
   id: number;
   name: string;
   userId: number;
-  keyvalue: string;
+  apikey: string;
   status: string;
   createdAt: string;
   updatedAt: string;
@@ -112,7 +112,7 @@ const TableComponent = forwardRef<TableComponentRef, TableComponentProps>(({ use
       data.map((item) => (
         <tr key={item.id} className="border-t">
           <td className="py-4 px-4 text-gray-500 border-b">{item.name}</td>
-          <td className="py-4 px-4 text-gray-500 border-b">{item.keyvalue}</td>
+          <td className="py-4 px-4 text-gray-500 border-b">{item.apikey}</td>
           <td className="py-4 px-4 text-gray-500 border-b">{item.updatedAt}</td>
           <td className="py-4 px-4 text-gray-500 border-b">
             <div className="flex items-center">
@@ -149,7 +149,7 @@ const TableComponent = forwardRef<TableComponentRef, TableComponentProps>(({ use
         <thead className="bg-gray-100 text-slate-600">
           <tr>
             <th className="py-2 px-4 text-left border-b">Name</th>
-            <th className="py-2 px-4 text-left border-b">Key Value</th>
+            <th className="py-2 px-4 text-left border-b">Apikey</th>
             <th className="py-2 px-4 text-left border-b">Date Updated</th>
             <th className="py-2 px-4 text-left border-b">Status</th>
             <th className="py-2 px-4 text-left border-b">Actions</th>

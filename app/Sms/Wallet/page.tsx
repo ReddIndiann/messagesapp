@@ -78,7 +78,7 @@ const Dashboard: React.FC = () => {
             transition={{ duration: 0.5 }}
           >
             <h2 className="text-xl sm:text-2xl font-bold text-gray-800 mb-4">SMS Bundles</h2>
-            <p className="text-sm sm:text-base text-gray-600 mb-6">Please select a bundle offer</p>
+            <p className="text-sm sm:text-base text-gray-600 mb-6">Please enter Amount to get its equivalent credit </p>
             <BundleOptionsTrue />
             <p className="text-sm sm:text-base text-gray-600 mb-6">Please select a bundle offer</p>
             <BundleOptions 
@@ -190,3 +190,9 @@ const Dashboard: React.FC = () => {
 };
 
 export default Dashboard;
+
+
+
+
+
+

@@ -116,7 +116,7 @@ const BundleOptions = () => {
         {loading ? (
           <div className="text-center">Loading plans...</div>
         ) : plans.length === 0 ? (
-          <div className="text-center">No plans available.</div>
+          <div className="text-center text-slate-600">No plans available.</div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {plans.map((plan: any, index: number) => (

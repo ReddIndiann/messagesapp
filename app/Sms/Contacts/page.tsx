@@ -11,6 +11,7 @@ const Dashboard = () => {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [currentSection, setCurrentSection] = useState<'bulkSMS' | 'Developer' | 'admin'>('bulkSMS');
   const [isExportExcelModalOpen, setIsExportExcelModalOpen] = useState<boolean>(false);
+  const [searchQuery, setSearchQuery] = useState<string>(''); // New state for search query
 
   const handleExportExcelClick = () => {
     setIsExportExcelModalOpen(true);
@@ -33,7 +34,9 @@ const Dashboard = () => {
                 <input
                   type="text"
                   placeholder="Search contact"
-                  className="border border-gray-300 rounded-lg px-4 py-2 w-full sm:w-64 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  value={searchQuery} // Bind the input to searchQuery
+                  onChange={(e) => setSearchQuery(e.target.value)} // Update searchQuery state
+                  className="border border-gray-300 rounded-lg text-slate-950 px-4 py-2 w-full sm:w-64 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
                 <button className="bg-blue-400 text-white px-4 py-2 rounded-lg flex items-center justify-center hover:bg-blue-600 transition duration-300">
                   <FontAwesomeIcon icon={faSearch} className="w-4 h-4 mr-2" /> Search
@@ -49,7 +52,7 @@ const Dashboard = () => {
               </div>
             </div>
             <div className="bg-gray-50 rounded-xl p-4 sm:p-6 mt-4">
-              <ContactsTables />
+              <ContactsTables searchQuery={searchQuery} /> {/* Pass searchQuery to ContactsTables */}
             </div>
           </div>
         </main>

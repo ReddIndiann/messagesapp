@@ -23,7 +23,7 @@ interface SignInResponse {
   };
 }
 
-export default function BasicBars() {
+export default function AdminBasicBars() {
   const [data, setData] = useState<ChartData[]>([]); // Use the defined type for data
   const [userId, setUserId] = useState<string | null>(null); // userId can be string or null
 
@@ -68,12 +68,12 @@ export default function BasicBars() {
       }]}
       series={[
         { 
-          label: 'Messages', 
+          label: 'Clients', 
           data: data.map(item => item.valueA),
           color: '#4caf50', // Custom color for Group A
         },
         { 
-          label: 'Receiptients', 
+          label: 'Receipts', 
           data: data.map(item => item.valueB),
           color: '#1e90ff', // Custom color for Group B
         },

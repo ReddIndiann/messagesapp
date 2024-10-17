@@ -77,11 +77,11 @@ const AddContact: React.FC<AddContactModalProps> = ({ isOpen, onClose }) => {
         onClose(); // Close the main modal
         navigate.push('/'); // Navigate to the home page or another route
       });
-    } catch (error) {
+    } catch (error:any) {
       console.error('Error registering contact:', error);
       Swal.fire({
         title: 'Error!',
-        text: 'There was an error registering the contact.',
+        text: error.message || 'Failed to create contact. Please try again.',
         icon: 'error',
         confirmButtonText: 'Close',
       });

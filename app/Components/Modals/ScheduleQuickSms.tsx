@@ -150,13 +150,7 @@ const Step2: React.FC<Step2Props> = ({ onNext, onPrevious, formData, setFormData
               )}
             </select>
 
-            <button
-              type="button"
-              className="bg-gray-100 text-gray-800 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors duration-200"
-              onClick={handleAddSenderID}
-            >
-              Add New
-            </button>
+          
           </div>
         </div>
 

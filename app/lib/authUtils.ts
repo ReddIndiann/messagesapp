@@ -65,9 +65,8 @@ export const signIn = async (formData: {
 
     return data;
   } catch (err: any) {
-    const errorMsg = err.response?.data.msg || 'Login failed';
-    console.error('Sign-In Error:', errorMsg);
-    throw new Error(errorMsg);
+    console.error('Login Error:', err);
+    throw new Error(err.response?.data.msg || 'Login failed');
   }
 };
 
@@ -102,6 +101,31 @@ export const updateUserDetails = async (
   } catch (err: any) {
     console.error('Error updating user details:', err.response?.data?.msg || 'An error occurred');
     throw err;
+  }
+};
+
+// Change Password Function
+export const changePassword = async (
+  userId: number,
+  formData: {
+    oldPassword: string;
+    newPassword: string;
+  }
+) => {
+  const { oldPassword, newPassword } = formData;
+
+  try {
+    const response = await axios.put(`${apiUrl}/auth/change-password/${userId}`, {
+      oldPassword,
+      newPassword,
+    });
+
+    console.log('Password changed successfully:', response.data);
+    return response.data;
+  } catch (err: any) {
+    const errorMsg = err.response?.data.msg || 'Password change failed';
+    console.error('Change Password Error:', errorMsg);
+    throw new Error(errorMsg);
   }
 };
 

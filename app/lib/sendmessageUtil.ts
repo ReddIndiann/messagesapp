@@ -51,11 +51,29 @@ export type FetchTableDataProps = {
       throw error;
     }
   };
+  export const fetchSendList = async (userId: number) => {
+    try {
+      const response = await axios.get(`${apiUrl}/send-messages/user/${userId}`);
+      return response.data; // Return the fetched contacts
+    } catch (error) {
+      console.error('Error fetching credit useddd:', error);
+      throw error;
+    }
+  };
 
+  export const fetchScheduleList = async (userId: number) => {
+    try {
+      const response = await axios.get(`${apiUrl}/schedule-messages/user/${userId}`);
+      return response.data; // Return the fetched contacts
+    } catch (error) {
+      console.error('Error fetching credit useddd:', error);
+      throw error;
+    }
+  };
   export const fetchGraph = async (userId: number) => {
     try {
       const response = await axios.get(`${apiUrl}/send-messages/getlist/${userId}`);
-      return response.data; // Ensure this returns the required data structure
+      return response.data.totalMessagesSent; // Ensure this returns the required data structure
     } catch (error) {
       console.error('Error fetching campaign data:', error);
       throw error;

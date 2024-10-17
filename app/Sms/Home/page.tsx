@@ -14,17 +14,23 @@ import { fetchGraph } from '@/app/lib/sendmessageUtil';
 import { fetchContacts } from '@/app/lib/contactUtil';
 import { fetchGroups } from '@/app/lib/grouputil';
 import { fetchList } from '@/app/lib/sendmessageUtil';
+import { fetchScheduleList } from '@/app/lib/sendmessageUtil';
+import { fetchSendList } from '@/app/lib/sendmessageUtil';
 
+
+import Swal from 'sweetalert2'; 
 const Dashboard: React.FC = () => {
-  const router = useRouter(); // Initialize useRouter
+  const router = useRouter(); 
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState<boolean>(false);
-  const [currentSection, setCurrentSection] = useState<'bulkSMS' | 'voiceCalls' | 'admin'>('bulkSMS');
+  const [currentSection, setCurrentSection] = useState<'bulkSMS' | 'Developer' | 'admin'>('bulkSMS');
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [userId, setUserId] = useState<number | null>(null);
   const [senderIds, setSenderIds] = useState<any[]>([]); 
   const [contactCount, setContactCount] = useState<number>(0); 
   const [groupCount, setGroupCount] = useState<number>(0); 
   const [creditCount, setCreditCount] = useState<number>(0); 
+  const [sendCount, setSendCount] = useState<number>(0); 
+  const [scheduledCount, SetScheduledCount] = useState<number>(0); 
   const [campaignCount, setCampaignCount] = useState<number>(0); 
   const [error, setError] = useState<string | null>(null);
 
@@ -52,12 +58,20 @@ const Dashboard: React.FC = () => {
           .then(data => setGroupCount(data.length))
           .catch(err => setError('Error fetching groups: ' + err.message));
     
+          fetchScheduleList(extractedUserId)
+          .then(data => SetScheduledCount(data.length))
+          .catch(err => setError('Error fetching credits: ' + err.message));
+        
+          fetchSendList(extractedUserId)
+          .then(data => setSendCount(data.length))
+          .catch(err => setError('Error fetching credits: ' + err.message));
+        
         // Fetch Graph data
         fetchGraph(extractedUserId)
           .then(data => {
             console.log("Graph Data:", data); // Log the fetched data
             // Assuming the structure is correct and it has the needed properties
-            setCampaignCount(data.totalMessagesSent || 0); // Use a fallback if undefined
+            setCampaignCount(data || 0); // Use a fallback if undefined
           })
           .catch(err => setError('Error fetching campaign data: ' + err.message));
       }
@@ -80,10 +94,18 @@ const Dashboard: React.FC = () => {
         .then(data => setCreditCount(data.length))
         .catch(err => setError('Error fetching credits: ' + err.message));
       
+        fetchScheduleList(userId)
+        .then(data => SetScheduledCount(data.length))
+        .catch(err => setError('Error fetching credits: ' + err.message));
+      
+        fetchSendList(userId)
+        .then(data => setSendCount(data.length))
+        .catch(err => setError('Error fetching credits: ' + err.message));
+      
       // Fetch Graph data again
       fetchGraph(userId)
         .then(data => {
-          setCampaignCount(data.totalMessagesSent || 0); // Use a fallback if undefined
+          setCampaignCount(data || 0); // Use a fallback if undefined
         })
         .catch(err => setError('Error fetching campaign data: ' + err.message));
     }
@@ -91,12 +113,32 @@ const Dashboard: React.FC = () => {
   
 
   const handleDelete = async (senderId: number) => {
-    if (window.confirm('Are you sure you want to delete this Sender ID?')) {
+    const result = await Swal.fire({
+      title: 'Are you sure?',
+      text: 'You won’t be able to revert this!',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6',
+      confirmButtonText: 'Yes, delete it!',
+    });
+
+    if (result.isConfirmed) {
       try {
         await deleteSenderId(senderId);
         setSenderIds(senderIds.filter(sender => sender.id !== senderId));
+        Swal.fire(
+          'Deleted!',
+          'Your group has been deleted.',
+          'success'
+        );
       } catch (err: any) {
-        setError('Error deleting sender ID: ' + err.message);
+        console.error('Error deleting group: ' + err.message);
+        Swal.fire({
+          icon: 'error',
+          title: ' Failed',
+          text: err.message || 'Failed to Delete. Please try again.',
+        });
       }
     }
   };
@@ -113,13 +155,9 @@ const Dashboard: React.FC = () => {
         <Sidebar onCollapse={setIsSidebarCollapsed} setCurrentSection={setCurrentSection} />
         <main className={`flex-1 ${isSidebarCollapsed ? 'ml-20' : 'ml-64'} p-6 overflow-y-auto`}>
           <div className="max-w-7xl mx-auto">
-            <p className="text-red-500 text-sm mb-6">Overview page displays data from the past 3 days.</p>
+            {/* <p className="text-red-500 text-sm mb-6">Overview page displays data from the past 3 days.</p> */}
 
-            {/* {error && (
-              <div className="bg-red-100 text-red-600 p-4 mb-4 rounded">
-                {error}
-              </div>
-            )} */}
+           
 
 <motion.div
   className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-8"
@@ -128,7 +166,7 @@ const Dashboard: React.FC = () => {
   transition={{ duration: 0.5 }}
 >
   {[
-    { value: campaignCount, label: 'Campaigns', icon: faBullhorn, color: 'bg-blue-500', page: 'CampaignHistory' },
+    { value: sendCount + scheduledCount, label: 'Campaigns', icon: faBullhorn, color: 'bg-blue-500', page: 'CampaignHistory' },
     { value: contactCount, label: 'Contacts', icon: faAddressBook, color: 'bg-green-500', page: 'Contacts' }, 
     { value: groupCount, label: 'Groups', icon: faUsers, color: 'bg-yellow-500', page: 'Contacts' },
     { value: creditCount, label: 'Credit Used', icon: faCoins, color: 'bg-orange-500', page: 'Wallet' },

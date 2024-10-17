@@ -244,13 +244,7 @@ console.log(`id : ${selectedSenderID}`)
                   <option value="" disabled>No Sender IDs available</option>
                 )}
               </select>
-              <button
-                type="button"
-                className="bg-gray-100 text-gray-800 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors duration-200"
-                onClick={handleAddSenderID}
-              >
-                Add New
-              </button>
+             
             </div>
           </div>
 

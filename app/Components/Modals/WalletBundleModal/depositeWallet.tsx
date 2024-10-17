@@ -8,15 +8,15 @@ interface DepositeWalletModalProps {
   onClose: () => void;
   onDepositSuccess: (amount: number) => void; // Add this line
 }
+
 const DepositeWallet: React.FC<DepositeWalletModalProps> = ({ isOpen, onClose, onDepositSuccess }) => {
-  const [number, setnumber] = useState<string>('');
+  const [number, setNumber] = useState<string>('');
   const [note, setNote] = useState<string>('');
   const [amount, setAmount] = useState<string>(''); // Changed to string to handle input
   const [userId, setUserId] = useState<number | null>(null);
   const navigate = useRouter();
 
   useEffect(() => {
-    // Retrieve and parse the user ID from local storage
     const signInResponse = localStorage.getItem('signInResponse');
     if (signInResponse) {
       const parsedResponse = JSON.parse(signInResponse);
@@ -28,28 +28,25 @@ const DepositeWallet: React.FC<DepositeWalletModalProps> = ({ isOpen, onClose, o
   if (!isOpen) return null;
 
   const handleRegister = async () => {
-    if (userId === null || amount === '') {
-      console.error('User ID or amount is not available.');
+    if (userId === null || !number || !amount || !note)  {
+      console.error('User ID, number, or amount is not available.');
       Swal.fire({
         icon: 'error',
         title: 'Error',
-        text: 'User ID or amount is missing!',
+        text: 'All fields are required!',
       });
       return;
     }
 
     try {
-      // Convert the amount to a number
       const parsedAmount = parseFloat(amount);
 
       await depositewallet({
-        
         userId,
         amount: parsedAmount, // Use parsed number here
         note,
       });
       onDepositSuccess(parsedAmount);
-      // Show success alert using SweetAlert
       Swal.fire({
         icon: 'success',
         title: 'Success!',
@@ -57,12 +54,9 @@ const DepositeWallet: React.FC<DepositeWalletModalProps> = ({ isOpen, onClose, o
         confirmButtonText: 'OK',
       }).then(() => {
         onClose();
-       
       });
     } catch (error) {
       console.error('Error registering group:', error);
-
-      // Show error alert using SweetAlert
       Swal.fire({
         icon: 'error',
         title: 'Error',
@@ -79,15 +73,16 @@ const DepositeWallet: React.FC<DepositeWalletModalProps> = ({ isOpen, onClose, o
           <h2 className="text-xl font-medium mb-4 text-black">Deposite Into Account</h2>
           <div className="mb-4">
             <label className="block text-black mb-2" htmlFor="transaction-id">
-             Number
+              Number
             </label>
             <input
               id="transaction-id"
               type="text"
               className="w-full p-2 border border-gray-300 rounded text-black"
               value={number}
-              onChange={(e: ChangeEvent<HTMLInputElement>) => setnumber(e.target.value)}
+              onChange={(e: ChangeEvent<HTMLInputElement>) => setNumber(e.target.value)}
               placeholder="Enter number"
+              required // Make this field required
             />
             <label className="block text-black mb-2" htmlFor="amount">
               Amount
@@ -97,8 +92,9 @@ const DepositeWallet: React.FC<DepositeWalletModalProps> = ({ isOpen, onClose, o
               type="number"
               className="w-full p-2 border border-gray-300 rounded text-black"
               value={amount}
-              onChange={(e: ChangeEvent<HTMLInputElement>) => setAmount(e.target.value)} // Change handler to update amount as string
+              onChange={(e: ChangeEvent<HTMLInputElement>) => setAmount(e.target.value)}
               placeholder="Enter amount"
+              required // Make this field required
             />
             <label className="block text-black mb-2" htmlFor="note">
               Note
@@ -110,6 +106,7 @@ const DepositeWallet: React.FC<DepositeWalletModalProps> = ({ isOpen, onClose, o
               value={note}
               onChange={(e: ChangeEvent<HTMLInputElement>) => setNote(e.target.value)}
               placeholder="Enter note"
+              required // Make this field required
             />
           </div>
           <div className="flex justify-end">

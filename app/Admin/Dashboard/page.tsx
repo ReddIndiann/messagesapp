@@ -7,15 +7,15 @@ import Header from '@/app/Components/Header';
 import Sidebar from '@/app/Components/SideNav';
 import AddSenderIdModal from '@/app/Components/Modals/SenderIdModal';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faBullhorn, faAddressBook, faUsers, faCoins, faTrash, faChartBar,faBox, faCogs } from '@fortawesome/free-solid-svg-icons';
-import BasicBars from '@/app/Components/Graph/Graph';
+import { faBullhorn, faAddressBook, faUsers, faCoins, faTrash, faChartBar, faBox, faCogs } from '@fortawesome/free-solid-svg-icons';
+import AdminBasicBars from '@/app/Components/Graph/AdminGraph';
 import { fetchSenderIds, deleteSenderId } from '@/app/lib/senderIdUtils';
 import { fetchAllContacts } from '@/app/lib/contactUtil';
 import { fetchAllGroups } from '@/app/lib/grouputil';
 import { fetchAllUsers } from '@/app/lib/userlib';
 import { fetchAllPackages } from '@/app/lib/package';
-import { fetchAllCreditUsage } from '@/app/lib/package';
-// Define types for User
+import { fetchAllCreditUsage, fetchallWallet } from '@/app/lib/package';  // Import fetchallWallet
+
 interface User {
   id: number;
   role: 'user' | 'admin';
@@ -35,8 +35,9 @@ const Dashboard: React.FC = () => {
   const [adminCount, setAdminCount] = useState<number>(0);
   const [groupCount, setGroupCount] = useState<number>(0);
   const [packagesCount, setPackagesCount] = useState<number>(0);
-
   const [usageCount, setUsageCount] = useState<number>(0);
+
+  const [totalAmount, setTotalAmount] = useState<number>(0); // New state for total amount
 
   useEffect(() => {
     const signInResponse = localStorage.getItem('signInResponse');
@@ -53,12 +54,11 @@ const Dashboard: React.FC = () => {
           .then(data => setContactCount(data.length))
           .catch(err => setError('Error fetching contacts: ' + err.message));
 
-          fetchAllPackages()
+        fetchAllPackages()
           .then(data => setPackagesCount(data.length))
           .catch(err => setError('Error fetching packages: ' + err.message));
 
-
-          fetchAllCreditUsage()
+        fetchAllCreditUsage()
           .then(data => setUsageCount(data.length))
           .catch(err => setError('Error fetching usage order: ' + err.message));
 
@@ -74,6 +74,11 @@ const Dashboard: React.FC = () => {
         fetchAllGroups()
           .then(data => setGroupCount(data.length))
           .catch(err => setError('Error fetching groups: ' + err.message));
+
+        // Fetch total amount from the wallet API
+        fetchallWallet()
+          .then(amount => setTotalAmount(amount))  // Set the total amount
+          .catch(err => setError('Error fetching total amount: ' + err.message));
       }
     }
   }, []);
@@ -83,7 +88,7 @@ const Dashboard: React.FC = () => {
       fetchSenderIds(userId)
         .then(data => setSenderIds(data))
         .catch(err => setError('Error fetching sender IDs: ' + err.message));
-      
+
       fetchAllGroups()
         .then(data => setGroupCount(data.length))
         .catch(err => setError('Error fetching groups: ' + err.message));
@@ -92,12 +97,11 @@ const Dashboard: React.FC = () => {
         .then(data => setContactCount(data.length))
         .catch(err => setError('Error fetching contacts: ' + err.message));
 
-        fetchAllCreditUsage()
+      fetchAllCreditUsage()
         .then(data => setUsageCount(data.length))
         .catch(err => setError('Error fetching usage order: ' + err.message));
 
-
-        fetchAllPackages()
+      fetchAllPackages()
         .then(data => setPackagesCount(data.length))
         .catch(err => setError('Error fetching packages: ' + err.message));
 
@@ -109,19 +113,15 @@ const Dashboard: React.FC = () => {
           setAdminCount(admins.length);
         })
         .catch(err => setError('Error fetching users: ' + err.message));
+
+      // Fetch the total amount again after a success action
+      fetchallWallet()
+        .then(amount => setTotalAmount(amount))
+        .catch(err => setError('Error fetching total amount: ' + err.message));
     }
   };
 
-  const handleDelete = async (senderId: number) => {
-    if (window.confirm('Are you sure you want to delete this Sender ID?')) {
-      try {
-        await deleteSenderId(senderId);
-        setSenderIds(senderIds.filter(sender => sender.id !== senderId));
-      } catch (err: any) {
-        setError('Error deleting sender ID: ' + err.message);
-      }
-    }
-  };
+  
 
   // Function to navigate to a specific page
   const handleCardClick = (page: string) => {
@@ -137,8 +137,6 @@ const Dashboard: React.FC = () => {
           <div className="max-w-7xl mx-auto">
             <p className="text-red-500 text-sm mb-6">Overview page displays data from the past Month.</p>
 
-           
-
             <motion.div
               className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-8"
               initial={{ opacity: 0, y: 20 }}
@@ -153,7 +151,7 @@ const Dashboard: React.FC = () => {
                 { value: groupCount, label: 'All Groups', icon: faChartBar, color: 'bg-purple-500', page: '' },
                 { value: packagesCount, label: 'Packages', icon: faBox, color: 'bg-blue-500', page: '' },
                 { value: usageCount, label: 'Credit Order', icon: faCoins, color: 'bg-yellow-500', page: '' },
-                { value: 3, label: 'Amount Accumulated', icon: faCoins, color: 'bg-orange-500', page: 'credits' },
+                { value: `GHS ${totalAmount}`, label: 'Amount Accumulated', icon: faCoins, color: 'bg-orange-500', page: 'credits' }, 
               ].map((item, index) => (
                 <motion.div
                   key={index}
@@ -181,7 +179,7 @@ const Dashboard: React.FC = () => {
                 transition={{ duration: 0.5 }}
               >
                 <h3 className="text-lg font-semibold mb-4 text-gray-600">Billing Summary</h3>
-                <BasicBars />
+                <AdminBasicBars />
               </motion.div>
             </div>
           </div>

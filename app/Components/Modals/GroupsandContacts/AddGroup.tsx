@@ -47,11 +47,11 @@ const AddGroup: React.FC<AddGroupModalProps> = ({ isOpen, onClose }) => {
         onClose(); // Close the main modal
         navigate.push('/'); // Navigate to the desired page
       });
-    } catch (error) {
+    } catch (error:any) {
       console.error('Error registering group:', error);
       Swal.fire({
         title: 'Error!',
-        text: 'There was an error registering the group.',
+        text: error.message || 'Failed to create group. Please try again.',
         icon: 'error',
         confirmButtonText: 'Close',
       });

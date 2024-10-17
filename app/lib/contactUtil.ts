@@ -18,9 +18,9 @@ const createContact = async (contactData: {
     const response = await axios.post(`${apiUrl}/contacts`, contactData);
     console.log('Contact registered successfully');
     return response; // Return the full response, including the new contact's ID
-  } catch (error) {
+  } catch (error:any) {
     console.error('Error registering contact:', error);
-    throw error;
+    throw new Error(error.response?.data.msg || 'Failed Creating contact');
   }
 };
 
@@ -71,4 +71,29 @@ const deleteContact = async (contactId: number) => {
   }
 };
 
-export { createContact, fetchContacts ,addContactToGroup ,fetchAllContacts,deleteContact};
+// Function to search contacts by name for a specific user
+const searchContactsByName = async (userId: number, name: string) => {
+  if (!name) {
+    throw new Error('Name query parameter is required.');
+  }
+
+  try {
+    const response = await axios.get(`${apiUrl}/contacts/user/${userId}/search`, {
+      params: { name },
+    });
+    return response.data; // Return the searched contacts
+  } catch (error) {
+    console.error('Error searching contacts:', error);
+    throw error;
+  }
+};
+
+// Export the new function along with others
+export { 
+  createContact, 
+  fetchContacts, 
+  addContactToGroup, 
+  fetchAllContacts, 
+  deleteContact, 
+  searchContactsByName 
+};

@@ -4,7 +4,7 @@ import React, { useState, useEffect,FC } from 'react';
 import { motion } from 'framer-motion';
 import Header from '@/app/Components/Header';
 import Sidebar from '@/app/Components/SideNav';
-import AddSenderIdModal from '@/app/Components/Modals/SenderIdModal';
+
 import TableComponent from '@/app/Components/Tables/SMSCampaignHistory';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faHistory, faFileAlt, faPlus ,IconDefinition} from '@fortawesome/free-solid-svg-icons';
@@ -64,13 +64,7 @@ const Dashboard: FC = () => {
             <div className="bg-gradient-to-r from-blue-400 to-blue-900 p-6">
               <div className="flex justify-between items-center">
                 <h1 className="text-2xl font-bold text-white">SMS Campaigns</h1>
-                <button
-                  onClick={() => setIsModalOpen(true)}
-                  className="bg-white text-blue-500 px-4 py-2 rounded-lg hover:bg-blue-50 transition duration-300 flex items-center"
-                >
-                  <FontAwesomeIcon icon={faPlus} className="mr-2" />
-                  Add Sender ID
-                </button>
+             
               </div>
             </div>
 
@@ -78,7 +72,7 @@ const Dashboard: FC = () => {
               <div className="flex">
                 <TabButton
                   icon={faHistory}
-                  label="Campaign History"
+                  label="Sms History"
                   isActive={currentTabSection === 'campaignHistory'}
                   onClick={() => setCurrentTabSection('campaignHistory')}
                 />

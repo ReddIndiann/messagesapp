@@ -121,7 +121,7 @@ const Header: React.FC<HeaderProps> = ({ currentSection }) => {
                   <span className="font-semibold bg-blue-500 text-white rounded-full px-2 py-1 mb-1">
                     {bonusCredit !== null ? bonusCredit.toFixed(0) : '0'}
                   </span>
-                  <span className="block text-xs text-red-500">Expires on {bonusExpiry}</span>
+                
                 </div>
               </div>
             </>
